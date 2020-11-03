@@ -1,0 +1,24 @@
+# permissions for end users to edit discoveredclusterrefreshes.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: discoveredclusterrefresh-editor-role
+rules:
+- apiGroups:
+  - discovery.open-cluster-management.io
+  resources:
+  - discoveredclusterrefreshes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - discovery.open-cluster-management.io
+  resources:
+  - discoveredclusterrefreshes/status
+  verbs:
+  - get

@@ -1,0 +1,9 @@
+apiVersion: discovery.open-cluster-management.io/v1
+kind: DiscoveryConfig
+metadata:
+  name: discoveryconfig
+spec:
+  providerConnections:
+    - ocm-api-token
+  filters:
+    age: 7

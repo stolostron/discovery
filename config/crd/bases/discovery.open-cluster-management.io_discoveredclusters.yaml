@@ -1,0 +1,82 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.3.0
+  creationTimestamp: null
+  name: discoveredclusters.discovery.open-cluster-management.io
+spec:
+  group: discovery.open-cluster-management.io
+  names:
+    kind: DiscoveredCluster
+    listKind: DiscoveredClusterList
+    plural: discoveredclusters
+    singular: discoveredcluster
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: DiscoveredCluster is the Schema for the discoveredclusters API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        info:
+          description: DiscoveredClusterInfo defines the desired state of DiscoveredCluster
+          properties:
+            activity_timestamp:
+              format: date-time
+              type: string
+            apiUrl:
+              type: string
+            cloudProvider:
+              type: string
+            console:
+              type: string
+            creation_timestamp:
+              format: date-time
+              type: string
+            healthState:
+              type: string
+            isManagedCluster:
+              type: boolean
+            name:
+              type: string
+            openshiftVersion:
+              type: string
+            product:
+              type: string
+            region:
+              type: string
+            state:
+              type: string
+          required:
+          - openshiftVersion
+          type: object
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        status:
+          description: DiscoveredClusterStatus defines the observed state of DiscoveredCluster
+          type: object
+      type: object
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

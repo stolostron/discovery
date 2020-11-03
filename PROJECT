@@ -1,0 +1,17 @@
+domain: open-cluster-management.io
+layout: go.kubebuilder.io/v2
+projectName: discovery
+repo: github.com/open-cluster-management/discovery
+resources:
+- group: discovery
+  kind: DiscoveredCluster
+  version: v1
+- group: discovery
+  kind: DiscoveryConfig
+  version: v1
+- group: discovery
+  kind: DiscoveredClusterRefresh
+  version: v1
+version: 3-alpha
+plugins:
+  go.sdk.operatorframework.io/v2-alpha: {}

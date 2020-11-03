@@ -1,0 +1,7 @@
+apiVersion: discovery.open-cluster-management.io/v1
+kind: DiscoveredCluster
+metadata:
+  name: discoveredcluster-sample
+spec:
+  # Add fields here
+  foo: bar
