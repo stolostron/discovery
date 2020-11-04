@@ -27,6 +27,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	corev1 "k8s.io/api/core/v1"
+
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	"github.com/open-cluster-management/discovery/controllers"
 	// +kubebuilder:scaffold:imports
@@ -41,6 +43,8 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(discoveryv1.AddToScheme(scheme))
+
+	utilruntime.Must(corev1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 

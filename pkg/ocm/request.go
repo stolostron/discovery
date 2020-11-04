@@ -13,9 +13,11 @@ import (
 )
 
 var (
+	// OCMClusterPath ...
 	OCMClusterPath = "https://api.openshift.com/api/clusters_mgmt/v1/clusters"
 )
 
+// OCMRequest ...
 type OCMRequest struct {
 	path   string
 	token  string
@@ -24,21 +26,25 @@ type OCMRequest struct {
 	filter discoveryv1.Filter
 }
 
+// Page ...
 func (r *OCMRequest) Page(n int) *OCMRequest {
 	r.page = &n
 	return r
 }
 
+// Size ...
 func (r *OCMRequest) Size(n int) *OCMRequest {
 	r.size = &n
 	return r
 }
 
+// Token ...
 func (r *OCMRequest) Token(token string) *OCMRequest {
 	r.token = token
 	return r
 }
 
+// Filter ...
 func (r *OCMRequest) Filter(filter discoveryv1.Filter) *OCMRequest {
 	r.filter = filter
 	return r
@@ -46,7 +52,6 @@ func (r *OCMRequest) Filter(filter discoveryv1.Filter) *OCMRequest {
 
 // Get ...
 func (r *OCMRequest) Get(ctx context.Context) (ClusterList, error) {
-	r.path = "https://api.openshift.com/api/clusters_mgmt/v1/clusters"
 	if r.token == "" {
 		return ClusterList{}, fmt.Errorf("Missing token")
 	}

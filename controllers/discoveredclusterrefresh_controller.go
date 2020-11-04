@@ -60,11 +60,11 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 	log := r.Log.WithValues("discoveredclusterrefresh", req.NamespacedName)
 
 	// Get discovery config. Die if there is none
-	var config discoveryv1.DiscoveryConfig
+	config := &discoveryv1.DiscoveryConfig{}
 	if err := r.Get(ctx, types.NamespacedName{
 		Name:      "discoveryconfig",
 		Namespace: req.Namespace,
-	}, &config); err != nil {
+	}, config); err != nil {
 		log.Error(err, "unable to fetch DiscoveryConfig")
 		return ctrl.Result{RequeueAfter: refreshInterval}, client.IgnoreNotFound(err)
 	}
@@ -104,7 +104,7 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 	var deleteClusters []discoveryv1.DiscoveredCluster
 	var unchangedClusters []discoveryv1.DiscoveredCluster
 
-	clusterRequest := ocm.ClusterRequest()
+	clusterRequest := ocm.ClusterRequest(config)
 	page := 1
 	size := 1000
 	for {
@@ -185,6 +185,7 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 	return ctrl.Result{RequeueAfter: refreshInterval}, nil
 }
 
+// SetupWithManager ...
 func (r *DiscoveredClusterRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&discoveryv1.DiscoveredClusterRefresh{}).
@@ -241,6 +242,5 @@ func userToken(kubeClient client.Client, secret types.NamespacedName) (string, e
 	if _, ok := ocmSecret.Data["token"]; !ok {
 		return "", fmt.Errorf("Secret '%s' does not contain 'token' field", secret.Name)
 	}
-
 	return string(ocmSecret.Data["token"]), nil
 }

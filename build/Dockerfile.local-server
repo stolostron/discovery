@@ -1,0 +1,11 @@
+FROM golang:1.15
+
+RUN mkdir /local-server
+
+ADD . /local-server
+
+WORKDIR /local-server
+
+RUN go build -o bin/local-server test/main.go
+
+CMD ["bin/local-server"]
