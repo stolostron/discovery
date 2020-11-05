@@ -36,6 +36,8 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+-include test/Makefile.test
+
 all: manager
 
 # Run tests
@@ -145,3 +147,6 @@ secrets:
 .PHONY: samples
 samples:
 	$(KUSTOMIZE) build config/samples | kubectl apply -f -
+
+logs:
+	@oc logs -f $(shell oc get pod -l app=discovery-controller -o jsonpath="{.items[0].metadata.name}")

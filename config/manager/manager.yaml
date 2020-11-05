@@ -28,14 +28,15 @@ spec:
         args:
         - --enable-leader-election
         image: controller:latest
+        imagePullPolicy: Always
         name: manager
         resources:
           limits:
-            cpu: 200m
-            memory: 800Mi
+            cpu: 300m
+            memory: 500Mi
           requests:
             cpu: 100m
-            memory: 300Mi
+            memory: 100Mi
       terminationGracePeriodSeconds: 10
       imagePullSecrets:
         - name: discovery-controller-pull-secret

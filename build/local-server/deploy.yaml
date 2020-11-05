@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-ocm-server
+spec:
+  selector:
+    matchLabels:
+      app: mock-ocm-server
+  template:
+    metadata:
+      labels:
+        app: mock-ocm-server
+    spec:
+      containers:
+      - name: mock-ocm-server
+        ports:
+        - containerPort: 8080
+        image: quay.io/rhibmcollab/mock-ocm-server:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+      imagePullSecrets:
+        - name: discovery-controller-pull-secret

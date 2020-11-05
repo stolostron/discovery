@@ -1,6 +1,8 @@
 package ocm
 
 import (
+	"fmt"
+
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	// "github.com/ghodss/yaml"
@@ -50,10 +52,16 @@ type Cluster struct {
 	DNSReady                 bool                   `json:"dns_ready,omitempty"`
 }
 
-func ClusterRequest() *OCMRequest {
-	return &OCMRequest{path: OCMClusterPath}
+// ClusterRequest ...
+func ClusterRequest(config *discoveryv1.DiscoveryConfig) *OCMRequest {
+	ocmRequest := &OCMRequest{path: OCMClusterPath}
+	if ocmURL, ok := config.Annotations["OCM_URL"]; ok {
+		ocmRequest.path = fmt.Sprintf("%s/api/clusters_mgmt/v1/clusters", ocmURL)
+	}
+	return ocmRequest
 }
 
+// DiscoveredCluster ...
 func DiscoveredCluster(cluster Cluster) discoveryv1.DiscoveredCluster {
 	return discoveryv1.DiscoveredCluster{
 		TypeMeta: metav1.TypeMeta{
