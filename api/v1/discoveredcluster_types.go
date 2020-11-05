@@ -20,8 +20,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// DiscoveredClusterInfo defines the desired state of DiscoveredCluster
-type DiscoveredClusterInfo struct {
+// DiscoveredClusterSpec defines the desired state of DiscoveredCluster
+type DiscoveredClusterSpec struct {
 	Name              string       `json:"name,omitempty" yaml:"name,omitempty"`
 	Console           string       `json:"console,omitempty" yaml:"console,omitempty"`
 	APIURL            string       `json:"apiUrl,omitempty" yaml:"apiUrl,omitempty"`
@@ -50,7 +50,7 @@ type DiscoveredCluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Info   DiscoveredClusterInfo   `json:"info,omitempty"`
+	Spec   DiscoveredClusterSpec   `json:"spec,omitempty"`
 	Status DiscoveredClusterStatus `json:"status,omitempty"`
 }
 

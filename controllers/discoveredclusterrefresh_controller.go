@@ -200,7 +200,7 @@ func (r *DiscoveredClusterRefreshReconciler) SetupWithManager(mgr ctrl.Manager) 
 }
 
 func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
-	c1i, c2i := c1.Info, c2.Info
+	c1i, c2i := c1.Spec, c2.Spec
 	if c1i.APIURL != c2i.APIURL {
 		return false
 	}
