@@ -32,10 +32,10 @@ spec:
         resources:
           limits:
             cpu: 200m
-            memory: 100Mi
+            memory: 800Mi
           requests:
             cpu: 100m
-            memory: 30Mi
+            memory: 300Mi
       terminationGracePeriodSeconds: 10
       imagePullSecrets:
         - name: discovery-controller-pull-secret
