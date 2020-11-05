@@ -72,7 +72,7 @@ func DiscoveredCluster(cluster Cluster) discoveryv1.DiscoveredCluster {
 			Name:      cluster.ID,
 			Namespace: "open-cluster-management",
 		},
-		Info: discoveryv1.DiscoveredClusterInfo{
+		Spec: discoveryv1.DiscoveredClusterSpec{
 			Console:           cluster.Console.URL,
 			CreationTimestamp: cluster.CreationTimestamp,
 			ActivityTimestamp: cluster.ActivityTimestamp,
