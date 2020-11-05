@@ -22,3 +22,13 @@ bin
 *.swp
 *.swo
 *~
+
+build-harness
+build-harness-extensions
+.build-harness
+.build-harness-bootstrap
+
+# override build harness vendoring
+!vbh/.build-harness-vendorized
+!vbh/build-harness
+!vbh/build-harness-extensions 
