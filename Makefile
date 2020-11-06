@@ -36,7 +36,7 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
--include test/Makefile.test
+-include testserver/Makefile
 
 all: manager
 

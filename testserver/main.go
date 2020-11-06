@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	api "github.com/open-cluster-management/discovery/test/api"
+	api "github.com/open-cluster-management/discovery/testserver/api"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
