@@ -132,7 +132,7 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 				delete(existing, discoveredCluster.Name)
 			} else {
 				updated := discoveredList.Items[ind]
-				updated.Info = discoveredCluster.Info
+				updated.Spec = discoveredCluster.Spec
 				updateClusters = append(updateClusters, updated)
 				delete(existing, discoveredCluster.Name)
 			}
