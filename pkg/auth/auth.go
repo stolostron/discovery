@@ -10,11 +10,11 @@ import (
 
 // ErrorResponse ...
 type ErrorResponse struct {
-	Kind   string `yaml:"kind,omitempty"`
-	ID     string `yaml:"id,omitempty"`
-	Href   string `yaml:"href,omitempty"`
-	Code   string `yaml:"code,omitempty"`
-	Reason string `yaml:"reason,omitempty"`
+	Kind   string `json:"kind,omitempty"`
+	ID     string `json:"id,omitempty"`
+	Href   string `json:"href,omitempty"`
+	Code   int    `json:"code,omitempty"`
+	Reason string `json:"reason,omitempty"`
 }
 
 // AuthTokenResponse ...
