@@ -24,6 +24,7 @@ import (
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	ref "k8s.io/client-go/tools/reference"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -70,17 +71,22 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 	}
 
 	// Get all refresh requests. If there are none then we were triggered by refresh interval
-	var refreshRequestList discoveryv1.DiscoveredClusterRefreshList
-	err := r.List(ctx, &refreshRequestList, client.InNamespace(req.Namespace))
-	if err != nil {
-		return ctrl.Result{}, err
+	var refreshRequest discoveryv1.DiscoveredClusterRefresh
+	if err := r.Get(ctx, req.NamespacedName, &refreshRequest); err != nil {
+		log.Error(err, "unable to fetch refreshRequest")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	secretName := config.Spec.ProviderConnections[0]
-	userToken, err := userToken(r.Client, types.NamespacedName{Name: secretName, Namespace: req.Namespace})
+	ocmSecret := &corev1.Secret{}
+	err := r.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: req.Namespace}, ocmSecret)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	if _, ok := ocmSecret.Data["token"]; !ok {
+		return ctrl.Result{}, fmt.Errorf("Secret '%s' does not contain 'token' field", secretName)
+	}
+	userToken := string(ocmSecret.Data["token"])
 
 	accessToken, err := auth.NewAccessToken(userToken)
 	if err != nil {
@@ -114,10 +120,32 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 			return ctrl.Result{}, err
 		}
 
+		// jobRef, err := ref.GetReference(r.Scheme, activeJob)
+		// if err != nil {
+		//     log.Error(err, "unable to make reference to active job", "job", activeJob)
+		//     continue
+		// }
+		// cronJob.Status.Active = append(cronJob.Status.Active, *jobRef)
 		// Merge newly discovered clusters with existing list
 		for _, cluster := range newDiscoveredList.Items {
 			discoveredCluster := ocm.DiscoveredCluster(cluster)
 			discoveredCluster.SetNamespace(req.Namespace)
+
+			// Assign dummy status
+			discoveredCluster.Spec.Subscription = discoveryv1.SubscriptionSpec{
+				Status:       "Active",
+				SupportLevel: "None",
+				Managed:      false,
+				CreatorID:    "abc123",
+			}
+
+			// Add reference to secret used for authentication
+			discoveredCluster.Spec.ProviderConnections = nil
+			secretRef, err := ref.GetReference(r.Scheme, ocmSecret)
+			if err != nil {
+				log.Error(err, "unable to make reference to secret", "secret", secretRef)
+			}
+			discoveredCluster.Spec.ProviderConnections = append(discoveredCluster.Spec.ProviderConnections, *secretRef)
 
 			ind, exists := existing[discoveredCluster.Name]
 			if !exists {
@@ -174,12 +202,24 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 
 	log.Info("Cluster categories", "Created", len(createClusters), "Updated", len(updateClusters), "Deleted", len(deleteClusters), "Unchanged", len(unchangedClusters))
 
-	// Remove refresh requests that existed at the beginning of this reconciliation
-	for _, request := range refreshRequestList.Items {
+	// Get all refresh requests. If there are none then we were triggered by refresh interval
+	var allRefreshRequests discoveryv1.DiscoveredClusterRefreshList
+	err = r.List(ctx, &allRefreshRequests, client.InNamespace(req.Namespace))
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	earlierRequests := priorRequests(&allRefreshRequests, &refreshRequest)
+	for _, request := range earlierRequests {
 		if err := r.Delete(ctx, &request); err != nil {
 			log.Error(err, "unable to delete refreshRequest", "Name", request.Name)
 			return ctrl.Result{}, err
 		}
+	}
+
+	if len(earlierRequests) < len(allRefreshRequests.Items) {
+		// There are requests created since this reconcile was triggered, so we should requeue
+		return ctrl.Result{RequeueAfter: time.Second}, nil
 	}
 
 	return ctrl.Result{RequeueAfter: refreshInterval}, nil
@@ -231,16 +271,12 @@ func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
 	return true
 }
 
-// readOCMAPISecret reads the token from the OCM api secret
-func userToken(kubeClient client.Client, secret types.NamespacedName) (string, error) {
-	ocmSecret := &corev1.Secret{}
-	err := kubeClient.Get(context.TODO(), secret, ocmSecret)
-	if err != nil {
-		return "", err
+func priorRequests(all *discoveryv1.DiscoveredClusterRefreshList, this *discoveryv1.DiscoveredClusterRefresh) []discoveryv1.DiscoveredClusterRefresh {
+	prior := []discoveryv1.DiscoveredClusterRefresh{}
+	for _, request := range all.Items {
+		if request.CreationTimestamp.Before(&this.CreationTimestamp) || request.CreationTimestamp.Equal(&this.CreationTimestamp) {
+			prior = append(prior, request)
+		}
 	}
-
-	if _, ok := ocmSecret.Data["token"]; !ok {
-		return "", fmt.Errorf("Secret '%s' does not contain 'token' field", secret.Name)
-	}
-	return string(ocmSecret.Data["token"]), nil
+	return prior
 }

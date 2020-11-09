@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,6 +35,17 @@ type DiscoveredClusterSpec struct {
 	State             string       `json:"state,omitempty" yaml:"state,omitempty"`
 	Product           string       `json:"product,omitempty" yaml:"product,omitempty"`
 	IsManagedCluster  bool         `json:"isManagedCluster,omitempty" yaml:"isManagedCluster,omitempty"`
+
+	ProviderConnections []corev1.ObjectReference `json:"providerConnections"`
+
+	Subscription SubscriptionSpec `json:"subscription" yaml:"subscription"`
+}
+
+type SubscriptionSpec struct {
+	Status       string `json:"status" yaml:"status"`
+	SupportLevel string `json:"support_level,omitempty" yaml:"support_level,omitempty"`
+	Managed      bool   `json:"managed" yaml:"managed"`
+	CreatorID    string `json:"creator_id" yaml:"creator_id"`
 }
 
 // DiscoveredClusterStatus defines the observed state of DiscoveredCluster
