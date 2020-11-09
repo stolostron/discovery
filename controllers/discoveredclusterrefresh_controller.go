@@ -120,12 +120,6 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 			return ctrl.Result{}, err
 		}
 
-		// jobRef, err := ref.GetReference(r.Scheme, activeJob)
-		// if err != nil {
-		//     log.Error(err, "unable to make reference to active job", "job", activeJob)
-		//     continue
-		// }
-		// cronJob.Status.Active = append(cronJob.Status.Active, *jobRef)
 		// Merge newly discovered clusters with existing list
 		for _, cluster := range newDiscoveredList.Items {
 			discoveredCluster := ocm.DiscoveredCluster(cluster)
