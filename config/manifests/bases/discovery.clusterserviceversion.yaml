@@ -1,0 +1,65 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Seamless Upgrades
+    categories: Integration & Delivery
+    operatorframework.io/suggested-namespace: open-cluster-management
+    operators.operatorframework.io/builder: operator-sdk-v1.2.0
+    operators.operatorframework.io/internal-objects: |-
+      ["discoveredclusterrefreshes.discovery.open-cluster-management.io",
+       "discoveredclusters.discovery.open-cluster-management.io"]'
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
+    support: Red Hat
+  name: discovery.vX.Y.Z
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: DiscoveredCluster is the Schema for the discoveredclusters API
+      displayName: Discovered Cluster
+      kind: DiscoveredCluster
+      name: discoveredclusters.discovery.open-cluster-management.io
+      version: v1
+    - description: DiscoveryConfig is the Schema for the discoveryconfigs API
+      displayName: Discovery Config
+      kind: DiscoveryConfig
+      name: discoveryconfigs.discovery.open-cluster-management.io
+      version: v1
+    - description: DiscoveredClusterRefresh is the Schema for the discoveredclusterrefreshes API
+      displayName: Discovered Cluster Refresh
+      kind: DiscoveredClusterRefresh
+      name: discoveredclusterrefreshes.discovery.open-cluster-management.io
+      version: v1
+  description: This operator discovers OpenShift Conatiner Platform clusters which are not yet under management by Open Cluster Management.
+  displayName: Multicluster Discovery Operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: false
+    type: AllNamespaces
+  keywords:
+  - none
+  links:
+  - name: Discovery
+    url: https://discovery.domain
+  maintainers:
+  - email: acm-contact@redhat.com
+    name: Red Hat
+  maturity: alpha
+  provider:
+    name: Red Hat
+  version: 0.0.1
