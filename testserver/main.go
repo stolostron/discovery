@@ -29,5 +29,5 @@ func main() {
 
 	api.SetupEndpoints(r, log.Logger)
 
-	r.Run()
+	r.Run(":3000")
 }
