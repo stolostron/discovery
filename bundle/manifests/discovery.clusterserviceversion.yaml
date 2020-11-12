@@ -214,7 +214,8 @@ spec:
   - supported: false
     type: AllNamespaces
   keywords:
-  - none
+  - open-cluster-management
+  - discovery
   links:
   - name: Discovery
     url: https://discovery.domain
