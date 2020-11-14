@@ -107,6 +107,8 @@ func SetupEndpoints(r *gin.Engine, logger zerolog.Logger) {
 	r.GET("/api/clusters_mgmt/v1/clusters/*clusterID", GetCluster)
 
 	r.GET("/api/accounts_mgmt/v1/subscriptions", GetSubscriptions)
+
+	r.POST("/auth/realms/redhat-external/protocol/openid-connect/token", GetToken)
 }
 
 // GetSubscriptions ...
@@ -164,4 +166,28 @@ func GetCluster(c *gin.Context) {
 	}
 
 	c.Status(http.StatusBadRequest)
+}
+
+// GetToken
+func GetToken(c *gin.Context) {
+	token := c.PostForm("refresh_token")
+	if token == "" {
+		file, err := ioutil.ReadFile("data/auth_error.json")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"msg": fmt.Sprintf("Error reading file: %s", err.Error()),
+			})
+			return
+		}
+		c.Data(http.StatusBadRequest, "application/json", file)
+	} else {
+		file, err := ioutil.ReadFile("data/auth_success.json")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"msg": fmt.Sprintf("Error reading file: %s", err.Error()),
+			})
+			return
+		}
+		c.Data(http.StatusOK, "application/json", file)
+	}
 }

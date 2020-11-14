@@ -31,13 +31,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
-	"github.com/open-cluster-management/discovery/pkg/auth"
-	"github.com/open-cluster-management/discovery/pkg/ocm"
+	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
+	"github.com/open-cluster-management/discovery/pkg/api/services/auth_service"
+	"github.com/open-cluster-management/discovery/pkg/api/services/cluster_service"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
-	refreshInterval = 10 * time.Minute
+	refreshInterval = 1 * time.Hour
 )
 
 // DiscoveredClusterRefreshReconciler reconciles a DiscoveredClusterRefresh object
@@ -67,7 +69,7 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 		Namespace: req.Namespace,
 	}, config); err != nil {
 		log.Error(err, "unable to fetch DiscoveryConfig")
-		return ctrl.Result{RequeueAfter: refreshInterval}, client.IgnoreNotFound(err)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, client.IgnoreNotFound(err)
 	}
 
 	// Get all refresh requests. If there are none then we were triggered by refresh interval
@@ -77,6 +79,7 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	// Get user token from secret provided in config
 	secretName := config.Spec.ProviderConnections[0]
 	ocmSecret := &corev1.Secret{}
 	err := r.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: req.Namespace}, ocmSecret)
@@ -88,7 +91,8 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 	}
 	userToken := string(ocmSecret.Data["token"])
 
-	accessToken, err := auth.NewAccessToken(userToken)
+	// Request ephemeral access token with user token. This will be used for OCM requests
+	accessToken, err := auth_service.AuthClient.GetToken(userToken)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -110,60 +114,53 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 	var deleteClusters []discoveryv1.DiscoveredCluster
 	var unchangedClusters []discoveryv1.DiscoveredCluster
 
-	clusterRequest := ocm.ClusterRequest(config)
-	page := 1
-	size := 1000
-	for {
-		log.Info("Requesting OCM clusters", "page", page, "size", size)
-		newDiscoveredList, err := clusterRequest.Page(page).Size(size).Token(accessToken).Filter(config.Spec.Filters).Get(ctx)
+	clusterClient := cluster_service.ClusterClientGenerator.NewClient(cluster_domain.ClusterRequest{
+		Token:  accessToken,
+		Filter: config.Spec.Filters,
+	})
+
+	newClusters, err := clusterClient.GetClusters()
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	for _, cluster := range newClusters {
+		// Build a DiscoveredCluster object from the cluster information
+		discoveredCluster := discoveredCluster(cluster)
+		discoveredCluster.SetNamespace(req.Namespace)
+
+		// Assign dummy status
+		discoveredCluster.Spec.Subscription = discoveryv1.SubscriptionSpec{
+			Status:       "Active",
+			SupportLevel: "None",
+			Managed:      false,
+			CreatorID:    "abc123",
+		}
+
+		// Add reference to secret used for authentication
+		discoveredCluster.Spec.ProviderConnections = nil
+		secretRef, err := ref.GetReference(r.Scheme, ocmSecret)
 		if err != nil {
-			return ctrl.Result{}, err
+			log.Error(err, "unable to make reference to secret", "secret", secretRef)
 		}
+		discoveredCluster.Spec.ProviderConnections = append(discoveredCluster.Spec.ProviderConnections, *secretRef)
 
-		// Merge newly discovered clusters with existing list
-		for _, cluster := range newDiscoveredList.Items {
-			discoveredCluster := ocm.DiscoveredCluster(cluster)
-			discoveredCluster.SetNamespace(req.Namespace)
-
-			// Assign dummy status
-			discoveredCluster.Spec.Subscription = discoveryv1.SubscriptionSpec{
-				Status:       "Active",
-				SupportLevel: "None",
-				Managed:      false,
-				CreatorID:    "abc123",
-			}
-
-			// Add reference to secret used for authentication
-			discoveredCluster.Spec.ProviderConnections = nil
-			secretRef, err := ref.GetReference(r.Scheme, ocmSecret)
-			if err != nil {
-				log.Error(err, "unable to make reference to secret", "secret", secretRef)
-			}
-			discoveredCluster.Spec.ProviderConnections = append(discoveredCluster.Spec.ProviderConnections, *secretRef)
-
-			ind, exists := existing[discoveredCluster.Name]
-			if !exists {
-				// Newly discovered cluster
-				createClusters = append(createClusters, discoveredCluster)
-				delete(existing, discoveredCluster.Name)
-				continue
-			}
-			// Cluster has already been discovered. Check for changes.
-			if same(discoveredCluster, discoveredList.Items[ind]) {
-				unchangedClusters = append(unchangedClusters, discoveredCluster)
-				delete(existing, discoveredCluster.Name)
-			} else {
-				updated := discoveredList.Items[ind]
-				updated.Spec = discoveredCluster.Spec
-				updateClusters = append(updateClusters, updated)
-				delete(existing, discoveredCluster.Name)
-			}
+		ind, exists := existing[discoveredCluster.Name]
+		if !exists {
+			// Newly discovered cluster
+			createClusters = append(createClusters, discoveredCluster)
+			delete(existing, discoveredCluster.Name)
+			continue
 		}
-
-		if len(newDiscoveredList.Items) < size {
-			break
+		// Cluster has already been discovered. Check for changes.
+		if same(discoveredCluster, discoveredList.Items[ind]) {
+			unchangedClusters = append(unchangedClusters, discoveredCluster)
+			delete(existing, discoveredCluster.Name)
+		} else {
+			updated := discoveredList.Items[ind]
+			updated.Spec = discoveredCluster.Spec
+			updateClusters = append(updateClusters, updated)
+			delete(existing, discoveredCluster.Name)
 		}
-		page++
 	}
 
 	// Remaining clusters are no longer found by OCM and should be labeled for delete
@@ -273,4 +270,33 @@ func priorRequests(all *discoveryv1.DiscoveredClusterRefreshList, this *discover
 		}
 	}
 	return prior
+}
+
+// DiscoveredCluster ...
+func discoveredCluster(cluster cluster_domain.Cluster) discoveryv1.DiscoveredCluster {
+	return discoveryv1.DiscoveredCluster{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "operator.open-cluster-management.io/v1",
+			Kind:       "DiscoveredCluster",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cluster.ID,
+			Namespace: "open-cluster-management",
+		},
+		Spec: discoveryv1.DiscoveredClusterSpec{
+			Console:           cluster.Console.URL,
+			CreationTimestamp: cluster.CreationTimestamp,
+			ActivityTimestamp: cluster.ActivityTimestamp,
+			// ActivityTimestamp: metav1.NewTime(time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)),
+			OpenshiftVersion: cluster.OpenShiftVersion,
+			Name:             cluster.Name,
+			Region:           cluster.Region.ID,
+			CloudProvider:    cluster.CloudProvider.ID,
+			HealthState:      cluster.HealthState,
+			State:            cluster.State,
+			Product:          cluster.Product.ID,
+			// IsManagedCluster:  managedClusterNames[cluster.Name],
+			// APIURL: apiurl,
+		},
+	}
 }

@@ -14,7 +14,7 @@ spec:
       containers:
       - name: mock-ocm-server
         ports:
-        - containerPort: 8080
+        - containerPort: 3000
         image: quay.io/rhibmcollab/mock-ocm-server:latest
         imagePullPolicy: Always
         resources:

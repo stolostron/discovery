@@ -1,24 +1,23 @@
-package ocm
+package cluster_domain
 
 import (
-	"fmt"
-
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	// "github.com/ghodss/yaml"
 )
 
-// ClusterList ...
-type ClusterList struct {
-	Kind   string    `json:"kind"`
-	Page   string    `json:"page"`
-	Size   int       `json:"size"`
-	Total  int       `json:"total"`
-	Items  []Cluster `json:"items"`
-	Reason string    `json:"reason"`
+// StandardKind ...
+type StandardKind struct {
+	Kind string `yaml:"kind,omitempty"`
+	ID   string `yaml:"id,omitempty"`
+	Href string `href:"kind,omitempty"`
 }
 
-// Cluster ...
+// Console ...
+type Console struct {
+	URL string `yaml:"url,omitempty"`
+}
+
+// Cluster represents a single cluster format returned by OCM
 type Cluster struct {
 	Kind                     string                 `json:"kind"`
 	ID                       string                 `json:"id"`
@@ -52,40 +51,21 @@ type Cluster struct {
 	DNSReady                 bool                   `json:"dns_ready,omitempty"`
 }
 
-// ClusterRequest ...
-func ClusterRequest(config *discoveryv1.DiscoveryConfig) *OCMRequest {
-	ocmRequest := &OCMRequest{path: OCMClusterPath}
-	if ocmURL, ok := config.Annotations["OCM_URL"]; ok {
-		ocmRequest.path = fmt.Sprintf("%s/api/clusters_mgmt/v1/clusters", ocmURL)
-	}
-	return ocmRequest
+// ClusterResponse represents the successful response format by OCM on a cluster request
+type ClusterResponse struct {
+	Kind   string    `json:"kind"`
+	Page   int       `json:"page"`
+	Size   int       `json:"size"`
+	Total  int       `json:"total"`
+	Items  []Cluster `json:"items"`
+	Reason string    `json:"reason"`
 }
 
-// DiscoveredCluster ...
-func DiscoveredCluster(cluster Cluster) discoveryv1.DiscoveredCluster {
-	return discoveryv1.DiscoveredCluster{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "operator.open-cluster-management.io/v1",
-			Kind:       "DiscoveredCluster",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cluster.ID,
-			Namespace: "open-cluster-management",
-		},
-		Spec: discoveryv1.DiscoveredClusterSpec{
-			Console:           cluster.Console.URL,
-			CreationTimestamp: cluster.CreationTimestamp,
-			ActivityTimestamp: cluster.ActivityTimestamp,
-			// ActivityTimestamp: metav1.NewTime(time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)),
-			OpenshiftVersion: cluster.OpenShiftVersion,
-			Name:             cluster.Name,
-			Region:           cluster.Region.ID,
-			CloudProvider:    cluster.CloudProvider.ID,
-			HealthState:      cluster.HealthState,
-			State:            cluster.State,
-			Product:          cluster.Product.ID,
-			// IsManagedCluster:  managedClusterNames[cluster.Name],
-			// APIURL: apiurl,
-		},
-	}
+// ClusterRequest contains the data used to customize a cluster get request
+type ClusterRequest struct {
+	BaseURL string
+	Token   string
+	Page    int
+	Size    int
+	Filter  discoveryv1.Filter
 }

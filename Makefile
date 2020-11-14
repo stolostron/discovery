@@ -150,3 +150,9 @@ samples:
 
 logs:
 	@oc logs -f $(shell oc get pod -l app=discovery-controller -o jsonpath="{.items[0].metadata.name}")
+
+setenv:
+	kubectl set env deployment/discovery-controller OCM_URL="http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"
+	
+unsetenv:
+	kubectl set env deployment/discovery-controller OCM_URL-
