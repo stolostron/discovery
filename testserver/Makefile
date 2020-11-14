@@ -26,7 +26,7 @@ server/docker-push:
 
 ## Run Mock OCM Server Image Locally
 server/docker-run:
-	docker run -p 8080:8080 quay.io/rhibmcollab/mock-ocm-server:latest
+	docker run -p 3000:3000 quay.io/rhibmcollab/mock-ocm-server:latest
 
 ## Annotate DiscoveryConfig with Mock OCM Server URL
 server/annotate:
