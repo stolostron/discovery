@@ -16,6 +16,7 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -52,13 +53,16 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	// Get discovery config in the trigger's namespace
+	// Get discovery config in the same namespace
 	config := &discoveryv1.DiscoveryConfig{}
 	if err := r.Get(ctx, types.NamespacedName{
 		Name:      "discoveryconfig",
 		Namespace: req.Namespace,
 	}, config); err != nil {
-		log.Error(err, "unable to find discoveryconfig")
+		if errors.IsNotFound(err) {
+			log.Info("could not find discoveryconfig to refresh in namespace `%s`", req.Namespace)
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -68,9 +72,8 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 		Object: config,
 	}
 
-	// Trigger is done. The refresh can now be deleted.
+	// Trigger is done. The refresh object can now be deleted.
 	if err := r.Delete(ctx, refresh); err != nil {
-		log.Error(err, "failed to delete refresh object")
 		return ctrl.Result{}, err
 	}
 
@@ -81,7 +84,6 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 func (r *DiscoveredClusterRefreshReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&discoveryv1.DiscoveredClusterRefresh{}).
-		// Watches(&source.Kind{Type: &discoveryv1.DiscoveryConfig{}}, &handler.EnqueueRequestForObject{}).
 		WithEventFilter(predicate.Funcs{
 			// Skip delete events
 			DeleteFunc: func(e event.DeleteEvent) bool {
