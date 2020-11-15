@@ -50,14 +50,11 @@ type DiscoveryConfigReconciler struct {
 	Trigger chan event.GenericEvent
 }
 
-// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusterrefreshes,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusterrefreshes/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/status,verbs=get;update;patch
-
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
 func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
