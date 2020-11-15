@@ -37,12 +37,9 @@ import (
 	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/services/auth_service"
 	"github.com/open-cluster-management/discovery/pkg/api/services/cluster_service"
+	"github.com/open-cluster-management/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-var (
-	refreshInterval = 1 * time.Hour
 )
 
 // DiscoveryConfigReconciler reconciles a DiscoveryConfig object
@@ -73,6 +70,13 @@ func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		Namespace: req.Namespace,
 	}, config); err != nil {
 		log.Error(err, "unable to fetch DiscoveryConfig")
+		return ctrl.Result{}, err
+	}
+
+	// Update the DiscoveryConfig status
+	config.Status.LastUpdateTime = &metav1.Time{Time: time.Now()}
+	if err := r.Status().Update(ctx, config); err != nil {
+		log.Error(err, "unable to update discoveryconfig status")
 		return ctrl.Result{}, err
 	}
 
@@ -194,7 +198,7 @@ func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 
 	log.Info("Cluster categories", "Created", len(createClusters), "Updated", len(updateClusters), "Deleted", len(deleteClusters), "Unchanged", len(unchangedClusters))
 
-	return ctrl.Result{RequeueAfter: refreshInterval}, nil
+	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
 }
 
 // SetupWithManager ...
@@ -206,6 +210,9 @@ func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			// Skip delete events
 			DeleteFunc: func(e event.DeleteEvent) bool {
 				return false
+			},
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				return e.MetaNew.GetGeneration() != e.MetaOld.GetGeneration()
 			},
 		}).
 		Build(r)
