@@ -17,12 +17,14 @@ limitations under the License.
 package controller_tests
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -85,7 +87,42 @@ var _ = BeforeSuite(func() {
 
 })
 
-// var _ = AfterSuite(func() {
-// 	By("tearing down the test environment")
+// var _ = BeforeSuite(func() {
+// 	// Add any setup steps that needs to be executed before each test
+// 	By("Cleaning up test objects")
+// 	ctx := context.Background()
 
+// 	discoveryRefresh := &discoveryv1.DiscoveredClusterRefresh{}
+// 	k8sClient.DeleteAllOf(ctx, discoveryRefresh, client.InNamespace("open-cluster-management"))
+
+// 	discoveryConfig := &discoveryv1.DiscoveryConfig{}
+// 	k8sClient.DeleteAllOf(ctx, discoveryConfig, client.InNamespace("open-cluster-management"))
+
+// 	discoveredCluster := &discoveryv1.DiscoveredCluster{}
+// 	k8sClient.DeleteAllOf(ctx, discoveredCluster, client.InNamespace("open-cluster-management"))
+
+// 	secretKey := types.NamespacedName{Name: SecretName, Namespace: DiscoveryNamespace}
+// 	secret := &corev1.Secret{}
+// 	_ = k8sClient.Get(ctx, secretKey, secret)
+// 	k8sClient.Delete(ctx, secret)
 // })
+
+var _ = AfterSuite(func() {
+	// Add any teardown steps that needs to be executed after each test
+	By("Cleaning up test objects")
+	ctx := context.Background()
+
+	discoveryRefresh := &discoveryv1.DiscoveredClusterRefresh{}
+	k8sClient.DeleteAllOf(ctx, discoveryRefresh, client.InNamespace("open-cluster-management"))
+
+	discoveryConfig := &discoveryv1.DiscoveryConfig{}
+	k8sClient.DeleteAllOf(ctx, discoveryConfig, client.InNamespace("open-cluster-management"))
+
+	discoveredCluster := &discoveryv1.DiscoveredCluster{}
+	k8sClient.DeleteAllOf(ctx, discoveredCluster, client.InNamespace("open-cluster-management"))
+
+	secretKey := types.NamespacedName{Name: SecretName, Namespace: DiscoveryNamespace}
+	secret := &corev1.Secret{}
+	_ = k8sClient.Get(ctx, secretKey, secret)
+	k8sClient.Delete(ctx, secret)
+})

@@ -48,9 +48,9 @@ test: generate fmt vet manifests
 	source $(ENVTEST_ASSETS_DIR)/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
 
 # Run tests
-ENVTEST_ASSETS_DIR = $(shell pwd)/testbin
-integration-tests: generate fmt vet manifests
-	ginkgo -tags functional -v --slowSpecThreshold=150 integration_tests
+integration-tests: install deploy server/deploy setenv
+	kubectl wait --for=condition=available --timeout=60s deployment/discovery-controller -n open-cluster-management
+	ginkgo -tags functional -v integration_tests/controller_tests
 
 # Build manager binary
 manager: generate fmt vet
