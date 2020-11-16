@@ -10,6 +10,14 @@ else
 -include vbh/.build-harness-vendorized
 endif
 
+# Allow operator-sdk version/binary to be used to be specified externally via
+# an environment variable.
+#
+# Default to currrent dev approach of using a version specific alias or
+# symbolic link called "osdk".
+
+OPERATOR_SDK ?= osdk
+
 # Current Operator version
 VERSION ?= 0.0.1
 # Default bundle image tag
@@ -125,12 +133,17 @@ KUSTOMIZE=$(shell which kustomize)
 endif
 
 # Generate bundle manifests and metadata, then validate generated files.
+#
+# Note: Generated bundle material must  be committed to be picked up and included
+# as part of the ACM composite bundle. The merge tooling assumes this stuff is
+# found in operator-sdk (V1's) default output directory (bundle).
+
 .PHONY: bundle
 bundle: manifests
-	osdk generate kustomize manifests -q
+	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
-	$(KUSTOMIZE) build config/manifests | osdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
-	osdk bundle validate ./bundle
+	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+	$(OPERATOR_SDK) bundle validate ./bundle
 
 # Build the bundle image.
 .PHONY: bundle-build
