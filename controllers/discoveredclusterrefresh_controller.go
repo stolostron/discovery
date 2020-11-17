@@ -60,7 +60,7 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 		Namespace: req.Namespace,
 	}, config); err != nil {
 		if errors.IsNotFound(err) {
-			log.Info("could not find discoveryconfig to refresh in namespace `%s`", req.Namespace)
+			log.Info("could not find discoveryconfig to refresh in same namespace")
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err

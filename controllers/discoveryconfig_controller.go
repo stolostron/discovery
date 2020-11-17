@@ -19,7 +19,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -71,11 +70,11 @@ func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 	}
 
 	// Update the DiscoveryConfig status
-	config.Status.LastUpdateTime = &metav1.Time{Time: time.Now()}
-	if err := r.Status().Update(ctx, config); err != nil {
-		log.Error(err, "unable to update discoveryconfig status")
-		return ctrl.Result{}, err
-	}
+	// config.Status.LastUpdateTime = &metav1.Time{Time: time.Now()}
+	// if err := r.Status().Update(ctx, config); err != nil {
+	// 	log.Error(err, "unable to update discoveryconfig status")
+	// 	return ctrl.Result{}, err
+	// }
 
 	// Get user token from secret provided in config
 	if len(config.Spec.ProviderConnections) == 0 {

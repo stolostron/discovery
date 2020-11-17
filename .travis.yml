@@ -22,6 +22,7 @@ env:
     # Required
     - OS=linux
     - COMPONENT_TAG_EXTENSION="-${TRAVIS_COMMIT}"
+    - COMPONENT_NAME=discovery-operator
 
     # Component Specific
     - COMPONENT_INIT_COMMAND=${TRAVIS_BUILD_DIR}/cicd-scripts/install-dependencies.sh
@@ -48,6 +49,9 @@ jobs:
           make component/build
           make component/push
           make security/scans
+          COMPONENT_NAME=discovery-operator-tests COMPONENT_BUILD_COMMAND=${TRAVIS_BUILD_DIR}/cicd-scripts/build-test-image.sh
+          make component/build
+          make component/push
     - stage: unit-test
       name: "Run unit tests"
       script:
@@ -81,4 +85,8 @@ jobs:
       script:
         - |
           make 
+          make pipeline-manifest/update PIPELINE_MANIFEST_COMPONENT_SHA256=${TRAVIS_COMMIT} PIPELINE_MANIFEST_COMPONENT_REPO=${TRAVIS_REPO_SLUG} PIPELINE_MANIFEST_BRANCH=${TRAVIS_BRANCH}
+          rm -rf pipeline
+          echo "Waiting 60s before publishing test image..." && sleep 60
+          COMPONENT_NAME=discovery-operator-tests
           make pipeline-manifest/update PIPELINE_MANIFEST_COMPONENT_SHA256=${TRAVIS_COMMIT} PIPELINE_MANIFEST_COMPONENT_REPO=${TRAVIS_REPO_SLUG} PIPELINE_MANIFEST_BRANCH=${TRAVIS_BRANCH}

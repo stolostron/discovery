@@ -33,5 +33,5 @@ server/annotate:
 	oc annotate discoveryconfig discoveryconfig OCM_URL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:8080 --overwrite
 
 ## Build, push, and deploy server in cluster
-server/deploy: server/docker-build server/docker-push
+server/deploy:
 	oc apply -k $(DIR)/build/local-server

@@ -2,7 +2,6 @@ package controller_tests
 
 import (
 	"context"
-	"os"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -26,46 +25,6 @@ const (
 	interval = time.Millisecond * 250
 )
 
-// var _ = BeforeSuite(func() {
-// 	// Add any setup steps that needs to be executed before each test
-// 	By("Cleaning up test objects")
-// 	ctx := context.Background()
-
-// 	discoveryRefresh := &discoveryv1.DiscoveredClusterRefresh{}
-// 	k8sClient.DeleteAllOf(ctx, discoveryRefresh, client.InNamespace("open-cluster-management"))
-
-// 	discoveryConfig := &discoveryv1.DiscoveryConfig{}
-// 	k8sClient.DeleteAllOf(ctx, discoveryConfig, client.InNamespace("open-cluster-management"))
-
-// 	discoveredCluster := &discoveryv1.DiscoveredCluster{}
-// 	k8sClient.DeleteAllOf(ctx, discoveredCluster, client.InNamespace("open-cluster-management"))
-
-// 	secretKey := types.NamespacedName{Name: SecretName, Namespace: DiscoveryNamespace}
-// 	secret := &corev1.Secret{}
-// 	_ = k8sClient.Get(ctx, secretKey, secret)
-// 	k8sClient.Delete(ctx, secret)
-// })
-
-var _ = AfterSuite(func() {
-	// Add any teardown steps that needs to be executed after each test
-	By("Cleaning up test objects")
-	ctx := context.Background()
-
-	discoveryRefresh := &discoveryv1.DiscoveredClusterRefresh{}
-	k8sClient.DeleteAllOf(ctx, discoveryRefresh, client.InNamespace("open-cluster-management"))
-
-	discoveryConfig := &discoveryv1.DiscoveryConfig{}
-	k8sClient.DeleteAllOf(ctx, discoveryConfig, client.InNamespace("open-cluster-management"))
-
-	discoveredCluster := &discoveryv1.DiscoveredCluster{}
-	k8sClient.DeleteAllOf(ctx, discoveredCluster, client.InNamespace("open-cluster-management"))
-
-	secretKey := types.NamespacedName{Name: SecretName, Namespace: DiscoveryNamespace}
-	secret := &corev1.Secret{}
-	_ = k8sClient.Get(ctx, secretKey, secret)
-	k8sClient.Delete(ctx, secret)
-})
-
 var _ = Describe("DiscoveredClusterRefresh controller", func() {
 	Context("When creating a DiscoveryConfig", func() {
 		It("Should trigger the creation of new discovered clusters ", func() {
@@ -78,7 +37,7 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 					Namespace: DiscoveryNamespace,
 				},
 				StringData: map[string]string{
-					"token": os.Getenv("OCM_API_TOKEN"),
+					"token": "dummytoken",
 				},
 			}
 

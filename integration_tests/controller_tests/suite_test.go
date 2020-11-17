@@ -17,19 +17,22 @@ limitations under the License.
 package controller_tests
 
 import (
+	"context"
+	"flag"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/reporters"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -43,6 +46,7 @@ import (
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var reportFile string
 
 var (
 	scheme = runtime.NewScheme()
@@ -57,24 +61,22 @@ func init() {
 	// +kubebuilder:scaffold:scheme
 }
 
+func init() {
+	flag.StringVar(&reportFile, "report-file", "../results/functional-results.xml", "Provide the path to where the junit results will be printed.")
+}
+
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-
+	junitReporter := reporters.NewJUnitReporter(reportFile)
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Controller Suite",
-		[]Reporter{printer.NewlineReporter{}})
-
-	// 	junitReporter := reporters.NewJUnitReporter(reportFile)
-
-	// RunSpecsWithDefaultAndCustomReporters(t, "MultiClusterHubOperator Install Suite", []Reporter{junitReporter})
-
+		[]Reporter{junitReporter})
 }
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
 
 	By("bootstrapping test environment")
-
 	c, err := config.GetConfig()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(c).ToNot(BeNil())
@@ -85,7 +87,42 @@ var _ = BeforeSuite(func() {
 
 })
 
-// var _ = AfterSuite(func() {
-// 	By("tearing down the test environment")
+// var _ = BeforeSuite(func() {
+// 	// Add any setup steps that needs to be executed before each test
+// 	By("Cleaning up test objects")
+// 	ctx := context.Background()
 
+// 	discoveryRefresh := &discoveryv1.DiscoveredClusterRefresh{}
+// 	k8sClient.DeleteAllOf(ctx, discoveryRefresh, client.InNamespace("open-cluster-management"))
+
+// 	discoveryConfig := &discoveryv1.DiscoveryConfig{}
+// 	k8sClient.DeleteAllOf(ctx, discoveryConfig, client.InNamespace("open-cluster-management"))
+
+// 	discoveredCluster := &discoveryv1.DiscoveredCluster{}
+// 	k8sClient.DeleteAllOf(ctx, discoveredCluster, client.InNamespace("open-cluster-management"))
+
+// 	secretKey := types.NamespacedName{Name: SecretName, Namespace: DiscoveryNamespace}
+// 	secret := &corev1.Secret{}
+// 	_ = k8sClient.Get(ctx, secretKey, secret)
+// 	k8sClient.Delete(ctx, secret)
 // })
+
+var _ = AfterSuite(func() {
+	// Add any teardown steps that needs to be executed after each test
+	By("Cleaning up test objects")
+	ctx := context.Background()
+
+	discoveryRefresh := &discoveryv1.DiscoveredClusterRefresh{}
+	k8sClient.DeleteAllOf(ctx, discoveryRefresh, client.InNamespace("open-cluster-management"))
+
+	discoveryConfig := &discoveryv1.DiscoveryConfig{}
+	k8sClient.DeleteAllOf(ctx, discoveryConfig, client.InNamespace("open-cluster-management"))
+
+	discoveredCluster := &discoveryv1.DiscoveredCluster{}
+	k8sClient.DeleteAllOf(ctx, discoveredCluster, client.InNamespace("open-cluster-management"))
+
+	secretKey := types.NamespacedName{Name: SecretName, Namespace: DiscoveryNamespace}
+	secret := &corev1.Secret{}
+	_ = k8sClient.Get(ctx, secretKey, secret)
+	k8sClient.Delete(ctx, secret)
+})
