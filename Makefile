@@ -45,6 +45,7 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 -include testserver/Makefile
+-include integration_tests/Makefile
 
 all: manager
 
@@ -53,7 +54,12 @@ ENVTEST_ASSETS_DIR = $(shell pwd)/testbin
 test: generate fmt vet manifests
 	mkdir -p $(ENVTEST_ASSETS_DIR)
 	test -f $(ENVTEST_ASSETS_DIR)/setup-envtest.sh || curl -sSLo $(ENVTEST_ASSETS_DIR)/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.6.3/hack/setup-envtest.sh
-	source $(ENVTEST_ASSETS_DIR)/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
+	source $(ENVTEST_ASSETS_DIR)/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test `go list ./... | grep -v integration_tests` -coverprofile cover.out
+
+# Run tests
+integration-tests: install deploy server/deploy setenv
+	kubectl wait --for=condition=available --timeout=60s deployment/discovery-controller -n open-cluster-management
+	ginkgo -tags functional -v integration_tests/controller_tests
 
 # Build manager binary
 manager: generate fmt vet
@@ -163,3 +169,9 @@ samples:
 
 logs:
 	@oc logs -f $(shell oc get pod -l app=discovery-controller -o jsonpath="{.items[0].metadata.name}")
+
+setenv:
+	kubectl set env deployment/discovery-controller OCM_URL="http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"
+	
+unsetenv:
+	kubectl set env deployment/discovery-controller OCM_URL-

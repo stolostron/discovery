@@ -26,12 +26,12 @@ server/docker-push:
 
 ## Run Mock OCM Server Image Locally
 server/docker-run:
-	docker run -p 8080:8080 quay.io/rhibmcollab/mock-ocm-server:latest
+	docker run -p 3000:3000 quay.io/rhibmcollab/mock-ocm-server:latest
 
 ## Annotate DiscoveryConfig with Mock OCM Server URL
 server/annotate:
 	oc annotate discoveryconfig discoveryconfig OCM_URL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:8080 --overwrite
 
 ## Build, push, and deploy server in cluster
-server/deploy: server/docker-build server/docker-push
+server/deploy:
 	oc apply -k $(DIR)/build/local-server
