@@ -2,7 +2,6 @@ package controller_tests
 
 import (
 	"context"
-	"os"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -38,7 +37,7 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 					Namespace: DiscoveryNamespace,
 				},
 				StringData: map[string]string{
-					"token": os.Getenv("OCM_API_TOKEN"),
+					"token": "dummytoken",
 				},
 			}
 

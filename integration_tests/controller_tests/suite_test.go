@@ -76,7 +76,6 @@ var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
 
 	By("bootstrapping test environment")
-
 	c, err := config.GetConfig()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(c).ToNot(BeNil())
