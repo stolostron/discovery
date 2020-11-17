@@ -28,4 +28,4 @@ WORKDIR /
 COPY --from=builder /workspace/integration_tests/controller_tests/controller_tests.test controller_tests.test
 
 
-ENTRYPOINT ["/controller_tests.test"]
+ENTRYPOINT ["/controller_tests.test", "-ginkgo.v"]

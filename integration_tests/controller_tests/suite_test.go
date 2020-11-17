@@ -18,9 +18,11 @@ package controller_tests
 
 import (
 	"context"
+	"flag"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/reporters"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -31,7 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -45,6 +46,7 @@ import (
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var reportFile string
 
 var (
 	scheme = runtime.NewScheme()
@@ -59,17 +61,16 @@ func init() {
 	// +kubebuilder:scaffold:scheme
 }
 
+func init() {
+	flag.StringVar(&reportFile, "report-file", "../results/functional-results.xml", "Provide the path to where the junit results will be printed.")
+}
+
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-
+	junitReporter := reporters.NewJUnitReporter(reportFile)
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Controller Suite",
-		[]Reporter{printer.NewlineReporter{}})
-
-	// 	junitReporter := reporters.NewJUnitReporter(reportFile)
-
-	// RunSpecsWithDefaultAndCustomReporters(t, "MultiClusterHubOperator Install Suite", []Reporter{junitReporter})
-
+		[]Reporter{junitReporter})
 }
 
 var _ = BeforeSuite(func() {
