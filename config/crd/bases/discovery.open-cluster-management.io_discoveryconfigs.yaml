@@ -49,7 +49,6 @@ spec:
                 credentials to connect to the OCM api on behalf of a user
               items:
                 type: string
-              minItems: 1
               type: array
           type: object
         status:
