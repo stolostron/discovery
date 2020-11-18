@@ -14,6 +14,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -49,7 +50,10 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 		Name:      req.Name,
 		Namespace: req.Namespace,
 	}, refresh); err != nil {
-		log.Error(err, "unable to find discoveredclusterrefresh")
+		if errors.IsNotFound(err) {
+			log.Info("refresh not found")
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -63,7 +67,7 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 			log.Info("could not find discoveryconfig to refresh in same namespace")
 			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, err
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, err
 	}
 
 	// Trigger reconcile of found DiscoveryConfig
@@ -74,7 +78,7 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 
 	// Trigger is done. The refresh object can now be deleted.
 	if err := r.Delete(ctx, refresh); err != nil {
-		return ctrl.Result{}, err
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, err
 	}
 
 	return ctrl.Result{}, nil

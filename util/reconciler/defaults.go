@@ -6,5 +6,5 @@ import (
 
 const (
 	// RefreshInterval is the maximum time to wait between reconciles
-	RefreshInterval = 90 * time.Minute
+	RefreshInterval = 30 * time.Minute
 )
