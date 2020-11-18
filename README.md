@@ -39,6 +39,7 @@ $ make docker-push
 Be sure you are logged in to a Kubernetes cluster, then run
 
 ```bash
+$ make install
 $ make deploy
 ```
 This will create the CRDs, RBAC, and deployment
