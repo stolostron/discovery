@@ -33,7 +33,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.2.0
+    operators.operatorframework.io/builder: operator-sdk-v1.1.0
     operators.operatorframework.io/internal-objects: |-
       ["discoveredclusterrefreshes.discovery.open-cluster-management.io",
        "discoveredclusters.discovery.open-cluster-management.io"]'
@@ -74,12 +74,8 @@ spec:
           resources:
           - secrets
           verbs:
-          - create
-          - delete
           - get
           - list
-          - patch
-          - update
           - watch
         - apiGroups:
           - discovery.open-cluster-management.io
@@ -116,6 +112,14 @@ spec:
         - apiGroups:
           - discovery.open-cluster-management.io
           resources:
+          - discoveredclusters/finalizers
+          verbs:
+          - get
+          - patch
+          - update
+        - apiGroups:
+          - discovery.open-cluster-management.io
+          resources:
           - discoveredclusters/status
           verbs:
           - get
@@ -136,6 +140,14 @@ spec:
         - apiGroups:
           - discovery.open-cluster-management.io
           resources:
+          - discoveryconfigs/finalizers
+          verbs:
+          - get
+          - patch
+          - update
+        - apiGroups:
+          - discovery.open-cluster-management.io
+          resources:
           - discoveryconfigs/status
           verbs:
           - get
@@ -143,17 +155,17 @@ spec:
           - update
         serviceAccountName: default
       deployments:
-      - name: discovery-controller
+      - name: discovery-operator
         spec:
           replicas: 1
           selector:
             matchLabels:
-              app: discovery-controller
+              app: discovery-operator
           strategy: {}
           template:
             metadata:
               labels:
-                app: discovery-controller
+                app: discovery-operator
             spec:
               containers:
               - args:
@@ -162,7 +174,7 @@ spec:
                 - /manager
                 image: discovery-operator:latest
                 imagePullPolicy: Always
-                name: manager
+                name: discovery-operator
                 resources:
                   limits:
                     cpu: 300m
@@ -171,7 +183,7 @@ spec:
                     cpu: 100m
                     memory: 100Mi
               imagePullSecrets:
-              - name: discovery-controller-pull-secret
+              - name: discovery-operator-pull-secret
               terminationGracePeriodSeconds: 10
       permissions:
       - rules:

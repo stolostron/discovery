@@ -31,18 +31,17 @@ spec:
           description: DiscoveryConfigSpec defines the desired state of DiscoveryConfig
           properties:
             filters:
+              description: Sets restrictions on what kind of clusters to discover
               properties:
                 age:
                   description: Age is the max age in days of clusters to discover, determined by creation date
                   type: integer
               type: object
             providerConnections:
-              description: the asdfasdf +kubebuilder:validation:MinItems=1 ProviderConnections are the list of secrets containing credentials to connect to the OCM api on behalf of a user
+              description: ProviderConnections are the list of secrets containing credentials to connect to the OCM api on behalf of a user
               items:
                 type: string
               type: array
-          required:
-          - providerConnections
           type: object
         status:
           description: DiscoveryConfigStatus defines the observed state of DiscoveryConfig
