@@ -1,6 +1,6 @@
 module github.com/open-cluster-management/discovery
 
-go 1.13
+go 1.15
 
 require (
 	github.com/go-logr/logr v0.1.0
