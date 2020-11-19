@@ -93,6 +93,7 @@ var _ = BeforeSuite(func(done Done) {
 	err = (&DiscoveryConfigReconciler{
 		Client:  k8sManager.GetClient(),
 		Log:     ctrl.Log.WithName("controllers").WithName("DiscoveredClusterRefresh"),
+		Scheme:  k8sManager.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
@@ -100,6 +101,7 @@ var _ = BeforeSuite(func(done Done) {
 	err = (&DiscoveredClusterRefreshReconciler{
 		Client:  k8sManager.GetClient(),
 		Log:     ctrl.Log.WithName("controllers").WithName("DiscoveredClusterRefresh"),
+		Scheme:  k8sManager.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())

@@ -133,21 +133,6 @@ var _ = Describe("DiscoveryConfig controller", func() {
 				return true
 			}, timeout, interval).Should(BeTrue())
 
-			// By("By creating a new DiscoveryRefresh")
-			// refresh := &discoveryv1.DiscoveredClusterRefresh{
-			// 	TypeMeta: metav1.TypeMeta{
-			// 		APIVersion: "discovery.open-cluster-management.io/v1",
-			// 		Kind:       "DiscoveredClusterRefresh",
-			// 	},
-			// 	ObjectMeta: metav1.ObjectMeta{
-			// 		Name:      "refresh",
-			// 		Namespace: DiscoveryNamespace,
-			// 	},
-			// 	Spec: discoveryv1.DiscoveredClusterRefreshSpec{},
-			// }
-
-			// Expect(k8sClient.Create(ctx, refresh)).Should(Succeed())
-
 			By("By checking that at least one discovered cluster has been created (without needing a discovery refresh)")
 			discoveredClusters := &discoveryv1.DiscoveredClusterList{}
 			Eventually(func() (int, error) {
@@ -157,6 +142,11 @@ var _ = Describe("DiscoveryConfig controller", func() {
 				}
 				return len(discoveredClusters.Items), nil
 			}, time.Second*15, interval).Should(BeNumerically(">", 0))
+
+			By("By verifying owner references are set on the new discovered clusters")
+			for _, c := range discoveredClusters.Items {
+				Expect(c.OwnerReferences).ToNot(BeNil())
+			}
 		})
 
 		It("Should reconcile differences between existing clusters and new discovered clusters ", func() {

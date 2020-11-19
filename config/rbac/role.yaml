@@ -49,6 +49,14 @@ rules:
 - apiGroups:
   - discovery.open-cluster-management.io
   resources:
+  - discoveredclusters/finalizers
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - discovery.open-cluster-management.io
+  resources:
   - discoveredclusters/status
   verbs:
   - get
@@ -66,6 +74,14 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - discovery.open-cluster-management.io
+  resources:
+  - discoveryconfigs/finalizers
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - discovery.open-cluster-management.io
   resources:
