@@ -58,7 +58,7 @@ test: generate fmt vet manifests
 
 # Run tests
 integration-tests: install deploy server/deploy setenv
-	kubectl wait --for=condition=available --timeout=60s deployment/discovery-controller -n open-cluster-management
+	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n open-cluster-management
 	ginkgo -tags functional -v integration_tests/controller_tests
 
 # Build manager binary
@@ -160,7 +160,7 @@ bundle-build:
 .PHONY: secrets
 secrets:
 	@oc create secret generic ocm-api-token --from-literal=token=$(OCM_API_TOKEN) || true
-	@oc create secret docker-registry discovery-controller-pull-secret --docker-server=quay.io --docker-username=$(DOCKER_USER) --docker-password=$(DOCKER_PASS) || true
+	@oc create secret docker-registry discovery-operator-pull-secret --docker-server=quay.io --docker-username=$(DOCKER_USER) --docker-password=$(DOCKER_PASS) || true
 
 # Create custom resources
 .PHONY: samples
@@ -168,10 +168,10 @@ samples:
 	$(KUSTOMIZE) build config/samples | kubectl apply -f -
 
 logs:
-	@oc logs -f $(shell oc get pod -l app=discovery-controller -o jsonpath="{.items[0].metadata.name}")
+	@oc logs -f $(shell oc get pod -l app=discovery-operator -o jsonpath="{.items[0].metadata.name}")
 
 setenv:
-	kubectl set env deployment/discovery-controller OCM_URL="http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"
+	kubectl set env deployment/discovery-operator OCM_URL="http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"
 	
 unsetenv:
-	kubectl set env deployment/discovery-controller OCM_URL-
+	kubectl set env deployment/discovery-operator OCM_URL-
