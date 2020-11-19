@@ -72,34 +72,6 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 
 			Expect(k8sClient.Create(ctx, discoveryConfig)).Should(Succeed())
 
-			configLookupKey := types.NamespacedName{Name: DiscoveryConfigName, Namespace: DiscoveryNamespace}
-			createdConfig := &discoveryv1.DiscoveryConfig{}
-
-			// We'll need to retry getting this newly created DiscoveryConfig, given that creation may not immediately happen.
-			Eventually(func() bool {
-				err := k8sClient.Get(ctx, configLookupKey, createdConfig)
-				if err != nil {
-					return false
-				}
-				return true
-			}, timeout, interval).Should(BeTrue())
-
-			By("By creating a new DiscoveryRefresh")
-			refresh := &discoveryv1.DiscoveredClusterRefresh{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "discovery.open-cluster-management.io/v1",
-					Kind:       "DiscoveredClusterRefresh",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "refresh",
-					Namespace: DiscoveryNamespace,
-				},
-				Spec: discoveryv1.DiscoveredClusterRefreshSpec{},
-			}
-
-			Expect(k8sClient).ToNot(BeNil())
-			Expect(k8sClient.Create(ctx, refresh)).Should(Succeed())
-
 			By("By checking that at least one discovered cluster has been created")
 			discoveredClusters := &discoveryv1.DiscoveredClusterList{}
 			Eventually(func() (int, error) {
@@ -142,35 +114,6 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 			createdConfig.Spec.Filters.Age = 30
 
 			Expect(k8sClient.Update(ctx, createdConfig)).Should(Succeed())
-
-			// We'll need to retry getting this newly created DiscoveryConfig, given that creation may not immediately happen.
-			Eventually(func() bool {
-				createdConfig = &discoveryv1.DiscoveryConfig{}
-				err := k8sClient.Get(ctx, configLookupKey, createdConfig)
-				if err != nil {
-					return false
-				}
-				if createdConfig.Spec.Filters.Age != 30 {
-					return false
-				}
-				return true
-			}, timeout, interval).Should(BeTrue())
-
-			By("By creating a new DiscoveryRefresh")
-			refresh := &discoveryv1.DiscoveredClusterRefresh{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "discovery.open-cluster-management.io/v1",
-					Kind:       "DiscoveredClusterRefresh",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "refresh2",
-					Namespace: DiscoveryNamespace,
-				},
-				Spec: discoveryv1.DiscoveredClusterRefreshSpec{},
-			}
-
-			Expect(k8sClient).ToNot(BeNil())
-			Expect(k8sClient.Create(ctx, refresh)).Should(Succeed())
 
 			By("By checking that at least one discovered cluster has been filtered and deleted")
 			discoveredClusters = &discoveryv1.DiscoveredClusterList{}

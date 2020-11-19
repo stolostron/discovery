@@ -27,10 +27,12 @@ type Filter struct {
 
 // DiscoveryConfigSpec defines the desired state of DiscoveryConfig
 type DiscoveryConfigSpec struct {
-	// the asdfasdf +kubebuilder:validation:MinItems=1
 	// ProviderConnections are the list of secrets containing credentials to connect to the OCM api on behalf of a user
-	ProviderConnections []string `json:"providerConnections"`
+	// +optional
+	ProviderConnections []string `json:"providerConnections,omitempty"`
 
+	// Sets restrictions on what kind of clusters to discover
+	// +optional
 	Filters Filter `json:"filters,omitempty"`
 }
 
