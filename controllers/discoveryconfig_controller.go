@@ -51,8 +51,10 @@ type DiscoveryConfigReconciler struct {
 
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/finalizers,verbs=get;update;patch
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/finalizers,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
 func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -171,6 +173,7 @@ func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 
 	// Create new clusters and clean up old ones
 	for _, cluster := range createClusters {
+		ctrl.SetControllerReference(config, &cluster, r.Scheme)
 		if err := r.Create(ctx, &cluster); err != nil {
 			log.Error(err, "unable to create discovered cluster", "name", cluster.Name)
 			return ctrl.Result{}, err
@@ -256,16 +259,6 @@ func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
 		return false
 	}
 	return true
-}
-
-func priorRequests(all *discoveryv1.DiscoveredClusterRefreshList, this *discoveryv1.DiscoveredClusterRefresh) []discoveryv1.DiscoveredClusterRefresh {
-	prior := []discoveryv1.DiscoveredClusterRefresh{}
-	for _, request := range all.Items {
-		if request.CreationTimestamp.Before(&this.CreationTimestamp) || request.CreationTimestamp.Equal(&this.CreationTimestamp) {
-			prior = append(prior, request)
-		}
-	}
-	return prior
 }
 
 // DiscoveredCluster ...

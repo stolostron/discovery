@@ -78,7 +78,7 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 
 	// Trigger is done. The refresh object can now be deleted.
 	if err := r.Delete(ctx, refresh); err != nil {
-		return ctrl.Result{RequeueAfter: 5 * time.Second}, err
+		return ctrl.Result{RequeueAfter: 1 * time.Second}, err
 	}
 
 	return ctrl.Result{}, nil

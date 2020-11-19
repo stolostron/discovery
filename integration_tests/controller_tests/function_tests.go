@@ -128,4 +128,30 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 		})
 	})
 
+	Context("When deleting a DiscoveryConfig", func() {
+		It("Should clean up all discovered clusters via garbage collection", func() {
+			By("By deleting the DiscoveryConfig")
+			ctx := context.Background()
+
+			configLookupKey := types.NamespacedName{Name: DiscoveryConfigName, Namespace: DiscoveryNamespace}
+			createdConfig := &discoveryv1.DiscoveryConfig{}
+
+			err := k8sClient.Get(ctx, configLookupKey, createdConfig)
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(k8sClient.Delete(ctx, createdConfig)).Should(Succeed())
+
+			By("By counting existing discovered clusters")
+			discoveredClusters := &discoveryv1.DiscoveredClusterList{}
+			// Wait for discovered clusters created to no longer be in flux
+			Eventually(func() int {
+				err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(DiscoveryNamespace))
+				if err != nil {
+					return 1
+				}
+				return len(discoveredClusters.Items)
+			}, time.Second*15, time.Second).Should(BeNumerically("==", 0))
+		})
+	})
+
 })

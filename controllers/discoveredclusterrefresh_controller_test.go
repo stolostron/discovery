@@ -86,8 +86,6 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 
 			Expect(k8sClient.Create(ctx, refresh)).Should(Succeed())
 
-			// Events is the channel we created to let the controllers communicate
-			// Eventually(events, timeout).Should(Receive())
 			refreshKey := types.NamespacedName{Name: "refresh", Namespace: Namespace}
 			createdRefresh := &discoveryv1.DiscoveredClusterRefresh{}
 			Eventually(func() bool {
