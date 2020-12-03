@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -47,6 +48,11 @@ type DiscoveryConfigReconciler struct {
 	Log     logr.Logger
 	Scheme  *runtime.Scheme
 	Trigger chan event.GenericEvent
+}
+
+// CloudRedHatProviderConnection ...
+type CloudRedHatProviderConnection struct {
+	OCMApiToken string `yaml:"ocmAPIToken"`
 }
 
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete
@@ -89,10 +95,16 @@ func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	if _, ok := ocmSecret.Data["token"]; !ok {
-		return ctrl.Result{}, fmt.Errorf("Secret '%s' does not contain 'token' field", secretName)
+	if _, ok := ocmSecret.Data["metadata"]; !ok {
+		return ctrl.Result{}, fmt.Errorf("Secret '%s' does not contain 'metadata' field", secretName)
 	}
-	userToken := string(ocmSecret.Data["token"])
+
+	providerConnection := &CloudRedHatProviderConnection{}
+	err = yaml.Unmarshal(ocmSecret.Data["metadata"], providerConnection)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	userToken := providerConnection.OCMApiToken
 
 	// Request ephemeral access token with user token. This will be used for OCM requests
 	accessToken, err := auth_service.AuthClient.GetToken(userToken)
