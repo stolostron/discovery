@@ -159,7 +159,7 @@ bundle-build:
 # Generate secrets for image pull and OCM access
 .PHONY: secrets
 secrets:
-	@oc create secret generic ocm-api-token --from-literal=token=$(OCM_API_TOKEN) || true
+	@cat config/samples/ocm-api-secret.yaml | yq - w data.metadata $(shell echo "ocmAPIToken: $(OCM_API_TOKEN)" | base64) | oc apply -f - || true
 	@oc create secret docker-registry discovery-operator-pull-secret --docker-server=quay.io --docker-username=$(DOCKER_USER) --docker-password=$(DOCKER_PASS) || true
 
 # Create custom resources
