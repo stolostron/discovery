@@ -86,7 +86,7 @@ var _ = Describe("DiscoveryConfig controller", func() {
 					Namespace: DiscoveryNamespace,
 				},
 				StringData: map[string]string{
-					"token": "dummytoken",
+					"metadata": "ocmAPIToken: dummytoken",
 				},
 			}
 
