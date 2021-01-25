@@ -29,7 +29,9 @@ func TestGetTokenNoError(t *testing.T) {
 	}
 	auth_provider.AuthProvider = &authProviderMock{} //without this line, the real api is fired
 
-	response, err := AuthClient.GetToken("this_is_my_token")
+	response, err := AuthClient.GetToken(auth_domain.AuthRequest{
+		Token: "this_is_my_token",
+	})
 	assert.Nil(t, err)
 	assert.EqualValues(t, "new_access_token", response)
 }
@@ -41,7 +43,9 @@ func TestGetTokenMissingAccessToken(t *testing.T) {
 	}
 	auth_provider.AuthProvider = &authProviderMock{} //without this line, the real api is fired
 
-	response, err := AuthClient.GetToken("this_is_my_token")
+	response, err := AuthClient.GetToken(auth_domain.AuthRequest{
+		Token: "this_is_my_token",
+	})
 	assert.NotNil(t, err)
 	assert.EqualValues(t, "", response)
 }
@@ -56,7 +60,9 @@ func TestGetTokenInvalidErrorResponse(t *testing.T) {
 	}
 	auth_provider.AuthProvider = &authProviderMock{} //without this line, the real api is fired
 
-	response, err := AuthClient.GetToken("this_is_my_token")
+	response, err := AuthClient.GetToken(auth_domain.AuthRequest{
+		Token: "this_is_my_token",
+	})
 	assert.NotNil(t, err)
 	assert.EqualValues(t, "", response)
 }

@@ -8,6 +8,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-cluster-management/discovery/pkg/api/domain/auth_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/services/auth_service"
 	"github.com/open-cluster-management/discovery/pkg/api/services/cluster_service"
@@ -21,7 +22,7 @@ import (
 )
 
 var (
-	getTokenFunc    func(string) (string, error)
+	getTokenFunc    func(auth_domain.AuthRequest) (string, error)
 	getClustersFunc func() ([]cluster_domain.Cluster, error)
 	clusterGetter   = clusterGetterMock{}
 )
@@ -29,8 +30,8 @@ var (
 // This mocks the authService request and returns a dummy access token
 type authServiceMock struct{}
 
-func (m *authServiceMock) GetToken(token string) (string, error) {
-	return getTokenFunc(token)
+func (m *authServiceMock) GetToken(request auth_domain.AuthRequest) (string, error) {
+	return getTokenFunc(request)
 }
 
 // The mocks the GetClusters request to return a select few clusters without connection
@@ -63,7 +64,7 @@ var _ = Describe("DiscoveryConfig controller", func() {
 
 	Context("When creating a DiscoveryConfig", func() {
 		// this mock return a dummy token
-		getTokenFunc = func(string) (string, error) {
+		getTokenFunc = func(auth_domain.AuthRequest) (string, error) {
 			return "valid_access_token", nil
 		}
 		auth_service.AuthClient = &authServiceMock{}                           // Mocks out the call to auth service
