@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	yaml "github.com/ghodss/yaml"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -32,6 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"sigs.k8s.io/yaml"
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"

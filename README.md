@@ -4,7 +4,8 @@ This project manages discovered clusters
 
 ## Prerequisites
 
-- [go][go_tool] version v1.13+
+- go version v1.13+
+- operator-sdk version v1.3.0
 - docker
 - quay credentials for https://quay.io/organization/rhibmcollab and https://quay.io/organization/open-cluster-management
 - Connection to an existing Kubernetes cluster
