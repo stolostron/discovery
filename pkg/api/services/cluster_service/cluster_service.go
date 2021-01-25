@@ -2,7 +2,6 @@ package cluster_service
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/providers/cluster_provider"
@@ -12,12 +11,6 @@ var (
 	ocmClusterBaseURL  = "https://api.openshift.com"
 	clusterRequestSize = 1000
 )
-
-func init() {
-	if val, ok := os.LookupEnv("OCM_URL"); ok {
-		ocmClusterBaseURL = val
-	}
-}
 
 var (
 	ClusterClientGenerator ClientGenerator = &clientGenerator{}

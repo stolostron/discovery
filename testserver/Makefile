@@ -30,7 +30,7 @@ server/docker-run:
 
 ## Annotate DiscoveryConfig with Mock OCM Server URL
 server/annotate:
-	oc annotate discoveryconfig discoveryconfig OCM_URL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:8080 --overwrite
+	oc annotate discoveryconfig discoveryconfig ocmBaseURL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000 --overwrite
 
 ## Build, push, and deploy server in cluster
 server/deploy:

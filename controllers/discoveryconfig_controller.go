@@ -34,6 +34,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	"github.com/open-cluster-management/discovery/pkg/api/domain/auth_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/services/auth_service"
 	"github.com/open-cluster-management/discovery/pkg/api/services/cluster_service"
@@ -107,7 +108,13 @@ func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 	userToken := providerConnection.OCMApiToken
 
 	// Request ephemeral access token with user token. This will be used for OCM requests
-	accessToken, err := auth_service.AuthClient.GetToken(userToken)
+	authRequest := auth_domain.AuthRequest{
+		Token: userToken,
+	}
+	if annotations := config.GetAnnotations(); annotations != nil {
+		authRequest.BaseURL = annotations["ocmBaseURL"]
+	}
+	accessToken, err := auth_service.AuthClient.GetToken(authRequest)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -129,10 +136,14 @@ func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 	var deleteClusters []discoveryv1.DiscoveredCluster
 	var unchangedClusters []discoveryv1.DiscoveredCluster
 
-	clusterClient := cluster_service.ClusterClientGenerator.NewClient(cluster_domain.ClusterRequest{
+	requestConfig := cluster_domain.ClusterRequest{
 		Token:  accessToken,
 		Filter: config.Spec.Filters,
-	})
+	}
+	if annotations := config.GetAnnotations(); annotations != nil {
+		requestConfig.BaseURL = annotations["ocmBaseURL"]
+	}
+	clusterClient := cluster_service.ClusterClientGenerator.NewClient(requestConfig)
 
 	newClusters, err := clusterClient.GetClusters()
 	if err != nil {
