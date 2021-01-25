@@ -57,7 +57,7 @@ test: generate fmt vet manifests
 	source $(ENVTEST_ASSETS_DIR)/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test `go list ./... | grep -v integration_tests` -coverprofile cover.out
 
 # Run tests
-integration-tests: install deploy server/deploy setenv
+integration-tests: install deploy server/deploy
 	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n open-cluster-management
 	ginkgo -tags functional -v integration_tests/controller_tests
 
@@ -170,8 +170,10 @@ samples:
 logs:
 	@oc logs -f $(shell oc get pod -l app=discovery-operator -o jsonpath="{.items[0].metadata.name}")
 
-setenv:
-	kubectl set env deployment/discovery-operator OCM_URL="http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"
-	
-unsetenv:
-	kubectl set env deployment/discovery-operator OCM_URL-
+# Annotate discoveryconfig to target mock server
+annotate:
+	oc annotate discoveryconfig discoveryconfig ocmBaseURL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000 --overwrite
+
+# Remove mock server annotation
+unannotate:
+	oc annotate discoveryconfig discoveryconfig ocmBaseURL-

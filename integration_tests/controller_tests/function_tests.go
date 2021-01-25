@@ -25,6 +25,12 @@ const (
 	interval = time.Millisecond * 250
 )
 
+// annotated adds an annotation to modify the baseUrl used with the discoveryconfig
+func annotated(dc *discoveryv1.DiscoveryConfig) *discoveryv1.DiscoveryConfig {
+	dc.SetAnnotations(map[string]string{"ocmBaseURL": "http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"})
+	return dc
+}
+
 var _ = Describe("DiscoveredClusterRefresh controller", func() {
 	Context("When creating a DiscoveryConfig", func() {
 		It("Should trigger the creation of new discovered clusters ", func() {
@@ -37,7 +43,7 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 					Namespace: DiscoveryNamespace,
 				},
 				StringData: map[string]string{
-					"token": "dummytoken",
+					"metadata": "ocmAPIToken: dummytoken",
 				},
 			}
 
@@ -69,6 +75,7 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 					ProviderConnections: []string{SecretName},
 				},
 			}
+			discoveryConfig = annotated(discoveryConfig)
 
 			Expect(k8sClient.Create(ctx, discoveryConfig)).Should(Succeed())
 
