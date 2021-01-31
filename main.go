@@ -99,6 +99,19 @@ func main() {
 	}
 	// +kubebuilder:scaffold:builder
 
+	managedClusterController, err := (&controllers.ManagedClusterReconciler{
+		Name:   "managed-cluster-controller",
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("ManagedCluster"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "ManagedCluster")
+		os.Exit(1)
+	}
+
+	controllers.StartManagedClusterController(managedClusterController, mgr, setupLog)
+
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
