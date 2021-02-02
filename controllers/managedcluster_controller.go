@@ -44,9 +44,8 @@ type ManagedClusterReconciler struct {
 
 // +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters,verbs=get;list;watch
 
-func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-	log := r.Log.WithValues("managedcluster", req.NamespacedName)
+func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := logr.FromContext(ctx)
 
 	managedClusterList := &unstructured.UnstructuredList{}
 	managedClusterList.SetGroupVersionKind(managedClusterGVK)
@@ -84,10 +83,6 @@ func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) (controlle
 }
 
 func StartManagedClusterController(c controller.Controller, mgr ctrl.Manager, log logr.Logger) {
-	// Create a stop channel for our controller. The controller will stop when
-	// this channel is closed.
-	stop := make(chan struct{})
-
 	// Start our controller in a goroutine so that we do not block.
 	go func() {
 		// Block until our controller manager is elected leader. We presume our
@@ -107,7 +102,7 @@ func StartManagedClusterController(c controller.Controller, mgr ctrl.Manager, lo
 
 			// Start our controller. This will block until the stop channel is
 			// closed, or the controller returns an error.
-			if err := c.Start(stop); err != nil {
+			if err := c.Start(context.TODO()); err != nil {
 				log.Error(err, "cannot run ManagedCluster controller")
 			}
 		}

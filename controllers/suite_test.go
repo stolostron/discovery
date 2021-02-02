@@ -30,7 +30,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
@@ -54,7 +53,9 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+	ctrl.SetLogger(
+		zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)),
+	)
 
 	By("bootstrapping test environment")
 
@@ -92,7 +93,6 @@ var _ = BeforeSuite(func(done Done) {
 
 	err = (&DiscoveryConfigReconciler{
 		Client:  k8sManager.GetClient(),
-		Log:     ctrl.Log.WithName("controllers").WithName("DiscoveredClusterRefresh"),
 		Scheme:  k8sManager.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(k8sManager)
@@ -100,7 +100,6 @@ var _ = BeforeSuite(func(done Done) {
 
 	err = (&DiscoveredClusterRefreshReconciler{
 		Client:  k8sManager.GetClient(),
-		Log:     ctrl.Log.WithName("controllers").WithName("DiscoveredClusterRefresh"),
 		Scheme:  k8sManager.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(k8sManager)
