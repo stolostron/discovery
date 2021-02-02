@@ -46,7 +46,6 @@ import (
 // DiscoveryConfigReconciler reconciles a DiscoveryConfig object
 type DiscoveryConfigReconciler struct {
 	client.Client
-	Log     logr.Logger
 	Scheme  *runtime.Scheme
 	Trigger chan event.GenericEvent
 }
@@ -64,9 +63,8 @@ type CloudRedHatProviderConnection struct {
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/finalizers,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
-func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-	log := r.Log.WithValues("discoveryconfig", req.NamespacedName)
+func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := logr.FromContext(ctx)
 
 	// Get discovery config. Die if there is none
 	config := &discoveryv1.DiscoveryConfig{}
@@ -234,7 +232,7 @@ func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				return false
 			},
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				return e.MetaNew.GetGeneration() != e.MetaOld.GetGeneration()
+				return e.ObjectNew.GetGeneration() != e.ObjectOld.GetGeneration()
 			},
 		}).
 		Build(r)

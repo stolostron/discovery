@@ -81,7 +81,6 @@ func main() {
 
 	if err = (&controllers.DiscoveryConfigReconciler{
 		Client:  mgr.GetClient(),
-		Log:     ctrl.Log.WithName("controllers").WithName("DiscoveryConfig"),
 		Scheme:  mgr.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(mgr); err != nil {
@@ -90,7 +89,6 @@ func main() {
 	}
 	if err = (&controllers.DiscoveredClusterRefreshReconciler{
 		Client:  mgr.GetClient(),
-		Log:     ctrl.Log.WithName("controllers").WithName("DiscoveredClusterRefresh"),
 		Scheme:  mgr.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(mgr); err != nil {
@@ -102,7 +100,6 @@ func main() {
 	managedClusterController, err := (&controllers.ManagedClusterReconciler{
 		Name:   "managed-cluster-controller",
 		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("ManagedCluster"),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr)
 	if err != nil {

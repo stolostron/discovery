@@ -92,7 +92,7 @@ fmt:
 
 # Run go vet against code
 vet:
-	go vet ./...
+	go vet `go list ./... | grep -v integration_tests`
 
 # Generate code
 generate: controller-gen
