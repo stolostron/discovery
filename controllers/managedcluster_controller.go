@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -25,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
@@ -47,15 +49,51 @@ type ManagedClusterReconciler struct {
 func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logr.FromContext(ctx)
 
-	managedClusterList := &unstructured.UnstructuredList{}
-	managedClusterList.SetGroupVersionKind(managedClusterGVK)
-
-	if err := r.List(ctx, managedClusterList); err != nil {
+	managedClusters := &unstructured.UnstructuredList{}
+	managedClusters.SetGroupVersionKind(managedClusterGVK)
+	if err := r.List(ctx, managedClusters); err != nil {
 		return ctrl.Result{}, errors.Wrapf(err, "error listing managed clusters")
 	}
 
-	for _, m := range managedClusterList.Items {
-		log.Info("Managed cluster", "Name", m.GetName())
+	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
+	if err := r.List(ctx, discoveredClusters, client.InNamespace(req.Namespace)); err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "error listing discovered clusters")
+	}
+
+	// Update for recently managed clusters
+	for _, m := range managedClusters.Items {
+		id := getClusterID(m)
+		dc := matchingDiscoveredCluster(discoveredClusters, id)
+		if dc == nil {
+			// No matching discovered cluster
+			log.Info("No matching discovered cluster for managed cluster", "managedCluster id", id)
+			continue
+		}
+
+		if updateRequired := setManagedStatus(dc); updateRequired {
+			// Update with managed labels
+			if err := r.Update(ctx, dc); err != nil {
+				return ctrl.Result{}, errors.Wrapf(err, "error updating discovered cluster `%s`", id)
+			}
+		}
+	}
+
+	// Update for recently unmanaged clusters
+	for _, dc := range discoveredClusters.Items {
+		if !dc.Spec.IsManagedCluster {
+			continue
+		}
+		if isManagedCluster(dc, managedClusters) {
+			continue
+		}
+
+		// Discovered cluster is labeled as managed, but does not have a matching managed cluster
+		unsetManagedStatus(&dc)
+
+		// Update with managed labels removed
+		if err := r.Update(ctx, &dc); err != nil {
+			return ctrl.Result{}, errors.Wrapf(err, "error updating discovered cluster `%s`", dc.Name)
+		}
 	}
 
 	return ctrl.Result{}, nil
@@ -74,7 +112,10 @@ func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) (controlle
 	u := &unstructured.Unstructured{}
 	u.SetGroupVersionKind(managedClusterGVK)
 	// Watch for Pod create / update / delete events and call Reconcile
-	err = managedClusterController.Watch(&source.Kind{Type: u}, &handler.EnqueueRequestForObject{})
+	err = managedClusterController.Watch(
+		&source.Kind{Type: u},
+		&handler.EnqueueRequestForObject{},
+		predicate.LabelChangedPredicate{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "error watching managedclusters")
 	}
@@ -108,3 +149,79 @@ func StartManagedClusterController(c controller.Controller, mgr ctrl.Manager, lo
 		}
 	}()
 }
+
+func getClusterID(managedCluster unstructured.Unstructured) string {
+	if labels := managedCluster.GetLabels(); labels != nil {
+		return labels["clusterID"]
+	}
+	return ""
+}
+
+// matchingDiscoveredCluster returns the discoveredCluster with the provided id or nil if not found
+func matchingDiscoveredCluster(discoveredList *discoveryv1.DiscoveredClusterList, id string) *discoveryv1.DiscoveredCluster {
+	for i, _ := range discoveredList.Items {
+		if discoveredList.Items[i].Spec.Name == id {
+			return &discoveredList.Items[i]
+		}
+	}
+	return nil
+}
+
+// setManagedStatus returns true if labels were added and false if the labels already exist
+func setManagedStatus(dc *discoveryv1.DiscoveredCluster) bool {
+	updated := false
+
+	if dc.Labels == nil || dc.Labels["isManagedCluster"] != "true" {
+		labels := make(map[string]string)
+		if dc.Labels != nil {
+			labels = dc.Labels
+		}
+		labels["isManagedCluster"] = "true"
+		dc.SetLabels(labels)
+		updated = true
+	}
+
+	if !dc.Spec.IsManagedCluster {
+		dc.Spec.IsManagedCluster = true
+		updated = true
+	}
+
+	return updated
+}
+
+// unsetManagedStatus returns true if labels were removed and false if the labels aren't present
+func unsetManagedStatus(dc *discoveryv1.DiscoveredCluster) bool {
+	updated := false
+	if dc.Labels["isManagedCluster"] == "true" {
+		delete(dc.Labels, "isManagedCluster")
+		updated = true
+	}
+	if dc.Spec.IsManagedCluster == true {
+		dc.Spec.IsManagedCluster = false
+		updated = true
+	}
+	return updated
+}
+
+func isManagedCluster(dc discoveryv1.DiscoveredCluster, managedClusters *unstructured.UnstructuredList) bool {
+	discoveredName := dc.Spec.Name
+	for _, mc := range managedClusters.Items {
+		id := getClusterID(mc)
+		if id != "" && id == discoveredName {
+			return true
+		}
+	}
+	return false
+}
+
+// // mergeLabels merges new labels into a set of old labels
+// func mergeLabels(newLabels map[string]string, oldLabels map[string]string) map[string]string {
+// 	labels := make(map[string]string)
+// 	if oldLabels != nil {
+// 		labels = oldLabels
+// 	}
+// 	for key, value := range newLabels {
+// 		labels[key] = value
+// 	}
+// 	return labels
+// }
