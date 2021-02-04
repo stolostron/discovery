@@ -6,6 +6,7 @@ This project manages discovered clusters
 
 - go version v1.13+
 - operator-sdk version v1.3.0
+- yq v4.4.x
 - docker
 - quay credentials for https://quay.io/organization/rhibmcollab and https://quay.io/organization/open-cluster-management
 - Connection to an existing Kubernetes cluster
