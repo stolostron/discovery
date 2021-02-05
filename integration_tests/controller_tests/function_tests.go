@@ -11,6 +11,7 @@ import (
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -88,6 +89,88 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 				}
 				return len(discoveredClusters.Items), nil
 			}, time.Second*15, interval).Should(BeNumerically(">", 0))
+		})
+	})
+
+	Context("When creating a ManagedCluster", func() {
+		It("Should update the matching discovered cluster as managed", func() {
+			ctx := context.Background()
+
+			By("By creating a new ManagedCluster")
+			mc1 := &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "cluster.open-cluster-management.io/v1",
+					"kind":       "ManagedCluster",
+					"metadata": map[string]interface{}{
+						"name":      "test-managedcluster",
+						"namespace": DiscoveryNamespace,
+						"labels": map[string]string{
+							"clusterID": "69aced7c-286d-471c-9482-eac8a1cd2e17",
+						},
+					},
+					"spec": map[string]interface{}{
+						"hubAcceptsClient":     true,
+						"leaseDurationSeconds": 60,
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, mc1)).To(Succeed())
+
+			By("Checking that a DiscoveredCluster is now labeled as managed")
+			var fetchedDiscoveredClusters discoveryv1.DiscoveredClusterList
+			Eventually(func() int {
+				err := k8sClient.List(ctx, &fetchedDiscoveredClusters,
+					client.InNamespace(DiscoveryNamespace),
+					client.MatchingLabels{
+						"isManagedCluster": "true",
+					})
+				if err != nil {
+					return 0
+				}
+				return len(fetchedDiscoveredClusters.Items)
+			}, timeout, interval).Should(Not(BeZero()))
+
+		})
+	})
+
+	Context("When deleting the ManagedCluster", func() {
+		It("Should update the matching discovered cluster to be unmanaged", func() {
+			ctx := context.Background()
+
+			By("By deleting a new ManagedCluster")
+			mc1 := &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "cluster.open-cluster-management.io/v1",
+					"kind":       "ManagedCluster",
+					"metadata": map[string]interface{}{
+						"name":      "test-managedcluster",
+						"namespace": DiscoveryNamespace,
+						"labels": map[string]string{
+							"clusterID": "69aced7c-286d-471c-9482-eac8a1cd2e17",
+						},
+					},
+					"spec": map[string]interface{}{
+						"hubAcceptsClient":     true,
+						"leaseDurationSeconds": 60,
+					},
+				},
+			}
+			Expect(k8sClient.Delete(ctx, mc1)).To(Succeed())
+
+			By("Checking that no discovered clusters are labeled as managed")
+			var fetchedDiscoveredClusters discoveryv1.DiscoveredClusterList
+			Eventually(func() int {
+				err := k8sClient.List(ctx, &fetchedDiscoveredClusters,
+					client.InNamespace(DiscoveryNamespace),
+					client.MatchingLabels{
+						"isManagedCluster": "true",
+					})
+				if err != nil {
+					return 1
+				}
+				return len(fetchedDiscoveredClusters.Items)
+			}, timeout, interval).Should(BeZero())
+
 		})
 	})
 
