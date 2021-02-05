@@ -66,7 +66,10 @@ var _ = BeforeSuite(func(done Done) {
 		}
 	} else {
 		testEnv = &envtest.Environment{
-			CRDDirectoryPaths: []string{filepath.Join("..", "config", "crd", "bases")},
+			CRDDirectoryPaths: []string{
+				filepath.Join("..", "config", "crd", "bases"),
+				filepath.Join(".", "testdata", "crds"),
+			},
 		}
 	}
 
@@ -104,6 +107,15 @@ var _ = BeforeSuite(func(done Done) {
 		Trigger: events,
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
+
+	managedClusterController, err := (&ManagedClusterReconciler{
+		Name:   "managed-cluster-controller",
+		Client: k8sManager.GetClient(),
+		Scheme: k8sManager.GetScheme(),
+	}).SetupWithManager(k8sManager)
+	Expect(err).ToNot(HaveOccurred())
+
+	StartManagedClusterController(managedClusterController, k8sManager, ctrl.Log)
 
 	go func() {
 		err = k8sManager.Start(ctrl.SetupSignalHandler())
