@@ -35,7 +35,7 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 REGISTRY ?= quay.io/rhibmcollab
 IMG ?= discovery-operator
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true"
+CRD_OPTIONS ?= "crd:crdVersions=v1"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -58,6 +58,7 @@ test: generate fmt vet manifests
 
 # Run tests
 integration-tests: install deploy server/deploy
+	kubectl apply -f controllers/testdata/crds/clusters.open-cluster-management.io_managedclusters.yaml
 	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n open-cluster-management
 	ginkgo -tags functional -v integration_tests/controller_tests
 
@@ -92,7 +93,7 @@ fmt:
 
 # Run go vet against code
 vet:
-	go vet ./...
+	go vet `go list ./... | grep -v integration_tests`
 
 # Generate code
 generate: controller-gen
@@ -115,7 +116,7 @@ ifeq (, $(shell which controller-gen))
 	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
 	cd $$CONTROLLER_GEN_TMP_DIR ;\
 	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0 ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1 ;\
 	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
 	}
 CONTROLLER_GEN=$(GOBIN)/controller-gen
@@ -158,8 +159,9 @@ bundle-build:
 
 # Generate secrets for image pull and OCM access
 .PHONY: secrets
+ENCRYPTED = $(shell echo "ocmAPIToken: ${OCM_API_TOKEN}" | base64)
 secrets:
-	@cat config/samples/ocm-api-secret.yaml | yq - w data.metadata $(shell echo "ocmAPIToken: $(OCM_API_TOKEN)" | base64) | oc apply -f - || true
+	@cat config/samples/ocm-api-secret.yaml | ocmtoken="${ENCRYPTED}" yq eval '.data.metadata = strenv(ocmtoken)' - | oc apply -f - || true
 	@oc create secret docker-registry discovery-operator-pull-secret --docker-server=quay.io --docker-username=$(DOCKER_USER) --docker-password=$(DOCKER_PASS) || true
 
 # Create custom resources
