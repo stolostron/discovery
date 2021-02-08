@@ -22,7 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	apimeta "k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ref "k8s.io/client-go/tools/reference"
@@ -135,7 +135,8 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	managedClusters := &unstructured.UnstructuredList{}
 	managedClusters.SetGroupVersionKind(managedClusterGVK)
 	if err := r.List(ctx, managedClusters); err != nil {
-		if !apierrors.IsInvalid(err) {
+		// Capture case were ManagedClusters resource does not exist
+		if !apimeta.IsNoMatchError(err) {
 			return ctrl.Result{}, errors.Wrapf(err, "error listing managed clusters")
 		}
 	}
