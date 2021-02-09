@@ -36,7 +36,7 @@ metadata:
     operators.operatorframework.io/builder: operator-sdk-v1.1.0
     operators.operatorframework.io/internal-objects: |-
       ["discoveredclusterrefreshes.discovery.open-cluster-management.io",
-       "discoveredclusters.discovery.open-cluster-management.io"]'
+       "discoveredclusters.discovery.open-cluster-management.io"]
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
     support: Red Hat
   name: discovery.v0.0.1
