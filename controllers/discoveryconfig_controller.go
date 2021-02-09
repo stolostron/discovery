@@ -184,10 +184,6 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		if _, managed := managedClusterIDs[discoveredCluster.Spec.Name]; managed {
 			setManagedStatus(&discoveredCluster)
 		}
-		// _, discoveredCluster.Spec.IsManagedCluster = managedClusterIDs[discoveredCluster.Spec.Name]
-		// if isManagedCluster(discoveredCluster, managedClusters) {
-		// 	setManagedStatus(&discoveredCluster)
-		// }
 
 		// Add reference to secret used for authentication
 		discoveredCluster.Spec.ProviderConnections = nil

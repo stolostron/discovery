@@ -213,15 +213,3 @@ func isManagedCluster(dc discoveryv1.DiscoveredCluster, managedClusters *unstruc
 	}
 	return false
 }
-
-// // mergeLabels merges new labels into a set of old labels
-// func mergeLabels(newLabels map[string]string, oldLabels map[string]string) map[string]string {
-// 	labels := make(map[string]string)
-// 	if oldLabels != nil {
-// 		labels = oldLabels
-// 	}
-// 	for key, value := range newLabels {
-// 		labels[key] = value
-// 	}
-// 	return labels
-// }
