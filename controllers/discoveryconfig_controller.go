@@ -170,9 +170,24 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+
+	var active int
+	var archived int
+	var stale int
+	var other int
 	for _, sub := range newSubs {
-		log.Info("Subscription found", "info", sub)
+		switch status := sub.Status; status {
+		case "Active":
+			active++
+		case "Archived":
+			archived++
+		case "Stale":
+			stale++
+		default:
+			other++
+		}
 	}
+	log.Info("Subscription categories", "Total", len(newSubs), "Active", active, "Archived", archived, "Stale", stale, "Other", other)
 
 	requestConfig := cluster_domain.ClusterRequest{
 		Token:  accessToken,

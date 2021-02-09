@@ -85,7 +85,7 @@ func (c *subscriptionProvider) GetSubscriptions(request subscription_domain.Subs
 // applyPreFilters adds fields to the http query to limit the number of items returned
 func applyPreFilters(query *url.Values, filters discoveryv1.Filter) {
 	if filters.Age != 0 {
-		query.Add("search", fmt.Sprintf("creation_timestamp >= '%s'", ageDate(time.Now(), filters.Age)))
+		query.Add("search", fmt.Sprintf("created_at >= '%s'", ageDate(time.Now(), filters.Age)))
 	}
 }
 
