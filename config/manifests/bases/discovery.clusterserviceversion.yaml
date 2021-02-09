@@ -12,12 +12,17 @@ metadata:
        "discoveredclusters.discovery.open-cluster-management.io"]
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
     support: Red Hat
-  name: discovery.vX.Y.Z
+  name: discovery.v0.0.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+    - description: DiscoveredClusterRefresh is the Schema for the discoveredclusterrefreshes API
+      displayName: Discovered Cluster Refresh
+      kind: DiscoveredClusterRefresh
+      name: discoveredclusterrefreshes.discovery.open-cluster-management.io
+      version: v1
     - description: DiscoveredCluster is the Schema for the discoveredclusters API
       displayName: Discovered Cluster
       kind: DiscoveredCluster
@@ -27,11 +32,6 @@ spec:
       displayName: Discovery Config
       kind: DiscoveryConfig
       name: discoveryconfigs.discovery.open-cluster-management.io
-      version: v1
-    - description: DiscoveredClusterRefresh is the Schema for the discoveredclusterrefreshes API
-      displayName: Discovered Cluster Refresh
-      kind: DiscoveredClusterRefresh
-      name: discoveredclusterrefreshes.discovery.open-cluster-management.io
       version: v1
   description: This operator discovers OpenShift Conatiner Platform clusters which are not yet under management by Open Cluster Management.
   displayName: Multicluster Discovery Operator
