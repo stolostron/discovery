@@ -39,8 +39,10 @@ import (
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	"github.com/open-cluster-management/discovery/pkg/api/domain/auth_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
+	"github.com/open-cluster-management/discovery/pkg/api/domain/subscription_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/services/auth_service"
 	"github.com/open-cluster-management/discovery/pkg/api/services/cluster_service"
+	"github.com/open-cluster-management/discovery/pkg/api/services/subscription_service"
 	"github.com/open-cluster-management/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -155,6 +157,22 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	var updateClusters []discoveryv1.DiscoveredCluster
 	var deleteClusters []discoveryv1.DiscoveredCluster
 	var unchangedClusters []discoveryv1.DiscoveredCluster
+
+	subscriptionRequestConfig := subscription_domain.SubscriptionRequest{
+		Token:  accessToken,
+		Filter: config.Spec.Filters,
+	}
+	if annotations := config.GetAnnotations(); annotations != nil {
+		subscriptionRequestConfig.BaseURL = annotations["ocmBaseURL"]
+	}
+	subscriptionClient := subscription_service.SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
+	newSubs, err := subscriptionClient.GetSubscriptions()
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	for _, sub := range newSubs {
+		log.Info("Subscription found", "info", sub)
+	}
 
 	requestConfig := cluster_domain.ClusterRequest{
 		Token:  accessToken,

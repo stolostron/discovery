@@ -31,7 +31,6 @@ type Subscription struct {
 	Provenance        string       `json:"provenance,omitempty"`
 	LastReconcileDate string       `json:"last_reconcile_date,omitempty"`
 	LastReleasedAt    string       `json:"last_released_at,omitempty"`
-	Reason            string       `json:"reason,omitempty"`
 }
 
 // SubscriptionResponse ...
