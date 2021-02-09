@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -181,6 +182,7 @@ func GetCluster(c *gin.Context) {
 func GetToken(c *gin.Context) {
 	token := c.PostForm("refresh_token")
 	if token == "" {
+		log.Println("Empty token received. Responding with auth error.")
 		file, err := ioutil.ReadFile("data/auth_error.json")
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -190,6 +192,7 @@ func GetToken(c *gin.Context) {
 		}
 		c.Data(http.StatusBadRequest, "application/json", file)
 	} else {
+		log.Println("Auth token received. Responding with auth success.")
 		file, err := ioutil.ReadFile("data/auth_success.json")
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{

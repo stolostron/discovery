@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
+	apimeta "k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ref "k8s.io/client-go/tools/reference"
@@ -41,12 +42,12 @@ import (
 	"github.com/open-cluster-management/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // DiscoveryConfigReconciler reconciles a DiscoveryConfig object
 type DiscoveryConfigReconciler struct {
 	client.Client
-	Log     logr.Logger
 	Scheme  *runtime.Scheme
 	Trigger chan event.GenericEvent
 }
@@ -64,9 +65,8 @@ type CloudRedHatProviderConnection struct {
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/finalizers,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
-func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-	log := r.Log.WithValues("discoveryconfig", req.NamespacedName)
+func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := logr.FromContext(ctx)
 
 	// Get discovery config. Die if there is none
 	config := &discoveryv1.DiscoveryConfig{}
@@ -131,6 +131,24 @@ func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 		existing[cluster.Name] = i
 	}
 
+	// List all managed clusters
+	managedClusters := &unstructured.UnstructuredList{}
+	managedClusters.SetGroupVersionKind(managedClusterGVK)
+	if err := r.List(ctx, managedClusters); err != nil {
+		// Capture case were ManagedClusters resource does not exist
+		if !apimeta.IsNoMatchError(err) {
+			return ctrl.Result{}, errors.Wrapf(err, "error listing managed clusters")
+		}
+	}
+
+	managedClusterIDs := make(map[string]int, len(managedClusters.Items))
+	for i, mc := range managedClusters.Items {
+		name := getClusterID(mc)
+		if name != "" {
+			managedClusterIDs[getClusterID(mc)] = i
+		}
+	}
+
 	var createClusters []discoveryv1.DiscoveredCluster
 	var updateClusters []discoveryv1.DiscoveredCluster
 	var deleteClusters []discoveryv1.DiscoveredCluster
@@ -160,6 +178,11 @@ func (r *DiscoveryConfigReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 			SupportLevel: "None",
 			Managed:      false,
 			CreatorID:    "abc123",
+		}
+
+		// Assign managed status
+		if _, managed := managedClusterIDs[discoveredCluster.Spec.Name]; managed {
+			setManagedStatus(&discoveredCluster)
 		}
 
 		// Add reference to secret used for authentication
@@ -234,7 +257,7 @@ func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				return false
 			},
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				return e.MetaNew.GetGeneration() != e.MetaOld.GetGeneration()
+				return e.ObjectNew.GetGeneration() != e.ObjectOld.GetGeneration()
 			},
 		}).
 		Build(r)
@@ -279,6 +302,9 @@ func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
 		return false
 	}
 	if c1i.State != c2i.State {
+		return false
+	}
+	if c1i.IsManagedCluster != c2i.IsManagedCluster {
 		return false
 	}
 	return true

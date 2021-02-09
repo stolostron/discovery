@@ -81,7 +81,6 @@ func main() {
 
 	if err = (&controllers.DiscoveryConfigReconciler{
 		Client:  mgr.GetClient(),
-		Log:     ctrl.Log.WithName("controllers").WithName("DiscoveryConfig"),
 		Scheme:  mgr.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(mgr); err != nil {
@@ -90,7 +89,6 @@ func main() {
 	}
 	if err = (&controllers.DiscoveredClusterRefreshReconciler{
 		Client:  mgr.GetClient(),
-		Log:     ctrl.Log.WithName("controllers").WithName("DiscoveredClusterRefresh"),
 		Scheme:  mgr.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(mgr); err != nil {
@@ -98,6 +96,18 @@ func main() {
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
+
+	managedClusterController, err := (&controllers.ManagedClusterReconciler{
+		Name:   "managed-cluster-controller",
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "ManagedCluster")
+		os.Exit(1)
+	}
+
+	controllers.StartManagedClusterController(managedClusterController, mgr, setupLog)
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {

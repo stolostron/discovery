@@ -31,7 +31,6 @@ import (
 // DiscoveredClusterRefreshReconciler reconciles a DiscoveredClusterRefresh object
 type DiscoveredClusterRefreshReconciler struct {
 	client.Client
-	Log     logr.Logger
 	Scheme  *runtime.Scheme
 	Trigger chan event.GenericEvent
 }
@@ -41,9 +40,8 @@ type DiscoveredClusterRefreshReconciler struct {
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs,verbs=get;list;watch
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/status,verbs=get;update;patch
 
-func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-	log := r.Log.WithValues("discoveredclusterrefresh", req.NamespacedName)
+func (r *DiscoveredClusterRefreshReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := logr.FromContext(ctx)
 
 	refresh := &discoveryv1.DiscoveredClusterRefresh{}
 	if err := r.Get(ctx, types.NamespacedName{
@@ -72,7 +70,6 @@ func (r *DiscoveredClusterRefreshReconciler) Reconcile(req ctrl.Request) (ctrl.R
 
 	// Trigger reconcile of found DiscoveryConfig
 	r.Trigger <- event.GenericEvent{
-		Meta:   config.GetObjectMeta(),
 		Object: config,
 	}
 
