@@ -1,0 +1,211 @@
+{
+    "kind": "SubscriptionList",
+    "page": 1,
+    "size": 3,
+    "total": 28489,
+    "items": [
+        {
+            "id": "1a02UsUX9x4v6efw5gThNWSZNhs",
+            "kind": "Subscription",
+            "href": "/api/accounts_mgmt/v1/subscriptions/1a02UsUX9x4v6efw5gThNWSZNhs",
+            "plan": {
+                "id": "OCP",
+                "kind": "Plan",
+                "href": "/api/accounts_mgmt/v1/plans/OCP"
+            },
+            "cluster_id": "1c9vh8c1teqnv0e6kkli7elpnueu5r07",
+            "external_cluster_id": "bac00074-3804-468c-ae7a-2c38331d8b0a",
+            "organization_id": "1H1PQMDtwzAUsjPxgoWRjhSpNGD",
+            "last_telemetry_date": "2020-04-03T08:58:49.574714Z",
+            "created_at": "2020-04-02T20:10:09.185967Z",
+            "updated_at": "2020-07-15T20:10:45.32943Z",
+            "support_level": "None",
+            "display_name": "bac00074-3804-468c-ae7a-2c38331d8b0a",
+            "creator": {
+                "id": "1IGgKv4wJJJXBf7aWLe1fw1k710",
+                "kind": "Account",
+                "href": "/api/accounts_mgmt/v1/accounts/1IGgKv4wJJJXBf7aWLe1fw1k710"
+            },
+            "managed": false,
+            "status": "Archived",
+            "provenance": "Telemetry",
+            "last_reconcile_date": "0001-01-01T00:00:00Z",
+            "last_released_at": "0001-01-01T00:00:00Z"
+        },
+        {
+            "id": "1aAhK44xKMxSnXN3ToNjxdDYRD1",
+            "kind": "Subscription",
+            "href": "/api/accounts_mgmt/v1/subscriptions/1aAhK44xKMxSnXN3ToNjxdDYRD1",
+            "plan": {
+                "id": "OCP",
+                "kind": "Plan",
+                "href": "/api/accounts_mgmt/v1/plans/OCP"
+            },
+            "cluster_id": "1ccf4bsakl8i97eva3fqr6mdibp61ef1",
+            "external_cluster_id": "81b4b2e9-d621-4871-9a9f-0bc94ca5cd86",
+            "organization_id": "1H1PQMDtwzAUsjPxgoWRjhSpNGD",
+            "last_telemetry_date": "2021-02-09T13:07:33.286724Z",
+            "created_at": "2020-04-06T14:43:58.773597Z",
+            "updated_at": "2021-02-09T13:07:33.286761Z",
+            "support_level": "Self-Support",
+            "service_level": "L1-L3",
+            "usage": "Production",
+            "system_units": "Cores/vCPU",
+            "cpu_total": 72,
+            "socket_total": 12,
+            "display_name": "81b4b2e9-d621-4871-9a9f-0bc94ca5cd86",
+            "creator": {
+                "id": "1Wilv4ZQoIPyzoGOzfoqyjnt1KM",
+                "kind": "Account",
+                "href": "/api/accounts_mgmt/v1/accounts/1Wilv4ZQoIPyzoGOzfoqyjnt1KM"
+            },
+            "managed": false,
+            "status": "Active",
+            "provenance": "Telemetry",
+            "last_reconcile_date": "2021-02-09T12:40:41.434313Z",
+            "consumer_uuid": "81b4b2e9-d621-4871-9a9f-0bc94ca5cd86",
+            "console_url": "https://console-openshift-console.apps.prods4.alsac.stjude.org",
+            "last_released_at": "0001-01-01T00:00:00Z",
+            "metrics": [
+                {
+                    "HealthState": "healthy",
+                    "memory": {
+                        "updated_timestamp": "2021-02-09T13:40:28.126Z",
+                        "used": {
+                            "value": 81720012800,
+                            "unit": "B"
+                        },
+                        "total": {
+                            "value": 594937442304,
+                            "unit": "B"
+                        }
+                    },
+                    "cpu": {
+                        "updated_timestamp": "2021-02-09T13:40:16.186Z",
+                        "used": {
+                            "value": 5.03077777777799,
+                            "unit": ""
+                        },
+                        "total": {
+                            "value": 102,
+                            "unit": ""
+                        }
+                    },
+                    "sockets": {
+                        "updated_timestamp": "0001-01-01T00:00:00Z",
+                        "used": {
+                            "value": 0,
+                            "unit": ""
+                        },
+                        "total": {
+                            "value": 0,
+                            "unit": ""
+                        }
+                    },
+                    "compute_nodes_memory": {
+                        "updated_timestamp": "1970-01-01T00:00:00Z",
+                        "used": {
+                            "value": 0,
+                            "unit": "B"
+                        },
+                        "total": {
+                            "value": 481079992320,
+                            "unit": "B"
+                        }
+                    },
+                    "compute_nodes_cpu": {
+                        "updated_timestamp": "1970-01-01T00:00:00Z",
+                        "used": {
+                            "value": 0,
+                            "unit": ""
+                        },
+                        "total": {
+                            "value": 90,
+                            "unit": ""
+                        }
+                    },
+                    "compute_nodes_sockets": {
+                        "updated_timestamp": "0001-01-01T00:00:00Z",
+                        "used": {
+                            "value": 0,
+                            "unit": ""
+                        },
+                        "total": {
+                            "value": 0,
+                            "unit": ""
+                        }
+                    },
+                    "storage": {
+                        "updated_timestamp": "0001-01-01T00:00:00Z",
+                        "used": {
+                            "value": 0,
+                            "unit": ""
+                        },
+                        "total": {
+                            "value": 0,
+                            "unit": ""
+                        }
+                    },
+                    "nodes": {
+                        "total": 12,
+                        "master": 3,
+                        "compute": 9
+                    },
+                    "operating_system": "",
+                    "upgrade": {
+                        "updated_timestamp": "2021-02-09T13:40:29.472Z",
+                        "state": "completed"
+                    },
+                    "state": "ready",
+                    "state_description": "",
+                    "openshift_version": "4.3.40",
+                    "cloud_provider": "vsphere",
+                    "region": "",
+                    "console_url": "https://console-openshift-console.apps.prods4.alsac.stjude.org",
+                    "critical_alerts_firing": 0,
+                    "operators_condition_failing": 0,
+                    "subscription_cpu_total": 72,
+                    "subscription_socket_total": 12,
+                    "subscription_obligation_exists": 3
+                }
+            ],
+            "cloud_provider_id": "vsphere",
+            "cluster_billing_model": "standard"
+        },
+        {
+            "id": "1aAxzoSEbqMULQb2nxF1Kygpb0C",
+            "kind": "Subscription",
+            "href": "/api/accounts_mgmt/v1/subscriptions/1aAxzoSEbqMULQb2nxF1Kygpb0C",
+            "plan": {
+                "id": "OCP",
+                "kind": "Plan",
+                "href": "/api/accounts_mgmt/v1/plans/OCP"
+            },
+            "cluster_id": "1cch4k0jcrr9tu25f1dbrtc485oq7k83",
+            "external_cluster_id": "01001814-c69b-4d00-9414-ce9d08687fc0",
+            "organization_id": "1H1PQMDtwzAUsjPxgoWRjhSpNGD",
+            "last_telemetry_date": "2020-04-07T14:04:10.892637Z",
+            "created_at": "2020-04-06T17:01:04.374794Z",
+            "updated_at": "2021-02-09T12:33:18.1945Z",
+            "support_level": "Self-Support",
+            "service_level": "L1-L3",
+            "usage": "Production",
+            "system_units": "Cores/vCPU",
+            "cpu_total": 24,
+            "socket_total": 1,
+            "display_name": "01001814-c69b-4d00-9414-ce9d08687fc0",
+            "creator": {
+                "id": "1L0bM59OpDROteG3DlsYpA3zGJZ",
+                "kind": "Account",
+                "href": "/api/accounts_mgmt/v1/accounts/1L0bM59OpDROteG3DlsYpA3zGJZ"
+            },
+            "managed": false,
+            "status": "Stale",
+            "provenance": "Telemetry",
+            "last_reconcile_date": "2021-02-09T12:33:18.19445Z",
+            "consumer_uuid": "01001814-c69b-4d00-9414-ce9d08687fc0",
+            "last_released_at": "0001-01-01T00:00:00Z",
+            "cluster_billing_model": "standard"
+        }
+    ]
+}

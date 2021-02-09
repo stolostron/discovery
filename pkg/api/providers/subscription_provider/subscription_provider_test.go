@@ -4,10 +4,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/open-cluster-management/discovery/pkg/api/clients/restclient"
+	"github.com/open-cluster-management/discovery/pkg/api/domain/subscription_domain"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +16,7 @@ var (
 	getRequestFunc func(*http.Request) (*http.Response, error)
 )
 
-// Mocking the ClusterGetInterface
+// Mocking the SubscriptionGetInterface
 type getClientMock struct{}
 
 func (cm *getClientMock) Get(request *http.Request) (*http.Response, error) {
@@ -25,7 +26,7 @@ func (cm *getClientMock) Get(request *http.Request) (*http.Response, error) {
 //When the everything is good
 func TestGetSubscriptionsNoError(t *testing.T) {
 	getRequestFunc = func(*http.Request) (*http.Response, error) {
-		file, err := os.Open("ocm_mock.json")
+		file, err := os.Open("testdata/accounts_mgmt_mock.json")
 		if err != nil {
 			t.Error(err)
 		}
@@ -42,60 +43,60 @@ func TestGetSubscriptionsNoError(t *testing.T) {
 	assert.EqualValues(t, 3, len(response.Items))
 }
 
-func TestGetClustersInvalidAccessToken(t *testing.T) {
-	t.Run("Bad token", func(t *testing.T) {
-		json := `{
-		"kind": "Error",
-		"id": "401",
-		"href": "/api/clusters_mgmt/v1/errors/401",
-		"code": "CLUSTERS-MGMT-401",
-		"reason": "Signature of bearer token isn't valid"
-		}`
-		getRequestFunc = func(*http.Request) (*http.Response, error) {
-			return &http.Response{
-				StatusCode: http.StatusUnauthorized,
-				Body:       ioutil.NopCloser(strings.NewReader(json)),
-			}, nil
-		}
-		restclient.ClusterHTTPClient = &getClientMock{} //without this line, the real api is fired
+// func TestGetSubscriptionsInvalidAccessToken(t *testing.T) {
+// 	t.Run("Bad token", func(t *testing.T) {
+// 		json := `{
+// 		"kind": "Error",
+// 		"id": "401",
+// 		"href": "/api/subscriptions_mgmt/v1/errors/401",
+// 		"code": "CLUSTERS-MGMT-401",
+// 		"reason": "Signature of bearer token isn't valid"
+// 		}`
+// 		getRequestFunc = func(*http.Request) (*http.Response, error) {
+// 			return &http.Response{
+// 				StatusCode: http.StatusUnauthorized,
+// 				Body:       ioutil.NopCloser(strings.NewReader(json)),
+// 			}, nil
+// 		}
+// 		restclient.SubscriptionHTTPClient = &getClientMock{} //without this line, the real api is fired
 
-		response, err := ClusterProvider.GetSubscriptions(subscription_domain.ClusterRequest{})
-		assert.NotNil(t, err)
-		assert.Nil(t, response)
-		assert.NotEmpty(t, err.Reason)
-		assert.EqualValues(t, "Error", err.Kind)
-	})
+// 		response, err := SubscriptionProvider.GetSubscriptions(subscription_domain.SubscriptionRequest{})
+// 		assert.NotNil(t, err)
+// 		assert.Nil(t, response)
+// 		assert.NotEmpty(t, err.Reason)
+// 		assert.EqualValues(t, "Error", err.Kind)
+// 	})
 
-	t.Run("Expired token", func(t *testing.T) {
-		json := `{
-			"kind": "Error",
-			"id": "401",
-			"href": "/api/clusters_mgmt/v1/errors/401",
-			"code": "CLUSTERS-MGMT-401",
-			"reason": "Bearer token is expired"
-		}`
-		getRequestFunc = func(*http.Request) (*http.Response, error) {
-			return &http.Response{
-				StatusCode: http.StatusUnauthorized,
-				Body:       ioutil.NopCloser(strings.NewReader(json)),
-			}, nil
-		}
-		restclient.SubscriptionHTTPClient = &getClientMock{} //without this line, the real api is fired
+// 	t.Run("Expired token", func(t *testing.T) {
+// 		json := `{
+// 			"kind": "Error",
+// 			"id": "401",
+// 			"href": "/api/subscriptions_mgmt/v1/errors/401",
+// 			"code": "CLUSTERS-MGMT-401",
+// 			"reason": "Bearer token is expired"
+// 		}`
+// 		getRequestFunc = func(*http.Request) (*http.Response, error) {
+// 			return &http.Response{
+// 				StatusCode: http.StatusUnauthorized,
+// 				Body:       ioutil.NopCloser(strings.NewReader(json)),
+// 			}, nil
+// 		}
+// 		restclient.SubscriptionHTTPClient = &getClientMock{} //without this line, the real api is fired
 
-		response, err := SubscriptionProvider.GetSubscriptions(subscription_domain.SubscriptionRequest{})
-		assert.NotNil(t, err)
-		assert.Nil(t, response)
-		assert.NotEmpty(t, err.Reason)
-		assert.EqualValues(t, "Error", err.Kind)
-	})
+// 		response, err := SubscriptionProvider.GetSubscriptions(subscription_domain.SubscriptionRequest{})
+// 		assert.NotNil(t, err)
+// 		assert.Nil(t, response)
+// 		assert.NotEmpty(t, err.Reason)
+// 		assert.EqualValues(t, "Error", err.Kind)
+// 	})
 
-}
+// }
 
-// func TestGetClustersInvalidFilter(t *testing.T) {
+// func TestGetSubscriptionsInvalidFilter(t *testing.T) {
 // 	json := `{
 // 		"kind": "Error",
 // 		"id": "400",
-// 		"href": "/api/clusters_mgmt/v1/errors/400",
+// 		"href": "/api/subscriptions_mgmt/v1/errors/400",
 // 		"code": "CLUSTERS-MGMT-400",
 // 		"reason": "foo is not a valid field name",
 // 		"operation_id": "1gt8hln464eqhcfga8ktc0sasf056sdk"
@@ -106,16 +107,16 @@ func TestGetClustersInvalidAccessToken(t *testing.T) {
 // 			Body:       ioutil.NopCloser(strings.NewReader(json)),
 // 		}, nil
 // 	}
-// 	restclient.ClusterHTTPClient = &getClientMock{} //without this line, the real api is fired
+// 	restclient.SubscriptionHTTPClient = &getClientMock{} //without this line, the real api is fired
 
-// 	response, err := ClusterProvider.GetClusters(cluster_domain.ClusterRequest{})
+// 	response, err := SubscriptionProvider.GetSubscriptions(subscription_domain.SubscriptionRequest{})
 // 	assert.NotNil(t, err)
 // 	assert.Nil(t, response)
 // 	assert.NotEmpty(t, err.Reason)
 // 	assert.EqualValues(t, "Error", err.Kind)
 // }
 
-// func TestGetClustersInvalidResponseInterface(t *testing.T) {
+// func TestGetSubscriptionsInvalidResponseInterface(t *testing.T) {
 // 	// this is an auth error response
 // 	json := `{"error":"invalid_grant","error_description":"Invalid refresh token"}`
 // 	getRequestFunc = func(*http.Request) (*http.Response, error) {
@@ -124,19 +125,19 @@ func TestGetClustersInvalidAccessToken(t *testing.T) {
 // 			Body:       ioutil.NopCloser(strings.NewReader(json)),
 // 		}, nil
 // 	}
-// 	restclient.ClusterHTTPClient = &getClientMock{} //without this line, the real api is fired
+// 	restclient.SubscriptionHTTPClient = &getClientMock{} //without this line, the real api is fired
 
-// 	response, err := ClusterProvider.GetClusters(cluster_domain.ClusterRequest{})
+// 	response, err := SubscriptionProvider.GetSubscriptions(subscription_domain.SubscriptionRequest{})
 // 	assert.NotNil(t, err)
 // 	assert.Nil(t, response)
 // 	assert.NotNil(t, err.Error)
 // 	assert.EqualValues(t, json, err.Response)
 // }
 
-// // When we apply a filter that filters all clusters. This is a valid response
-// func TestGetClustersNoMatchingClusters(t *testing.T) {
+// // When we apply a filter that filters all subscriptions. This is a valid response
+// func TestGetSubscriptionsNoMatchingSubscriptions(t *testing.T) {
 // 	json := `{
-// 		"kind": "ClusterList",
+// 		"kind": "SubscriptionList",
 // 		"page": 0,
 // 		"size": 0,
 // 		"total": 0,
@@ -148,9 +149,9 @@ func TestGetClustersInvalidAccessToken(t *testing.T) {
 // 			Body:       ioutil.NopCloser(strings.NewReader(json)),
 // 		}, nil
 // 	}
-// 	restclient.ClusterHTTPClient = &getClientMock{} //without this line, the real api is fired
+// 	restclient.SubscriptionHTTPClient = &getClientMock{} //without this line, the real api is fired
 
-// 	response, err := ClusterProvider.GetClusters(cluster_domain.ClusterRequest{
+// 	response, err := SubscriptionProvider.GetSubscriptions(subscription_domain.SubscriptionRequest{
 // 		Filter: discoveryv1.Filter{
 // 			Age: 1,
 // 		},

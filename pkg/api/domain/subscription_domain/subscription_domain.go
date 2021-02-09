@@ -13,35 +13,34 @@ type StandardKind struct {
 
 // Subscription ...
 type Subscription struct {
-	ID                string       `yaml:"id" json:"id"`
-	Kind              string       `yaml:"kind" json:"kind"`
-	Href              string       `yaml:"href" json:"href"`
-	Plan              StandardKind `yaml:"plan,omitempty" json:"plan,omitempty"`
-	ClusterID         string       `yaml:"cluster_id,omitempty" json:"cluster_id,omitempty"`
-	ExternalClusterID string       `yaml:"external_cluster_id,omitempty" json:"external_cluster_id,omitempty"`
-	OrganizationID    string       `yaml:"organization_id,omitempty" json:"organization_id,omitempty"`
-	LastTelemetryDate string       `yaml:"last_telemetry_date,omitempty" json:"last_telemetry_date,omitempty"`
-	CreatedAt         string       `yaml:"created_at,omitempty" json:"created_at,omitempty"`
-	UpdatedAt         string       `yaml:"updated_at,omitempty" json:"updated_at,omitempty"`
-	SupportLevel      string       `yaml:"support_level,omitempty" json:"support_level,omitempty"`
-	DisplayName       string       `yaml:"display_name,omitempty" json:"display_name,omitempty"`
-	Creator           StandardKind `yaml:"creator" json:"creator"`
-	Managed           bool         `yaml:"managed,omitempty" json:"managed,omitempty"`
-	Status            string       `yaml:"status" json:"status"`
-	Provenance        string       `yaml:"provenance,omitempty" json:"provenance,omitempty"`
-	LastReconcileDate string       `yaml:"last_reconcile_date,omitempty" json:"last_reconcile_date,omitempty"`
-	LastReleasedAt    string       `yaml:"last_released_at,omitempty" json:"last_released_at,omitempty"`
-	Reason            string       `yaml:"reason,omitempty" json:"reason,omitempty"`
+	ID                string       `json:"id"`
+	Kind              string       `json:"kind"`
+	Href              string       `json:"href"`
+	Plan              StandardKind `json:"plan,omitempty"`
+	ClusterID         string       `json:"cluster_id,omitempty"`
+	ExternalClusterID string       `json:"external_cluster_id,omitempty"`
+	OrganizationID    string       `json:"organization_id,omitempty"`
+	LastTelemetryDate string       `json:"last_telemetry_date,omitempty"`
+	CreatedAt         string       `json:"created_at,omitempty"`
+	UpdatedAt         string       `json:"updated_at,omitempty"`
+	SupportLevel      string       `json:"support_level,omitempty"`
+	DisplayName       string       `json:"display_name,omitempty"`
+	Creator           StandardKind `json:"creator"`
+	Managed           bool         `json:"managed,omitempty"`
+	Status            string       `json:"status"`
+	Provenance        string       `json:"provenance,omitempty"`
+	LastReconcileDate string       `json:"last_reconcile_date,omitempty"`
+	LastReleasedAt    string       `json:"last_released_at,omitempty"`
+	Reason            string       `json:"reason,omitempty"`
 }
 
 // SubscriptionResponse ...
 type SubscriptionResponse struct {
-	Kind   string         `yaml:"kind" json:"kind"`
-	Page   string         `yaml:"page" json:"page"`
-	Size   int            `yaml:"size" json:"size"`
-	Total  int            `yaml:"total" json:"total"`
-	Items  []Subscription `yaml:"items" json:"items"`
-	Reason string         `yaml:"reason" json:"reason"`
+	Kind  string         `json:"kind"`
+	Page  int            `json:"page"`
+	Size  int            `json:"size"`
+	Total int            `json:"total"`
+	Items []Subscription `json:"items"`
 }
 
 // SubscriptionRequest contains the data used to customize a subscription get request
