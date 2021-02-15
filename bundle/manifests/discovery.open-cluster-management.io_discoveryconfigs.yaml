@@ -33,9 +33,14 @@ spec:
               filters:
                 description: Sets restrictions on what kind of clusters to discover
                 properties:
-                  age:
-                    description: Age is the max age in days of clusters to discover, determined by creation date
+                  lastActive:
+                    description: LastActive is the last active in days of clusters to discover, determined by activity timestamp
                     type: integer
+                  openShiftVersions:
+                    description: OpenShiftVersions is the list of releae versions of OpenShift
+                    items:
+                      type: string
+                    type: array
                 type: object
               providerConnections:
                 description: ProviderConnections are the list of secrets containing credentials to connect to the OCM api on behalf of a user
