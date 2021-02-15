@@ -25,7 +25,7 @@ type Filter struct {
 	// LastActive is the last active in days of clusters to discover, determined by activity timestamp
 	LastActive int `json:"lastActive,omitempty"`
 
-	// OpenShiftVersions is the list of releae versions of OpenShift
+	// OpenShiftVersions is the list of release versions of OpenShift
 	// +optional
 	OpenShiftVersions []string `json:"openShiftVersions,omitempty"`
 }

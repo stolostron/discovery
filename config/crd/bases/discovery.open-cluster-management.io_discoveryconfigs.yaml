@@ -44,7 +44,7 @@ spec:
                       to discover, determined by activity timestamp
                     type: integer
                   openShiftVersions:
-                    description: OpenShiftVersions is the list of releae versions
+                    description: OpenShiftVersions is the list of release versions
                       of OpenShift
                     items:
                       type: string
