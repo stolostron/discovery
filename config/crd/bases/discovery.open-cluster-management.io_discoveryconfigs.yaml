@@ -45,7 +45,8 @@ spec:
                     type: integer
                   openShiftVersions:
                     description: OpenShiftVersions is the list of release versions
-                      of OpenShift
+                      of OpenShift. This is currently just an API addition and has
+                      no implemented functionality yet
                     items:
                       type: string
                     type: array

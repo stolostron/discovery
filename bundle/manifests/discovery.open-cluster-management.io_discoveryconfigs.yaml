@@ -37,7 +37,7 @@ spec:
                     description: LastActive is the last active in days of clusters to discover, determined by activity timestamp
                     type: integer
                   openShiftVersions:
-                    description: OpenShiftVersions is the list of release versions of OpenShift
+                    description: OpenShiftVersions is the list of release versions of OpenShift. This is currently just an API addition and has no implemented functionality yet
                     items:
                       type: string
                     type: array
