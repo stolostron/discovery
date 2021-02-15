@@ -22,7 +22,7 @@ metadata:
           },
           "spec": {
             "filters": {
-              "age": 7
+              "lastActive": 7
             },
             "providerConnections": [
               "ocm-api-token"
@@ -33,7 +33,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.3.0
+    operators.operatorframework.io/builder: operator-sdk-v1.3.2
     operators.operatorframework.io/internal-objects: |-
       ["discoveredclusterrefreshes.discovery.open-cluster-management.io",
        "discoveredclusters.discovery.open-cluster-management.io"]
@@ -69,6 +69,14 @@ spec:
     spec:
       clusterPermissions:
       - rules:
+        - apiGroups:
+          - cluster.open-cluster-management.io
+          resources:
+          - managedclusters
+          verbs:
+          - get
+          - list
+          - watch
         - apiGroups:
           - ""
           resources:
@@ -214,6 +222,18 @@ spec:
           verbs:
           - create
           - patch
+        - apiGroups:
+          - coordination.k8s.io
+          resources:
+          - leases
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - patch
+          - delete
         serviceAccountName: default
     strategy: deployment
   installModes:

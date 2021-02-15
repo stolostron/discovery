@@ -6,4 +6,4 @@ spec:
   providerConnections:
     - ocm-api-token
   filters:
-    age: 7
+    lastActive: 7
