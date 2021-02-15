@@ -20,9 +20,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// Filter ...
 type Filter struct {
-	// Age is the max age in days of clusters to discover, determined by creation date
-	Age int `json:"age,omitempty"`
+	// LastActive is the last active in days of clusters to discover, determined by activity timestamp
+	LastActive int `json:"lastActive,omitempty"`
+
+	// OpenShiftVersions is the list of releae versions of OpenShift
+	// +optional
+	OpenShiftVersions []string `json:"openShiftVersions,omitempty"`
 }
 
 // DiscoveryConfigSpec defines the desired state of DiscoveryConfig

@@ -154,7 +154,7 @@ func TestGetClustersNoMatchingClusters(t *testing.T) {
 
 	response, err := ClusterProvider.GetClusters(cluster_domain.ClusterRequest{
 		Filter: discoveryv1.Filter{
-			Age: 1,
+			LastActive: 1,
 		},
 	})
 	assert.NotNil(t, response)

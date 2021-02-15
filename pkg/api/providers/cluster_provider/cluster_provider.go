@@ -84,8 +84,8 @@ func (c *clusterProvider) GetClusters(request cluster_domain.ClusterRequest) (*c
 
 // applyPreFilters adds fields to the http query to limit the number of items returned
 func applyPreFilters(query *url.Values, filters discoveryv1.Filter) {
-	if filters.Age != 0 {
-		query.Add("search", fmt.Sprintf("creation_timestamp >= '%s'", ageDate(time.Now(), filters.Age)))
+	if filters.LastActive != 0 {
+		query.Add("search", fmt.Sprintf("creation_timestamp >= '%s'", ageDate(time.Now(), filters.LastActive)))
 	}
 }
 
