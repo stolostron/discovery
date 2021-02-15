@@ -1,4 +1,4 @@
-package controller_tests
+package controllertests
 
 import (
 	"context"
@@ -201,7 +201,7 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 			err := k8sClient.Get(ctx, configLookupKey, createdConfig)
 			Expect(err).ToNot(HaveOccurred())
 
-			createdConfig.Spec.Filters.Age = 30
+			createdConfig.Spec.Filters.LastActive = 30
 
 			Expect(k8sClient.Update(ctx, createdConfig)).Should(Succeed())
 
