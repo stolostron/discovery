@@ -29,7 +29,6 @@ do
             || $FILE == *"Makefile"  \
             || $FILE == *".gitignore"  \
             || $FILE == *".md"  \
-            || $FILE == *".sum"  \
             || $FILE == *".mod" ]]; then
         
         FILE_STRING=$(cat $FILE)
