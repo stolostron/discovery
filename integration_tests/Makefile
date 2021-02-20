@@ -1,3 +1,5 @@
+# Copyright Contributors to the Open Cluster Management project
+
 ## Build the MCH functional test image
 tests/docker-build:
 	@echo "Building $(REGISTRY)/$(IMG)-tests:$(VERSION)"
