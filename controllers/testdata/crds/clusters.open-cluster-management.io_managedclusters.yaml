@@ -19,15 +19,11 @@ spec:
     openAPIV3Schema:
       description: "ManagedCluster represents the desired state and current status
         of managed cluster. ManagedCluster is a cluster scoped resource. The name
-        is the cluster UID. 
- The cluster join process follows a double opt-in process:
-        
- 1. agent on managed cluster creates CSR on hub with cluster UID and agent
+        is the cluster UID. \n The cluster join process follows a double opt-in process: \n 1. agent on managed cluster creates CSR on hub with cluster UID and agent
         name. 2. agent on managed cluster creates ManagedCluster on hub. 3. cluster
         admin on hub approves the CSR for the ManagedCluster's UID and agent name.
         4. cluster admin sets spec.acceptClient of ManagedCluster to true. 5. cluster
-        admin on managed cluster creates credential of kubeconfig to hub. 
- Once
+        admin on managed cluster creates credential of kubeconfig to hub. \n Once
         the hub creates the cluster namespace, the Klusterlet agent on the Managed
         Cluster pushes the credential to the hub to use against the managed cluster's
         kube-apiserver."
