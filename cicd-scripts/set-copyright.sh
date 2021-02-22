@@ -28,8 +28,7 @@ do
             || $FILE == *"Dockerfile" \
             || $FILE == *"Makefile"  \
             || $FILE == *".gitignore"  \
-            || $FILE == *".md"  \
-            || $FILE == *".mod" ]]; then
+            || $FILE == *".md"  ]]; then
         
         FILE_STRING=$(cat $FILE)
         HEADER_WITH_COMMENT="$COMMENT_START$COPY_HEADER_STRING$COMMENT_END"

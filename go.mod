@@ -1,5 +1,3 @@
-# Copyright Contributors to the Open Cluster Management project
-
 module github.com/open-cluster-management/discovery
 
 go 1.15
