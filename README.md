@@ -56,7 +56,7 @@ _To run the image locally instead, run_
 $ make run
 ```
 
-Once the deployment is running a default DiscoveryConfig and DiscoveredClusterRefresh can be created with
+Once the deployment is running a default DiscoveryConfig and DiscoveredClusterRefresh can be created with:
 ```bash
 $ make samples
 ```
