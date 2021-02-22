@@ -1,3 +1,5 @@
+// Copyright Contributors to the Open Cluster Management project
+
 package cluster_domain
 
 // ClusterError represents the error format response by OCM on a cluster request

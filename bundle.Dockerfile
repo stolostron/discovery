@@ -1,3 +1,5 @@
+# Copyright Contributors to the Open Cluster Management project
+
 FROM scratch
 
 LABEL operators.operatorframework.io.bundle.mediatype.v1=registry+v1
