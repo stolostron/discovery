@@ -57,7 +57,14 @@ func (client *subscriptionClient) GetSubscriptions() ([]subscription_domain.Subs
 		if err != nil {
 			return nil, fmt.Errorf(err.Reason)
 		}
-		discovered = append(discovered, discoveredList.Items...)
+
+		// Filter archived clusters
+		for _, sub := range discoveredList.Items {
+			if sub.Status == "Active" {
+				discovered = append(discovered, sub)
+			}
+		}
+
 		if len(discoveredList.Items) < request.Size {
 			break
 		}

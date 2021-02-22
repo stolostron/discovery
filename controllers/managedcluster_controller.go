@@ -139,7 +139,7 @@ func StartManagedClusterController(c controller.Controller, mgr ctrl.Manager, lo
 
 			if err != nil {
 				// Do not create controller
-				log.Info("ManagedCluster resource does not exist: Waiting to start controller")
+				// log.Info("ManagedCluster resource does not exist: Waiting to start controller")
 				time.Sleep(10 * time.Second)
 				continue
 			}

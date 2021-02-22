@@ -1,0 +1,90 @@
+[
+    {
+        "id": "1YuEObNEl4Z8b79mbbHD7a9hkl6",
+        "kind": "Subscription",
+        "href": "/api/accounts_mgmt/v1/subscriptions/1YuEObNEl4Z8b79mbbHD7a9hkl6",
+        "plan": {
+            "id": "OCP",
+            "kind": "Plan",
+            "href": "/api/accounts_mgmt/v1/plans/OCP"
+        },
+        "cluster_id": "1bq54rrj7ha37av4d5ad8d3r9q4ukv20",
+        "external_cluster_id": "69aced7c-286d-471c-9482-eac8a1cd2e17",
+        "organization_id": "1Yu9TWVAfvJu9Cj5hbMT6iYkdk8",
+        "last_telemetry_date": "2020-03-10T13:53:52.198877Z",
+        "created_at": "2020-03-09T20:00:47.876334Z",
+        "updated_at": "2020-07-15T22:53:56.796303Z",
+        "support_level": "None",
+        "cpu_total": 3,
+        "socket_total": 3,
+        "display_name": "69aced7c-286d-471c-9482-eac8a1cd2e17",
+        "creator": {
+            "id": "1Yu9TMhpDebs1S6wjLPIgYLlOn4",
+            "kind": "Account",
+            "href": "/api/accounts_mgmt/v1/accounts/1Yu9TMhpDebs1S6wjLPIgYLlOn4"
+        },
+        "managed": false,
+        "status": "Active",
+        "provenance": "Telemetry",
+        "last_reconcile_date": "2020-03-10T20:43:46.428922Z",
+        "last_released_at": "0001-01-01T00:00:00Z"
+    },
+    {
+        "id": "1ZJEZjTUtqlpNeRDGv4fBkVpobK",
+        "kind": "Subscription",
+        "href": "/api/accounts_mgmt/v1/subscriptions/1ZJEZjTUtqlpNeRDGv4fBkVpobK",
+        "plan": {
+            "id": "OCP",
+            "kind": "Plan",
+            "href": "/api/accounts_mgmt/v1/plans/OCP"
+        },
+        "cluster_id": "1bvvrtd8l74fgf7n2ffi3ie0s5qdn236",
+        "external_cluster_id": "24c22838-e774-4519-960b-5ab0583a2280",
+        "organization_id": "1Yu9TWVAfvJu9Cj5hbMT6iYkdk8",
+        "last_telemetry_date": "2020-03-19T13:28:15.648101Z",
+        "created_at": "2020-03-18T16:27:33.077427Z",
+        "updated_at": "2020-07-15T20:24:21.013384Z",
+        "support_level": "None",
+        "display_name": "24c22838-e774-4519-960b-5ab0583a2280",
+        "creator": {
+            "id": "1Yu9TMhpDebs1S6wjLPIgYLlOn4",
+            "kind": "Account",
+            "href": "/api/accounts_mgmt/v1/accounts/1Yu9TMhpDebs1S6wjLPIgYLlOn4"
+        },
+        "managed": false,
+        "status": "Active",
+        "provenance": "Telemetry",
+        "last_reconcile_date": "0001-01-01T00:00:00Z",
+        "last_released_at": "0001-01-01T00:00:00Z"
+    },
+    {
+        "id": "1YwZwXuRksAf7z6k8d1etV4BeIc",
+        "kind": "Subscription",
+        "href": "/api/accounts_mgmt/v1/subscriptions/1YwZwXuRksAf7z6k8d1etV4BeIc",
+        "plan": {
+            "id": "OCP",
+            "kind": "Plan",
+            "href": "/api/accounts_mgmt/v1/plans/OCP"
+        },
+        "cluster_id": "1bqmlrq8goch7dqut8i5ih5ho19h41h0",
+        "external_cluster_id": "2a874968-3c5d-4f5b-b565-1b983c36c2b8",
+        "organization_id": "1Yu9TWVAfvJu9Cj5hbMT6iYkdk8",
+        "last_telemetry_date": "2020-03-18T15:10:55.560708Z",
+        "created_at": "2020-03-10T15:57:35.323223Z",
+        "updated_at": "2020-07-15T23:33:11.359933Z",
+        "support_level": "None",
+        "cpu_total": 12,
+        "socket_total": 3,
+        "display_name": "2a874968-3c5d-4f5b-b565-1b983c36c2b8",
+        "creator": {
+            "id": "1Yu9TMhpDebs1S6wjLPIgYLlOn4",
+            "kind": "Account",
+            "href": "/api/accounts_mgmt/v1/accounts/1Yu9TMhpDebs1S6wjLPIgYLlOn4"
+        },
+        "managed": false,
+        "status": "Active",
+        "provenance": "Telemetry",
+        "last_reconcile_date": "2020-03-11T00:39:51.71761Z",
+        "last_released_at": "0001-01-01T00:00:00Z"
+    }
+]
