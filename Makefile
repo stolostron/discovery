@@ -58,6 +58,10 @@ test: generate fmt vet manifests
 	test -f $(ENVTEST_ASSETS_DIR)/setup-envtest.sh || curl -sSLo $(ENVTEST_ASSETS_DIR)/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.6.3/hack/setup-envtest.sh
 	source $(ENVTEST_ASSETS_DIR)/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test `go list ./... | grep -v integration_tests` -coverprofile cover.out
 
+# Run fast tests that don't require extra binary
+unit-tests:
+	go test ./... -short -v
+
 # Run tests
 integration-tests: install deploy server/deploy
 	kubectl apply -f controllers/testdata/crds/clusters.open-cluster-management.io_managedclusters.yaml

@@ -47,6 +47,9 @@ var testEnv *envtest.Environment
 var events chan event.GenericEvent
 
 func TestAPIs(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
