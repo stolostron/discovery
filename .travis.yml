@@ -17,7 +17,7 @@ addons:
   sonarcloud:
     organization: "open-cluster-management"
     token:
-      secure: "ENCRYPTED_TOKEN"
+      secure: "CzdZGPhURVw7ORf6uYewWP9izplB2TgGk0EShh9NEKfS+6+MQZzHq/WMmkU4XhShpdDm+wix5Gcw4wPBgrHgodHJpqnBGd97q6Lz2Y1pHnNULfh1Gp4sxSqZfDBRkA2XQ7bLTBk/puXg58mJPjhjcwFrZCF3B9l3jdm3nRFLpvN1hLfxjFCxHh4WVwuvVOlTG/PPFII7JXX15vPbHkdVfsnfJSfHzeSfszHi6B1jB5kyGdcJHpS1jImsXU6OoWJIP00mIxCYOGPB6ryp3DjoPzlz7arv31A2q0/ZSZt7Fx9NFySoeo5eJ//vusRklHuI04j1N3PAUW/z7FDwXQCGRhynW+wVDq+ACLUf7th2UnA142HQoe7so3xmCyaPeyt1z4Ayo4MQbqwzRPOcdpWlVBtH9MKzjnYXBpBETYziM5xwODbAdqSmKKsJVHLkX31rY2Dw2oQcuLh6ESNMsVeEsVUD8pMuVYfnj0UsYHlFtO0A5noOp2KeANsQAru076gKBG6eKSRXIhsUDPGOiHxnIWQWJxAaot8wf91mdtm8MO6SnbRTovqV8M8FgXIKyz9x8khDhGSiqOohtZW2SISeUPqW7wgHnHtNtz8nSiu6EQTpK9XL/UbOMOq2q8jRC7pxK+IY9150l9YKwna4s6emjUo/zMq/V05AqkrjEd5wq+Q="
 
 env:
   global:
@@ -64,7 +64,7 @@ jobs:
           make 
           make component/pull 
           make component/test/unit 
-        #  make sonar/go
+          make sonar/go
     - stage: test-e2e
       name: "Deploy the image to a cluster and run e2e tests"
       if: type = pull_request
