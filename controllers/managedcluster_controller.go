@@ -82,6 +82,7 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	// Update for recently unmanaged clusters
 	for _, dc := range discoveredClusters.Items {
+		dc := dc
 		if !dc.Spec.IsManagedCluster {
 			continue
 		}

@@ -31,5 +31,8 @@ func main() {
 
 	api.SetupEndpoints(r, log.Logger)
 
-	r.Run(":3000")
+	err := r.Run(":3000")
+	if err != nil {
+		panic(err)
+	}
 }

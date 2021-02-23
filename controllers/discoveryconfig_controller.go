@@ -221,7 +221,11 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	// Create new clusters and clean up old ones
 	for _, cluster := range createClusters {
-		ctrl.SetControllerReference(config, &cluster, r.Scheme)
+		cluster := cluster
+		if err := ctrl.SetControllerReference(config, &cluster, r.Scheme); err != nil {
+			log.Error(err, "failed to set controller reference", "name", cluster.Name)
+			return ctrl.Result{}, err
+		}
 		if err := r.Create(ctx, &cluster); err != nil {
 			log.Error(err, "unable to create discovered cluster", "name", cluster.Name)
 			return ctrl.Result{}, err
@@ -229,6 +233,7 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		log.Info("Created cluster", "Name", cluster.Name)
 	}
 	for _, cluster := range updateClusters {
+		cluster := cluster
 		if err := r.Update(ctx, &cluster); err != nil {
 			log.Error(err, "unable to update discovered cluster", "name", cluster.Name)
 			return ctrl.Result{}, err
@@ -236,6 +241,7 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		log.Info("Updated cluster", "Name", cluster.Name)
 	}
 	for _, cluster := range deleteClusters {
+		cluster := cluster
 		if err := r.Delete(ctx, &cluster); err != nil {
 			log.Error(err, "unable to delete discovered cluster", "name", cluster.Name)
 			return ctrl.Result{}, err
