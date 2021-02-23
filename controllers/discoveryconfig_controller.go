@@ -189,6 +189,13 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 	log.Info("Subscription categories", "Total", len(newSubs), "Active", active, "Archived", archived, "Stale", stale, "Other", other)
 
+	subscriptionSpecs := make(map[string]discoveryv1.SubscriptionSpec, len(newSubs))
+	for _, sub := range newSubs {
+		if sub.ExternalClusterID != "" {
+			subscriptionSpecs[sub.ExternalClusterID] = subscriptionSpec(sub)
+		}
+	}
+
 	requestConfig := cluster_domain.ClusterRequest{
 		Token:  accessToken,
 		Filter: config.Spec.Filters,
@@ -203,17 +210,18 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 	for _, cluster := range newClusters {
+		matchingSubscriptionSpec, ok := subscriptionSpecs[cluster.ExternalID]
+		if !ok {
+			// Ignore clusters without an active subscription
+			continue
+		}
+
 		// Build a DiscoveredCluster object from the cluster information
 		discoveredCluster := discoveredCluster(cluster)
 		discoveredCluster.SetNamespace(req.Namespace)
 
 		// Assign dummy status
-		discoveredCluster.Spec.Subscription = discoveryv1.SubscriptionSpec{
-			Status:       "Active",
-			SupportLevel: "None",
-			Managed:      false,
-			CreatorID:    "abc123",
-		}
+		discoveredCluster.Spec.Subscription = matchingSubscriptionSpec
 
 		// Assign managed status
 		if _, managed := managedClusterIDs[discoveredCluster.Spec.Name]; managed {
@@ -377,5 +385,15 @@ func discoveredCluster(cluster cluster_domain.Cluster) discoveryv1.DiscoveredClu
 			// IsManagedCluster:  managedClusterNames[cluster.Name],
 			// APIURL: apiurl,
 		},
+	}
+}
+
+// subscriptionSpec converts a Subscription to a SubscriptionSpec
+func subscriptionSpec(sub subscription_domain.Subscription) discoveryv1.SubscriptionSpec {
+	return discoveryv1.SubscriptionSpec{
+		Status:       sub.Status,
+		SupportLevel: sub.SupportLevel,
+		Managed:      sub.Managed,
+		CreatorID:    sub.ClusterID,
 	}
 }
