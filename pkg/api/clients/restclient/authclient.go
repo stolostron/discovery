@@ -18,5 +18,5 @@ var (
 )
 
 func (c *authClient) Post(url string, data url.Values) (resp *http.Response, err error) {
-	return http.PostForm(url, data)
+	return http.PostForm(url, data) // #nosec G107 (url needs to be configurable to target mock servers)
 }
