@@ -1,4 +1,4 @@
-# include /opt/build-harness/Makefile.prow
+-include /opt/build-harness/Makefile.prow
 
 .PHONY: build
 build:
