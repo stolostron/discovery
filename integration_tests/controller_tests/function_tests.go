@@ -28,6 +28,8 @@ const (
 	interval = time.Millisecond * 250
 )
 
+var k8sClient client.Client
+
 // annotated adds an annotation to modify the baseUrl used with the discoveryconfig
 func annotated(dc *discoveryv1.DiscoveryConfig) *discoveryv1.DiscoveryConfig {
 	dc.SetAnnotations(map[string]string{"ocmBaseURL": "http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"})
