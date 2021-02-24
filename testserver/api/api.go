@@ -116,7 +116,7 @@ func SetupEndpoints(r *gin.Engine, logger zerolog.Logger) {
 
 // GetSubscriptions ...
 func GetSubscriptions(c *gin.Context) {
-	file, err := ioutil.ReadFile("data/filtered_subscriptions.json")
+	file, err := ioutil.ReadFile("data/subscriptions.json")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"msg": fmt.Sprintf("Error reading file: %s", err.Error()),
@@ -167,7 +167,7 @@ func GetCluster(c *gin.Context) {
 	}
 
 	if clusterID != "" {
-		c.JSON(http.StatusOK, clusterList)
+		c.Data(http.StatusOK, "application/json", file)
 	}
 
 	for _, cluster := range clusterList.Items {
