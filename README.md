@@ -9,7 +9,7 @@ This project manages discovered clusters
 
 ## Prerequisites
 
-- go version v1.13+
+- go version v1.15+
 - operator-sdk version v1.3.0
 - yq v4.4.x
 - docker
