@@ -188,3 +188,5 @@ unannotate:
 
 set-copyright:
 	@bash ./cicd-scripts/set-copyright.sh
+
+verify: test integration-tests manifests
