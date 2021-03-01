@@ -169,6 +169,11 @@ secrets:
 	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(ENCRYPTED)/g" | kubectl apply -f - || true
 	@kubectl create secret docker-registry discovery-operator-pull-secret --docker-server=quay.io --docker-username=$(DOCKER_USER) --docker-password=$(DOCKER_PASS) || true
 
+# Generate secret for OCM access
+.PHONY: secret
+secret:
+	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(ENCRYPTED)/g" | kubectl apply -f - || true
+
 # Create custom resources
 .PHONY: samples
 samples:
