@@ -5,58 +5,73 @@
 We are in the process of enabling this repo for community contribution. See wiki [here](https://open-cluster-management.io/concepts/architecture/).
 # Discovery
 
-This project manages discovered clusters
+Operator for managing discovered clusters from OpenShift Cluster Manager
 
 ## Prerequisites
 
-- go version v1.13+
-- operator-sdk version v1.3.0
-- yq v4.4.x
-- docker
-- quay credentials for https://quay.io/organization/rhibmcollab and https://quay.io/organization/open-cluster-management
+- Go v1.15+
+- kubectl 1.19+
+- Operator-sdk v1.3.0
+- Docker
 - Connection to an existing Kubernetes cluster
 
-## Installing
+## Installation
 
-### Required Variables
+Before deploying the Discovery CRDs need to be installed onto the cluster.
 
-To run, export your Docker/Quay credentials and your OpenShift Cluster Manager API Token
-
-```bash
-$ export DOCKER_USER=<DOCKER_USER>
-$ export DOCKER_PASS=<DOCKER_PASS>
-$ export OCM_API_TOKEN=<OpenShift Cluster Manager API Token>
-```
-The OpenShift Cluster Manager API Token can be retrieved from [here](https://cloud.redhat.com/openshift/token).
-
-It is also recommended to set a unique version label when building the image
-
-```bash
-$ export VERSION=<A_UNIQUE_VERSION>
+```shell
+make install
 ```
 
-### Building Image
-The image can be built and pushed with
-```bash
-$ make docker-build
-$ make docker-push
+### Outside the Cluster
+
+The operator can be run locally against the configured Kubernetes cluster in ~/.kube/config with the following command:
+
+```shell
+make run
 ```
 
-### Installing
-Be sure you are logged in to a Kubernetes cluster, then run
+### Inside the Cluster
 
-```bash
-$ make install
-$ make deploy
+The operator can also run inside the cluster as a Deployment. To do that first build the container image and push to an accessible image registry.
+
+1. Build the image:
+    ```shell
+    make docker-build URL=<registry>/<imagename>:<tag>
+    ```
+2. Push the image:
+    ```shell
+    make docker-push URL=<registry>/<imagename>:<tag>
+    ```
+3. Deploy the Operator:
+    ```shell
+    make deploy URL=<registry>/<imagename>:<tag>
+    ```
+
+## Usage
+
+The discovery operator generates `DiscoveredClusters` based on a `DiscoveryConfig` resource. The config takes in a secret containing your OCM api token. To create this secret run the following:
+
+```shell
+make secret OCM_API_TOKEN=<OpenShift Cluster Manager API Token>
 ```
-This will create the CRDs, RBAC, and deployment
 
-_To run the image locally instead, run_
-```bash
-$ make run
+The OpenShift Cluster Manager API Token can be retrieved from [here](https://cloud.redhat.com/openshift/token). This will create a secret named `ocm-api-token` in the current namespace. With the secret created you can create the `DiscoveryConfig` resource with the following command:
+
+```shell
+make samples
 ```
 
-Once the deployment is running a default DiscoveryConfig and DiscoveredClusterRefresh can be created with:
-```bash
-$ make samples
+This will create a `DiscoveryConfig` like the example below:
+
+```yaml
+apiVersion: discovery.open-cluster-management.io/v1
+kind: DiscoveryConfig
+metadata:
+  name: discoveryconfig
+spec:
+  providerConnections:
+    - ocm-api-token
+  filters:
+    lastActive: 7
 ```

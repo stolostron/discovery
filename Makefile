@@ -1,13 +1,11 @@
 # Copyright Contributors to the Open Cluster Management project
 
-# GITHUB_USER containing '@' char must be escaped with '%40'
-GITHUB_USER := $(shell echo $(GITHUB_USER) | sed 's/@/%40/g')
-GITHUB_TOKEN ?=
-
 USE_VENDORIZED_BUILD_HARNESS ?=
 
 ifndef USE_VENDORIZED_BUILD_HARNESS
--include $(shell curl -s -H 'Authorization: token ${GITHUB_TOKEN}' -H 'Accept: application/vnd.github.v4.raw' -L https://api.github.com/repos/open-cluster-management/build-harness-extensions/contents/templates/Makefile.build-harness-bootstrap -o .build-harness-bootstrap; echo .build-harness-bootstrap)
+	ifeq ($(TRAVIS_BUILD),1)
+	-include $(shell curl -H 'Accept: application/vnd.github.v4.raw' -L https://api.github.com/repos/open-cluster-management/build-harness-extensions/contents/templates/Makefile.build-harness-bootstrap -o .build-harness-bootstrap; echo .build-harness-bootstrap)
+	endif
 else
 -include vbh/.build-harness-vendorized
 endif
@@ -36,6 +34,7 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 # Image URL to use all building/pushing image targets
 REGISTRY ?= quay.io/rhibmcollab
 IMG ?= discovery-operator
+URL ?= $(REGISTRY)/$(IMG):$(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:crdVersions=v1"
 
@@ -85,8 +84,8 @@ uninstall: manifests kustomize
 	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: manifests kustomize secrets
-	cd config/manager && $(KUSTOMIZE) edit set image controller="$(REGISTRY)/$(IMG):$(VERSION)"
+deploy: manifests kustomize
+	cd config/manager && $(KUSTOMIZE) edit set image controller="${URL}"
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
@@ -107,11 +106,11 @@ generate: controller-gen
 
 # Build the docker image
 docker-build:
-	docker build . -t "$(REGISTRY)/$(IMG):$(VERSION)"
+	docker build . -t "${URL}"
 
 # Push the docker image
 docker-push:
-	docker push "$(REGISTRY)/$(IMG):$(VERSION)"
+	docker push "${URL}"
 
 # find or download controller-gen
 # download controller-gen if necessary
@@ -167,8 +166,8 @@ bundle-build:
 .PHONY: secrets
 ENCRYPTED = $(shell echo "ocmAPIToken: ${OCM_API_TOKEN}" | base64)
 secrets:
-	@cat config/samples/ocm-api-secret.yaml | ocmtoken="${ENCRYPTED}" yq eval '.data.metadata = strenv(ocmtoken)' - | oc apply -f - || true
-	@oc create secret docker-registry discovery-operator-pull-secret --docker-server=quay.io --docker-username=$(DOCKER_USER) --docker-password=$(DOCKER_PASS) || true
+	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(ENCRYPTED)/g" | kubectl apply -f - || true
+	@kubectl create secret docker-registry discovery-operator-pull-secret --docker-server=quay.io --docker-username=$(DOCKER_USER) --docker-password=$(DOCKER_PASS) || true
 
 # Create custom resources
 .PHONY: samples
@@ -176,15 +175,15 @@ samples:
 	$(KUSTOMIZE) build config/samples | kubectl apply -f -
 
 logs:
-	@oc logs -f $(shell oc get pod -l app=discovery-operator -o jsonpath="{.items[0].metadata.name}")
+	@kubectl logs -f $(shell kubectl get pod -l app=discovery-operator -o jsonpath="{.items[0].metadata.name}")
 
 # Annotate discoveryconfig to target mock server
 annotate:
-	oc annotate discoveryconfig discoveryconfig ocmBaseURL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000 --overwrite
+	kubectl annotate discoveryconfig discoveryconfig ocmBaseURL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000 --overwrite
 
 # Remove mock server annotation
 unannotate:
-	oc annotate discoveryconfig discoveryconfig ocmBaseURL-
+	kubectl annotate discoveryconfig discoveryconfig ocmBaseURL-
 
 set-copyright:
 	@bash ./cicd-scripts/set-copyright.sh
