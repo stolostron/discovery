@@ -2,6 +2,7 @@
 
 .PHONY: build
 build:
+	echo "Reliable code processing"
 	go build -o bin/manager main.go
 
 unit-tests:
