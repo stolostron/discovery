@@ -1,0 +1,346 @@
+{
+    "kind": "ClusterList",
+    "page": 1,
+    "size": 2,
+    "total": 2,
+    "items": [
+      {
+        "kind": "Cluster",
+        "id": "1bq54rrj7ha37av4d5ad8d3r9q4ukv20",
+        "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20",
+        "name": "69aced7c-286d-471c-9482-eac8a1cd2e17",
+        "external_id": "69aced7c-286d-471c-9482-eac8a1cd2e17",
+        "display_name": "69aced7c-286d-471c-9482-eac8a1cd2e17",
+        "creation_timestamp": "2020-03-09T20:00:47.933846Z",
+        "activity_timestamp": "2020-03-10T14:11:21Z",
+        "cloud_provider": {
+          "kind": "CloudProviderLink",
+          "id": "aws",
+          "href": "/api/clusters_mgmt/v1/cloud_providers/aws"
+        },
+        "openshift_version": "4.3.3",
+        "subscription": {
+          "kind": "SubscriptionLink",
+          "id": "1YuEObNEl4Z8b79mbbHD7a9hkl6",
+          "href": "/api/accounts_mgmt/v1/subscriptions/1YuEObNEl4Z8b79mbbHD7a9hkl6"
+        },
+        "region": {
+          "kind": "CloudRegionLink",
+          "id": "us-east-1",
+          "href": "/api/clusters_mgmt/v1/cloud_providers/aws/regions/us-east-1"
+        },
+        "console": {
+          "url": "https://console-openshift-console.apps.test-cluster-01.dev01.red-chesterfield.com"
+        },
+        "nodes": {
+          "total": 0,
+          "master": 0,
+          "infra": 0,
+          "compute": 0
+        },
+        "state": "ready",
+        "groups": {
+          "kind": "GroupListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20/groups"
+        },
+        "network": {
+          "host_prefix": 23
+        },
+        "external_configuration": {
+          "kind": "ExternalConfiguration",
+          "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20/external_configuration",
+          "syncsets": {
+            "kind": "SyncsetListLink",
+            "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20/external_configuration/syncsets"
+          },
+          "labels": {
+            "kind": "LabelListLink",
+            "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20/external_configuration/labels"
+          }
+        },
+        "multi_az": false,
+        "managed": false,
+        "byoc": false,
+        "ccs": {
+          "enabled": false,
+          "disable_scp_checks": false
+        },
+        "cluster_admin_enabled": false,
+        "identity_providers": {
+          "kind": "IdentityProviderListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20/identity_providers"
+        },
+        "aws_infrastructure_access_role_grants": {
+          "kind": "AWSInfrastructureAccessRoleGrantLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20/aws_infrastructure_access_role_grants",
+          "items": null
+        },
+        "metrics": {
+          "memory": {
+            "updated_timestamp": "2020-03-10T14:11:18Z",
+            "used": {
+              "value": 16406011904,
+              "unit": "B"
+            },
+            "total": {
+              "value": 75513511936,
+              "unit": "B"
+            }
+          },
+          "cpu": {
+            "updated_timestamp": "2020-03-10T14:11:16Z",
+            "used": {
+              "value": 3.4260000000001236,
+              "unit": ""
+            },
+            "total": {
+              "value": 18,
+              "unit": ""
+            }
+          },
+          "sockets": {
+            "used": {
+              "value": 0,
+              "unit": ""
+            },
+            "total": {
+              "value": 0,
+              "unit": ""
+            }
+          },
+          "compute_nodes_memory": {
+            "total": {
+              "value": 25073180672,
+              "unit": "B"
+            }
+          },
+          "compute_nodes_cpu": {
+            "total": {
+              "value": 6,
+              "unit": ""
+            }
+          },
+          "compute_nodes_sockets": {
+            "total": {
+              "value": 0,
+              "unit": ""
+            }
+          },
+          "storage": {
+            "used": {
+              "value": 0,
+              "unit": "B"
+            },
+            "total": {
+              "value": 0,
+              "unit": "B"
+            }
+          },
+          "nodes": {
+            "total": 6,
+            "master": 3,
+            "compute": 3
+          },
+          "version_update_available": false,
+          "upgrade": {
+            "updated_timestamp": "2020-03-10T14:11:21Z",
+            "available": false
+          }
+        },
+        "addons": {
+          "kind": "AddOnInstallationListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20/addons"
+        },
+        "ingresses": {
+          "kind": "IngressListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20/ingresses",
+          "id": "1bq54rrj7ha37av4d5ad8d3r9q4ukv20"
+        },
+        "machine_pools": {
+          "kind": "MachinePoolListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bq54rrj7ha37av4d5ad8d3r9q4ukv20/machine_pools"
+        },
+        "health_state": "unknown",
+        "product": {
+          "kind": "ProductLink",
+          "id": "ocp",
+          "href": "/api/clusters_mgmt/v1/products/ocp"
+        },
+        "status": {
+          "state": "ready",
+          "dns_ready": true,
+          "provision_error_message": "",
+          "provision_error_code": ""
+        }
+      },
+      {
+        "kind": "Cluster",
+        "id": "1bqmlrq8goch7dqut8i5ih5ho19h41h0",
+        "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0",
+        "name": "2a874968-3c5d-4f5b-b565-1b983c36c2b8",
+        "external_id": "2a874968-3c5d-4f5b-b565-1b983c36c2b8",
+        "display_name": "2a874968-3c5d-4f5b-b565-1b983c36c2b8",
+        "creation_timestamp": "2020-03-10T15:57:35.403072Z",
+        "activity_timestamp": "2020-03-18T15:42:53Z",
+        "cloud_provider": {
+          "kind": "CloudProviderLink",
+          "id": "aws",
+          "href": "/api/clusters_mgmt/v1/cloud_providers/aws"
+        },
+        "openshift_version": "4.3.3",
+        "subscription": {
+          "kind": "SubscriptionLink",
+          "id": "1YwZwXuRksAf7z6k8d1etV4BeIc",
+          "href": "/api/accounts_mgmt/v1/subscriptions/1YwZwXuRksAf7z6k8d1etV4BeIc"
+        },
+        "region": {
+          "kind": "CloudRegionLink",
+          "id": "us-east-1",
+          "href": "/api/clusters_mgmt/v1/cloud_providers/aws/regions/us-east-1"
+        },
+        "console": {
+          "url": "https://console-openshift-console.apps.test-cluster-02.dev01.red-chesterfield.com"
+        },
+        "nodes": {
+          "total": 0,
+          "master": 0,
+          "infra": 0,
+          "compute": 0
+        },
+        "state": "ready",
+        "groups": {
+          "kind": "GroupListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0/groups"
+        },
+        "network": {
+          "host_prefix": 23
+        },
+        "external_configuration": {
+          "kind": "ExternalConfiguration",
+          "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0/external_configuration",
+          "syncsets": {
+            "kind": "SyncsetListLink",
+            "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0/external_configuration/syncsets"
+          },
+          "labels": {
+            "kind": "LabelListLink",
+            "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0/external_configuration/labels"
+          }
+        },
+        "multi_az": false,
+        "managed": false,
+        "byoc": false,
+        "ccs": {
+          "enabled": false,
+          "disable_scp_checks": false
+        },
+        "cluster_admin_enabled": false,
+        "identity_providers": {
+          "kind": "IdentityProviderListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0/identity_providers"
+        },
+        "aws_infrastructure_access_role_grants": {
+          "kind": "AWSInfrastructureAccessRoleGrantLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0/aws_infrastructure_access_role_grants",
+          "items": null
+        },
+        "metrics": {
+          "memory": {
+            "updated_timestamp": "2020-03-18T15:42:52Z",
+            "used": {
+              "value": 23383146496,
+              "unit": "B"
+            },
+            "total": {
+              "value": 148529872896,
+              "unit": "B"
+            }
+          },
+          "cpu": {
+            "updated_timestamp": "2020-03-18T15:42:49Z",
+            "used": {
+              "value": 2.8455555555591783,
+              "unit": ""
+            },
+            "total": {
+              "value": 36,
+              "unit": ""
+            }
+          },
+          "sockets": {
+            "used": {
+              "value": 0,
+              "unit": ""
+            },
+            "total": {
+              "value": 0,
+              "unit": ""
+            }
+          },
+          "compute_nodes_memory": {
+            "total": {
+              "value": 99366653952,
+              "unit": "B"
+            }
+          },
+          "compute_nodes_cpu": {
+            "total": {
+              "value": 24,
+              "unit": ""
+            }
+          },
+          "compute_nodes_sockets": {
+            "total": {
+              "value": 0,
+              "unit": ""
+            }
+          },
+          "storage": {
+            "used": {
+              "value": 0,
+              "unit": "B"
+            },
+            "total": {
+              "value": 0,
+              "unit": "B"
+            }
+          },
+          "nodes": {
+            "total": 6,
+            "master": 3,
+            "compute": 3
+          },
+          "version_update_available": true,
+          "upgrade": {
+            "updated_timestamp": "2020-03-18T15:42:53Z",
+            "available": true
+          }
+        },
+        "addons": {
+          "kind": "AddOnInstallationListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0/addons"
+        },
+        "ingresses": {
+          "kind": "IngressListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0/ingresses",
+          "id": "1bqmlrq8goch7dqut8i5ih5ho19h41h0"
+        },
+        "machine_pools": {
+          "kind": "MachinePoolListLink",
+          "href": "/api/clusters_mgmt/v1/clusters/1bqmlrq8goch7dqut8i5ih5ho19h41h0/machine_pools"
+        },
+        "health_state": "unknown",
+        "product": {
+          "kind": "ProductLink",
+          "id": "ocp",
+          "href": "/api/clusters_mgmt/v1/products/ocp"
+        },
+        "status": {
+          "state": "ready",
+          "dns_ready": true,
+          "provision_error_message": "",
+          "provision_error_code": ""
+        }
+      }
+    ]
+}
