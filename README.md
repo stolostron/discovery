@@ -17,7 +17,7 @@ Operator for managing discovered clusters from OpenShift Cluster Manager
 
 ## Installation
 
-Before deploying the Discovery CRDs need to be installed onto the cluster.
+Before deploying, the Discovery CRDs need to be installed onto the cluster.
 
 ```shell
 make install
