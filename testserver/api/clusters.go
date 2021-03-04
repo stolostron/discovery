@@ -13,6 +13,7 @@ import (
 
 // GetCluster ...
 func GetCluster(c *gin.Context) {
+	fmt.Println(path.Join(dataFolder, "cluster_response.json"))
 	file, err := ioutil.ReadFile(path.Join(dataFolder, "cluster_response.json"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

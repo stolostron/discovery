@@ -1,19 +1,32 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 var dataFolder = "data"
 
 var scenarios = map[string]string{
-	// clustersAdded starts with a set number of clusters and adds more
-	"clustersAdded":   "data/clusters_added",
-	"clustersRemoved": "data/cluster_removed",
+	// responds with 10 active clusters
+	"tenClusters": "data/scenarios/ten_clusters",
 }
 
 // SetScenario sets up predetermined api responses to simulate various scenarios
 // for testing
 func SetScenario(c *gin.Context) {
-	name := c.Param("playbook")
-	dataFolder = scenarios[name]
+	name := c.Param("scenario")
+	fmt.Println(name)
+	scenarioPath, ok := scenarios[name]
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": fmt.Sprintf("'%s' is not a valid scenario", name),
+		})
+		return
+	}
 
+	dataFolder = scenarioPath
+	c.Status(http.StatusOK)
 }

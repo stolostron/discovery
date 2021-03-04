@@ -18,7 +18,7 @@ spec:
         ports:
         - containerPort: 3000
         image: quay.io/rhibmcollab/mock-ocm-server:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         resources:
           requests:
             memory: "64Mi"
