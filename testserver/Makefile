@@ -2,33 +2,25 @@
 
 .PHONY: local-server
 
-DIR ?= $(shell basename `pwd`)
-ifeq ($(DIR),testserver)
-DIR := .
-else
-DIR := ./testserver
-endif
-
 ## Build Mock OCM Server Binary
 server/build:
-	echo ${DIR}
-	cd $(DIR) && go build -o ./bin/local-server main.go
+	go build -o testserver/bin/local-server main.go
 
 ## Start Mock OCM Server Binary
 server/run:
-	cd $(DIR) && go run main.go
+	go run testserver/main.go
 
 ## Build Mock OCM Server Image
 server/docker-build:
-	cd $(DIR) && docker build . -f ./build/Dockerfile -t quay.io/rhibmcollab/mock-ocm-server:latest
+	docker build . -f ./testserver/build/Dockerfile -t quay.io/jakobgray/mock-ocm-server:latest
 
 ## Push Mock OCM Server Image
 server/docker-push:
-	docker push quay.io/rhibmcollab/mock-ocm-server:latest
+	docker push quay.io/jakobgray/mock-ocm-server:latest
 
 ## Run Mock OCM Server Image Locally
 server/docker-run:
-	docker run -p 3000:3000 quay.io/rhibmcollab/mock-ocm-server:latest
+	docker run -p 3000:3000 quay.io/jakobgray/mock-ocm-server:latest
 
 ## Annotate DiscoveryConfig with Mock OCM Server URL
 server/annotate:
@@ -36,4 +28,4 @@ server/annotate:
 
 ## Build, push, and deploy server in cluster
 server/deploy:
-	oc apply -k $(DIR)/build/local-server
+	oc apply -k testserver/build/local-server

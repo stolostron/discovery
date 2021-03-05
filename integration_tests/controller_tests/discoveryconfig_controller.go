@@ -12,6 +12,7 @@ import (
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,13 +31,35 @@ const (
 
 var k8sClient client.Client
 
-// annotated adds an annotation to modify the baseUrl used with the discoveryconfig
-func annotated(dc *discoveryv1.DiscoveryConfig) *discoveryv1.DiscoveryConfig {
-	dc.SetAnnotations(map[string]string{"ocmBaseURL": "http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"})
-	return dc
-}
+var (
+	ctx = context.Background()
+	// globalsInitialized    = false
+	// gkNamespace           = ""
+	// auditName             = types.NamespacedName{}
+	// controllerManagerName = types.NamespacedName{}
+	discoveryConfig = types.NamespacedName{
+		Name:      DiscoveryConfigName,
+		Namespace: DiscoveryNamespace,
+	}
+	// validatingWebhookName = types.NamespacedName{}
+	// mutatingWebhookName   = types.NamespacedName{}
+)
 
-var _ = Describe("DiscoveredClusterRefresh controller", func() {
+var _ = Describe("Discoveryconfig controller", func() {
+
+	AfterEach(func() {
+		Expect(k8sClient.Delete(ctx, defaultDiscoveryConfig(), client.PropagationPolicy(metav1.DeletePropagationForeground))).Should(Succeed())
+
+		// Once this succeeds, clean up has happened for all owned resources.
+		Eventually(func() bool {
+			err := k8sClient.Get(ctx, discoveryConfig, &discoveryv1.DiscoveryConfig{})
+			if err == nil {
+				return false
+			}
+			return apierrors.IsNotFound(err)
+		}, timeout, interval).Should(BeTrue())
+	})
+
 	Context("When creating a DiscoveryConfig", func() {
 		It("Should trigger the creation of new discovered clusters ", func() {
 			By("By creating a secret with OCM credentials")
@@ -80,7 +103,7 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 					ProviderConnections: []string{SecretName},
 				},
 			}
-			discoveryConfig = annotated(discoveryConfig)
+			discoveryConfig = annotate(discoveryConfig)
 
 			Expect(k8sClient.Create(ctx, discoveryConfig)).Should(Succeed())
 
@@ -249,3 +272,33 @@ var _ = Describe("DiscoveredClusterRefresh controller", func() {
 	})
 
 })
+
+// annotate adds an annotation to modify the baseUrl used with the discoveryconfig
+func annotate(dc *discoveryv1.DiscoveryConfig) *discoveryv1.DiscoveryConfig {
+	dc.SetAnnotations(map[string]string{"ocmBaseURL": "http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"})
+	return dc
+}
+
+func dummySecret() *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      SecretName,
+			Namespace: DiscoveryNamespace,
+		},
+		StringData: map[string]string{
+			"metadata": "ocmAPIToken: dummytoken",
+		},
+	}
+}
+
+func defaultDiscoveryConfig() *discoveryv1.DiscoveryConfig {
+	return &discoveryv1.DiscoveryConfig{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      DiscoveryConfigName,
+			Namespace: DiscoveryNamespace,
+		},
+		Spec: discoveryv1.DiscoveryConfigSpec{
+			ProviderConnections: []string{SecretName},
+		},
+	}
+}

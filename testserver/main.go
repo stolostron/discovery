@@ -13,6 +13,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// func init() {
+// 	flag.StringVar(&api.Scenario, "scenario", "tenClusters", "The address the metric endpoint binds to.")
+// 	flag.Parse()
+// }
+
 func main() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if gin.IsDebugging() {

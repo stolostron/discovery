@@ -1,17 +1,28 @@
 package api
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
+// Scenario is
+var scenario string
+
 var dataFolder = "data"
 
 var scenarios = map[string]string{
 	// responds with 10 active clusters
 	"tenClusters": "data/scenarios/ten_clusters",
+}
+
+func init() {
+	flag.StringVar(&scenario, "scenario", "tenClusters", "The address the metric endpoint binds to.")
+	flag.Parse()
+
+	dataFolder = scenarios[scenario]
 }
 
 // SetScenario sets up predetermined api responses to simulate various scenarios
