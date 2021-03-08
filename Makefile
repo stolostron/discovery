@@ -86,6 +86,7 @@ uninstall: manifests kustomize
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize
+	@echo "Deploying with image ${URL}"
 	cd config/manager && $(KUSTOMIZE) edit set image controller="${URL}"
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 

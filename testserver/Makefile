@@ -35,5 +35,6 @@ server/secret:
 
 ## Build, push, and deploy server in cluster
 server/deploy:
+	@echo "Deploying with image ${SERVER_URL}"
 	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="${SERVER_URL}"
 	$(KUSTOMIZE) build testserver/build/local-server | kubectl apply -f -
