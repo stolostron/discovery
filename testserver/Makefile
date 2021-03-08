@@ -2,8 +2,8 @@
 
 .PHONY: local-server
 
-IMG := mock-ocm-server
-URL ?= $(REGISTRY)/$(IMG):$(VERSION)
+SERVER_IMG := mock-ocm-server
+SERVER_URL ?= $(REGISTRY)/$(SERVER_IMG):$(VERSION)
 
 ## Build Mock OCM Server Binary
 server/build:
@@ -15,15 +15,15 @@ server/run:
 
 ## Build Mock OCM Server Image
 server/docker-build:
-	docker build . -f ./testserver/build/Dockerfile -t "${URL}"
+	docker build . -f ./testserver/build/Dockerfile -t "${SERVER_URL}"
 
 ## Push Mock OCM Server Image
 server/docker-push:
-	docker push "${URL}"
+	docker push "${SERVER_URL}"
 
 ## Run Mock OCM Server Image Locally
 server/docker-run:
-	docker run -p 3000:3000 "${URL}"
+	docker run -p 3000:3000 "${SERVER_URL}"
 
 ## Annotate DiscoveryConfig with Mock OCM Server URL
 server/annotate:
@@ -35,4 +35,5 @@ server/secret:
 
 ## Build, push, and deploy server in cluster
 server/deploy:
-	oc apply -k testserver/build/local-server
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="${SERVER_URL}"
+	$(KUSTOMIZE) build testserver/build/local-server | kubectl apply -f -

@@ -217,7 +217,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 	})
 
 	Context("Archived clusters", func() {
-		FIt("Should not create DiscoveredClusters out of archived clusters", func() {
+		It("Should not create DiscoveredClusters out of archived clusters", func() {
 			By("Having OCM include archived clusters", func() {
 				updateTestserverScenario("archivedClusters")
 			})
