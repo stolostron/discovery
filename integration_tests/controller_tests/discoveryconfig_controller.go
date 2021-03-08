@@ -54,6 +54,7 @@ var (
 var _ = Describe("Discoveryconfig controller", func() {
 
 	BeforeEach(func() {
+		// verify testserver is present in namespace
 		getTestserverDeployment()
 	})
 
@@ -165,6 +166,33 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 	})
 
+	Context("Unchanged DiscoveryConfig", func() {
+		It("Should update discovered clusters when the OCM responses change", func() {
+			By("Creating a DiscoveryConfig and discovered clusters", func() {
+				updateTestserverScenario("tenClusters")
+				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, time.Second*15, interval).Should(Equal(10))
+			})
+
+			By("Changing the number of clusters returned from the testserver", func() {
+				updateTestserverScenario("fiveClusters")
+			})
+
+			By("Forcing the DiscoveryConfig to be reconciled on", func() {
+				Expect(k8sClient.Create(ctx, defaultDiscoveredClusterRefresh())).Should(Succeed())
+			})
+
+			By("By checking that discovered clusters have changed", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, time.Second*15, interval).Should(Equal(5))
+			})
+		})
+	})
+
 	Context("Deleting a DiscoveryConfig", func() {
 		It("Should delete all discovered clusters via garbage collection", func() {
 			By("Creating a DiscoveryConfig and discovered clusters", func() {
@@ -189,6 +217,22 @@ var _ = Describe("Discoveryconfig controller", func() {
 	})
 
 	Context("Archived clusters", func() {
+		FIt("Should not create DiscoveredClusters out of archived clusters", func() {
+			By("Having OCM include archived clusters", func() {
+				updateTestserverScenario("archivedClusters")
+			})
+
+			By("Creating a DiscoveryConfig", func() {
+				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+			})
+
+			By("By checking only 8 discovered clusters have been created", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, time.Second*15, interval).Should(Equal(8))
+			})
+		})
 	})
 
 })
@@ -199,6 +243,13 @@ func annotate(dc *discoveryv1.DiscoveryConfig) *discoveryv1.DiscoveryConfig {
 	return dc
 }
 
+// func byAddingTimestampAnnotation() {
+// 	dc := &discoveryv1.DiscoveryConfig{}
+// 	Expect(k8sClient.Get(ctx, discoveryConfig, dc)).To(Succeed())
+// 	dc.Annotations["triggerTimestamp"] = time.Now().String()
+// 	Expect(k8sClient.Update(ctx, dc)).To(Succeed())
+// }
+
 func getTestserverDeployment() *appsv1.Deployment {
 	testserverDeployment := &appsv1.Deployment{}
 	Eventually(func() error {
@@ -207,16 +258,37 @@ func getTestserverDeployment() *appsv1.Deployment {
 	return testserverDeployment
 }
 
+func getTestserverPods() (*corev1.PodList, error) {
+	testserverPods := &corev1.PodList{}
+	err := k8sClient.List(ctx, testserverPods,
+		client.InNamespace(DiscoveryNamespace),
+		client.MatchingLabels{"app": "mock-ocm-server"})
+	return testserverPods, err
+}
+
+// Updates the entrypoint argument of the testserver deployment. This changes the content the
+// deployment serves.
 func updateTestserverScenario(scenario string) {
-	arg := fmt.Sprintf("scenario=%s", scenario)
+	arg := fmt.Sprintf("--scenario=%s", scenario)
 	tsd := getTestserverDeployment()
 	tsd.Spec.Template.Spec.Containers[0].Args = []string{arg}
 	Expect(k8sClient.Update(ctx, tsd)).To(Succeed())
-	Eventually(func() bool {
-		tsd = getTestserverDeployment()
-		return (tsd.Spec.Template.Spec.Containers[0].Args[0] == arg) && (tsd.Status.ReadyReplicas == 1)
 
-	}, time.Second*30, interval).Should(BeTrue(), "Testserver should reach a running state with its entrypoint argument set to "+arg)
+	Eventually(func() bool {
+		tsps, err := getTestserverPods()
+		if err != nil {
+			return false
+		}
+		for _, tsp := range tsps.Items {
+			if (tsp.Spec.Containers[0].Args[0] == arg) && (tsp.Status.Phase == corev1.PodRunning) {
+				return true
+			}
+		}
+		return false
+	}, time.Minute, interval).Should(BeTrue(), "Testserver should reach a running state with its entrypoint argument set to "+arg)
+
+	// Give time for testserver to begin serving new output
+	time.Sleep(time.Second * 3)
 }
 
 func listDiscoveredClusters() (*discoveryv1.DiscoveredClusterList, error) {
@@ -301,6 +373,15 @@ func defaultDiscoveryConfig() *discoveryv1.DiscoveryConfig {
 		},
 		Spec: discoveryv1.DiscoveryConfigSpec{
 			ProviderConnections: []string{SecretName},
+		},
+	}
+}
+
+func defaultDiscoveredClusterRefresh() *discoveryv1.DiscoveredClusterRefresh {
+	return &discoveryv1.DiscoveredClusterRefresh{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "refresh",
+			Namespace: DiscoveryNamespace,
 		},
 	}
 }

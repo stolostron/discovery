@@ -17,7 +17,7 @@ spec:
       - command:
         - /local-server
         args:
-        - scenario=tenClusters
+        - --scenario=tenClusters
         image: quay.io/jakobgray/mock-ocm-server:latest
         imagePullPolicy: IfNotPresent
         name: mock-ocm-server

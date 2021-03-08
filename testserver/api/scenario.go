@@ -16,11 +16,16 @@ var dataFolder = "data"
 var scenarios = map[string]string{
 	// responds with 10 active clusters
 	"tenClusters": "data/scenarios/ten_clusters",
+	// responds with 5 active clusters
+	"fiveClusters": "data/scenarios/five_clusters",
+	// responds with 10 clusters: 8 active, 2 archived
+	"archivedClusters": "data/scenarios/archived_clusters",
 }
 
 func init() {
 	flag.StringVar(&scenario, "scenario", "tenClusters", "The address the metric endpoint binds to.")
 	flag.Parse()
+	fmt.Println("Starting with scenario " + scenario)
 
 	dataFolder = scenarios[scenario]
 }
