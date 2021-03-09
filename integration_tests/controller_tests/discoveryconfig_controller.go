@@ -28,8 +28,7 @@ const (
 	SecretName          = "test-connection-secret"
 	TestserverName      = "mock-ocm-server"
 
-	timeout  = time.Second * 10
-	duration = time.Second * 10
+	timeout  = time.Second * 30
 	interval = time.Millisecond * 250
 )
 
@@ -59,9 +58,15 @@ var _ = Describe("Discoveryconfig controller", func() {
 	})
 
 	AfterEach(func() {
-		Expect(k8sClient.Delete(ctx, defaultDiscoveryConfig(), client.PropagationPolicy(metav1.DeletePropagationForeground))).Should(Succeed())
+		err := k8sClient.Delete(ctx, defaultDiscoveryConfig(), client.PropagationPolicy(metav1.DeletePropagationForeground))
+		if err != nil {
+			Expect(apierrors.IsNotFound(err)).To(BeTrue())
+		}
 
-		Expect(k8sClient.Delete(ctx, dummySecret())).Should(Succeed())
+		err = k8sClient.Delete(ctx, dummySecret())
+		if err != nil {
+			Expect(apierrors.IsNotFound(err)).To(BeTrue())
+		}
 
 		byDeletingAllManagedCluster()
 
@@ -101,7 +106,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("By checking 10 discovered clusters have been created", func() {
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(10))
+				}, timeout, interval).Should(Equal(10))
 			})
 		})
 	})
@@ -117,7 +122,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("Checking that no DiscoveredClusters are labeled as managed", func() {
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(10))
+				}, timeout, interval).Should(Equal(10))
 				Expect(countManagedDiscoveredClusters()).To(Equal(0))
 			})
 
@@ -128,7 +133,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("Checking that a DiscoveredCluster is now labeled as managed", func() {
 				Eventually(func() (int, error) {
 					return countManagedDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(1))
+				}, timeout, interval).Should(Equal(1))
 			})
 		})
 
@@ -150,7 +155,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("Checking that all ManagedClusters are recognized in their matching DiscoveredClusters", func() {
 				Eventually(func() (int, error) {
 					return countManagedDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(5))
+				}, timeout, interval).Should(Equal(5))
 			})
 
 			By("Deleting all ManagedClusters", func() {
@@ -160,7 +165,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("Checking that no DiscoveredClusters are labeled as managed", func() {
 				Eventually(func() (int, error) {
 					return countManagedDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(0))
+				}, timeout, interval).Should(Equal(0))
 				Expect(countDiscoveredClusters()).To(Equal(10))
 			})
 		})
@@ -174,7 +179,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(10))
+				}, timeout, interval).Should(Equal(10))
 			})
 
 			By("Changing the number of clusters returned from the testserver", func() {
@@ -188,7 +193,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("By checking that discovered clusters have changed", func() {
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(5))
+				}, timeout, interval).Should(Equal(5))
 			})
 		})
 	})
@@ -201,7 +206,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(10))
+				}, timeout, interval).Should(Equal(10))
 			})
 
 			By("Deleting the DiscoveryConfig", func() {
@@ -211,7 +216,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("Checking all discovered clusters are gone", func() {
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(0))
+				}, timeout, interval).Should(Equal(0))
 			})
 		})
 	})
@@ -230,7 +235,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("By checking only 8 discovered clusters have been created", func() {
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters()
-				}, time.Second*15, interval).Should(Equal(8))
+				}, timeout, interval).Should(Equal(8))
 			})
 		})
 	})
@@ -288,7 +293,7 @@ func updateTestserverScenario(scenario string) {
 	}, time.Minute, interval).Should(BeTrue(), "Testserver should reach a running state with its entrypoint argument set to "+arg)
 
 	// Give time for testserver to begin serving new output
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 10)
 }
 
 func listDiscoveredClusters() (*discoveryv1.DiscoveredClusterList, error) {
@@ -350,7 +355,7 @@ func byDeletingAllManagedCluster() {
 
 	Eventually(func() (int, error) {
 		return countManagedClusters()
-	}, time.Second*15, interval).Should(Equal(0))
+	}, timeout, interval).Should(Equal(0))
 }
 
 func dummySecret() *corev1.Secret {
