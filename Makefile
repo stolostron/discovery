@@ -65,6 +65,7 @@ unit-tests:
 integration-tests: install deploy server/deploy
 	kubectl apply -f controllers/testdata/crds/clusters.open-cluster-management.io_managedclusters.yaml
 	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n open-cluster-management
+	kubectl wait --for=condition=available --timeout=60s deployment/mock-ocm-server -n open-cluster-management
 	ginkgo -tags functional -v integration_tests/controller_tests
 
 # Build manager binary
@@ -85,6 +86,7 @@ uninstall: manifests kustomize
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize
+	@echo "Deploying with image ${URL}"
 	cd config/manager && $(KUSTOMIZE) edit set image controller="${URL}"
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 

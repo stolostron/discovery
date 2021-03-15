@@ -3,7 +3,6 @@
 package main
 
 import (
-	"flag"
 	"os"
 
 	api "github.com/open-cluster-management/discovery/testserver/api"
@@ -27,7 +26,6 @@ func main() {
 	)
 
 	r := gin.Default()
-	flag.Parse()
 
 	api.SetupEndpoints(r, log.Logger)
 

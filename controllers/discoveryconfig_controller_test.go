@@ -12,8 +12,10 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/open-cluster-management/discovery/pkg/api/domain/auth_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
+	"github.com/open-cluster-management/discovery/pkg/api/domain/subscription_domain"
 	"github.com/open-cluster-management/discovery/pkg/api/services/auth_service"
 	"github.com/open-cluster-management/discovery/pkg/api/services/cluster_service"
+	"github.com/open-cluster-management/discovery/pkg/api/services/subscription_service"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -24,9 +26,11 @@ import (
 )
 
 var (
-	getTokenFunc    func(auth_domain.AuthRequest) (string, error)
-	getClustersFunc func() ([]cluster_domain.Cluster, error)
-	clusterGetter   = clusterGetterMock{}
+	getTokenFunc         func(auth_domain.AuthRequest) (string, error)
+	getClustersFunc      func() ([]cluster_domain.Cluster, error)
+	clusterGetter        = clusterGetterMock{}
+	getSubscriptionsFunc func() ([]subscription_domain.Subscription, error)
+	subscriptionGetter   = subscriptionGetterMock{}
 )
 
 // This mocks the authService request and returns a dummy access token
@@ -51,6 +55,21 @@ func (m *clusterClientGeneratorMock) NewClient(config cluster_domain.ClusterRequ
 	return &clusterGetter
 }
 
+// The mocks the GetClusters request to return a select few clusters without connection
+// to an external datasource
+type subscriptionGetterMock struct{}
+
+func (m *subscriptionGetterMock) GetSubscriptions() ([]subscription_domain.Subscription, error) {
+	return getSubscriptionsFunc()
+}
+
+// This mocks the NewClient function and returns an instance of the subscriptionGetterMock
+type subscriptionClientGeneratorMock struct{}
+
+func (m *subscriptionClientGeneratorMock) NewClient(config subscription_domain.SubscriptionRequest) subscription_service.SubscriptionGetter {
+	return &subscriptionGetter
+}
+
 var _ = Describe("DiscoveryConfig controller", func() {
 
 	// Define utility constants for object names and testing timeouts/durations and intervals.
@@ -69,16 +88,24 @@ var _ = Describe("DiscoveryConfig controller", func() {
 		getTokenFunc = func(auth_domain.AuthRequest) (string, error) {
 			return "valid_access_token", nil
 		}
-		auth_service.AuthClient = &authServiceMock{}                           // Mocks out the call to auth service
-		cluster_service.ClusterClientGenerator = &clusterClientGeneratorMock{} // Mocks out the cluster client creation
+		auth_service.AuthClient = &authServiceMock{}                                          // Mocks out the call to auth service
+		cluster_service.ClusterClientGenerator = &clusterClientGeneratorMock{}                // Mocks out the cluster client creation
+		subscription_service.SubscriptionClientGenerator = &subscriptionClientGeneratorMock{} // Mocks out the subscription client creation
 
 		It("Should trigger the creation of new discovered clusters ", func() {
 			// this mock returns 3 clusters read from mock_clusters.json
 			getClustersFunc = func() ([]cluster_domain.Cluster, error) {
-				file, _ := ioutil.ReadFile("mock_clusters.json")
+				file, _ := ioutil.ReadFile("testdata/mock_clusters.json")
 				clusters := []cluster_domain.Cluster{}
-				_ = json.Unmarshal([]byte(file), &clusters)
-				return clusters, nil
+				err := json.Unmarshal([]byte(file), &clusters)
+				return clusters, err
+			}
+			// this mock returns 3 subscriptions read from mock_subscriptions.json
+			getSubscriptionsFunc = func() ([]subscription_domain.Subscription, error) {
+				file, _ := ioutil.ReadFile("testdata/mock_subscriptions.json")
+				subscriptions := []subscription_domain.Subscription{}
+				err := json.Unmarshal([]byte(file), &subscriptions)
+				return subscriptions, err
 			}
 
 			By("By creating a secret with OCM credentials")
@@ -156,10 +183,17 @@ var _ = Describe("DiscoveryConfig controller", func() {
 			// this mock returns 3 clusters read from mock_clusters2.json
 			// it adds 1 new cluster, removes 1 old cluster, and leaves 1 cluster unchanged
 			getClustersFunc = func() ([]cluster_domain.Cluster, error) {
-				file, _ := ioutil.ReadFile("mock_clusters_2.json")
+				file, _ := ioutil.ReadFile("testdata/mock_clusters_2.json")
 				clusters := []cluster_domain.Cluster{}
-				_ = json.Unmarshal([]byte(file), &clusters)
-				return clusters, nil
+				err := json.Unmarshal([]byte(file), &clusters)
+				return clusters, err
+			}
+			// this mock returns 3 subscriptions read from mock_subscriptions.json
+			getSubscriptionsFunc = func() ([]subscription_domain.Subscription, error) {
+				file, _ := ioutil.ReadFile("testdata/mock_subscriptions_2.json")
+				subscriptions := []subscription_domain.Subscription{}
+				err := json.Unmarshal([]byte(file), &subscriptions)
+				return subscriptions, err
 			}
 
 			By("By creating a new DiscoveryRefresh")

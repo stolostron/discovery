@@ -14,11 +14,15 @@ spec:
         app: mock-ocm-server
     spec:
       containers:
-      - name: mock-ocm-server
+      - command:
+        - /local-server
+        args:
+        - --scenario=tenClusters
+        image: testserver:latest
+        imagePullPolicy: IfNotPresent
+        name: mock-ocm-server
         ports:
         - containerPort: 3000
-        image: quay.io/rhibmcollab/mock-ocm-server:latest
-        imagePullPolicy: Always
         resources:
           requests:
             memory: "64Mi"
@@ -26,5 +30,3 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"
-      imagePullSecrets:
-        - name: discovery-operator-pull-secret

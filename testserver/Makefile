@@ -2,38 +2,39 @@
 
 .PHONY: local-server
 
-DIR ?= $(shell basename `pwd`)
-ifeq ($(DIR),testserver)
-DIR := .
-else
-DIR := ./testserver
-endif
+SERVER_IMG := mock-ocm-server
+SERVER_URL ?= $(REGISTRY)/$(SERVER_IMG):$(VERSION)
 
 ## Build Mock OCM Server Binary
 server/build:
-	echo ${DIR}
-	cd $(DIR) && go build -o ./bin/local-server main.go
+	go build -o testserver/bin/local-server main.go
 
 ## Start Mock OCM Server Binary
 server/run:
-	cd $(DIR) && go run main.go
+	cd testserver && go run main.go
 
 ## Build Mock OCM Server Image
 server/docker-build:
-	cd $(DIR) && docker build . -f ./build/Dockerfile -t quay.io/rhibmcollab/mock-ocm-server:latest
+	docker build . -f ./testserver/build/Dockerfile -t "${SERVER_URL}"
 
 ## Push Mock OCM Server Image
 server/docker-push:
-	docker push quay.io/rhibmcollab/mock-ocm-server:latest
+	docker push "${SERVER_URL}"
 
 ## Run Mock OCM Server Image Locally
 server/docker-run:
-	docker run -p 3000:3000 quay.io/rhibmcollab/mock-ocm-server:latest
+	docker run -p 3000:3000 "${SERVER_URL}"
 
 ## Annotate DiscoveryConfig with Mock OCM Server URL
 server/annotate:
 	oc annotate discoveryconfig discoveryconfig ocmBaseURL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000 --overwrite
 
+DUMMY_ENCRYPTION = $(shell echo "ocmAPIToken: dummytoken" | base64)
+server/secret:
+	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(DUMMY_ENCRYPTION)/g" | kubectl apply -f - || true
+
 ## Build, push, and deploy server in cluster
 server/deploy:
-	oc apply -k $(DIR)/build/local-server
+	@echo "Deploying with image ${SERVER_URL}"
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="${SERVER_URL}"
+	$(KUSTOMIZE) build testserver/build/local-server | kubectl apply -f -
