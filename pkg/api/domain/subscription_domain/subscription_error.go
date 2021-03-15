@@ -10,14 +10,3 @@ type SubscriptionError struct {
 	Error    error  `json:"-"`
 	Response []byte `json:"-"`
 }
-
-/*
-{
-    "kind": "Error",
-    "id": "400",
-    "href": "/api/clusters_mgmt/v1/errors/400",
-    "code": "CLUSTERS-MGMT-400",
-    "reason": "bad order value 'asdfasdfasdf'",
-    "operation_id": "1grla68e486r9gqcbiifalhl9hpljhje"
-}
-*/
