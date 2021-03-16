@@ -24,6 +24,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apimeta "k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -72,13 +73,12 @@ type CloudRedHatProviderConnection struct {
 func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logr.FromContext(ctx)
 
-	// Get discovery config. Die if there is none
 	config := &discoveryv1.DiscoveryConfig{}
-	if err := r.Get(ctx, types.NamespacedName{
-		Name:      req.Name,
-		Namespace: req.Namespace,
-	}, config); err != nil {
-		log.Error(err, "unable to fetch DiscoveryConfig")
+	err := r.Get(ctx, req.NamespacedName, config)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -96,7 +96,7 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 	secretName := config.Spec.ProviderConnections[0]
 	ocmSecret := &corev1.Secret{}
-	err := r.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: req.Namespace}, ocmSecret)
+	err = r.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: req.Namespace}, ocmSecret)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -304,9 +304,6 @@ func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			// Skip delete events
 			DeleteFunc: func(e event.DeleteEvent) bool {
 				return false
-			},
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				return e.ObjectNew.GetGeneration() != e.ObjectOld.GetGeneration()
 			},
 		}).
 		Build(r)
