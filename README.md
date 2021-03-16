@@ -34,7 +34,7 @@ make run
 
 ### Inside the Cluster
 
-The operator can also run inside the cluster as a Deployment. To do that first build the container image and push to an accessible image registry.
+The operator can also run inside the cluster as a Deployment. To do that first build the container image and push to an accessible image registry:
 
 1. Build the image:
     ```shell
