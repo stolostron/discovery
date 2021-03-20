@@ -36,4 +36,4 @@ build-harness-extensions
 !vbh/build-harness-extensions 
 
 # Functional test results
-integration_tests/results
+test/e2e/results

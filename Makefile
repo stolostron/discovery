@@ -38,6 +38,9 @@ URL ?= $(REGISTRY)/$(IMG):$(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:crdVersions=v1"
 
+# Namespace to deploy resources into
+NAMESPACE ?= open-cluster-management
+
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -46,7 +49,7 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 -include testserver/Makefile
--include integration_tests/Makefile
+# -include integration_tests/Makefile
 
 all: manager
 
@@ -64,8 +67,8 @@ unit-tests:
 # Run tests
 integration-tests: install deploy server/deploy
 	kubectl apply -f controllers/testdata/crds/clusters.open-cluster-management.io_managedclusters.yaml
-	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n open-cluster-management
-	kubectl wait --for=condition=available --timeout=60s deployment/mock-ocm-server -n open-cluster-management
+	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n $(NAMESPACE)
+	kubectl wait --for=condition=available --timeout=60s deployment/mock-ocm-server -n $(NAMESPACE)
 	ginkgo -tags functional -v integration_tests/controller_tests
 
 # Build manager binary
@@ -88,7 +91,11 @@ uninstall: manifests kustomize
 deploy: manifests kustomize
 	@echo "Deploying with image ${URL}"
 	cd config/manager && $(KUSTOMIZE) edit set image controller="${URL}"
+	cd config/default && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
+	# Reset values
+	cd config/manager && $(KUSTOMIZE) edit set image controller="discovery-operator:latest"
+	cd config/default && $(KUSTOMIZE) edit set namespace open-cluster-management
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
@@ -158,6 +165,7 @@ bundle: manifests kustomize
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	$(OPERATOR_SDK) bundle validate ./bundle
+	cd config/manager && $(KUSTOMIZE) edit set image controller="discovery-operator:latest"
 
 # Build the bundle image.
 .PHONY: bundle-build
@@ -186,7 +194,7 @@ logs:
 
 # Annotate discoveryconfig to target mock server
 annotate:
-	kubectl annotate discoveryconfig discoveryconfig ocmBaseURL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000 --overwrite
+	kubectl annotate discoveryconfig discoveryconfig ocmBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 --overwrite
 
 # Remove mock server annotation
 unannotate:
@@ -196,3 +204,55 @@ set-copyright:
 	@bash ./cicd-scripts/set-copyright.sh
 
 verify: test integration-tests manifests
+
+############################################################
+# e2e test section
+############################################################
+.PHONY: kind-bootstrap-cluster-dev
+kind-bootstrap-cluster-dev: kind-create-cluster kind-load-image kind-load-testserver-image kind-deploy-controller kind-deploy-testserver
+
+kind-deploy-controller:
+	@echo Installing config policy controller
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	
+	cd config/default && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
+	$(KUSTOMIZE) build config/default | kubectl apply -f -
+	cd config/default && $(KUSTOMIZE) edit set namespace open-cluster-management
+	
+	@echo "Patch deployment image"
+	kubectl patch deployment discovery-operator -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"discovery-operator\",\"imagePullPolicy\":\"Never\"}]}}}}"
+	kubectl patch deployment discovery-operator -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"discovery-operator\",\"image\":\"$(URL)\"}]}}}}"
+	kubectl rollout status -n $(NAMESPACE) deployment discovery-operator --timeout=180s
+
+kind-load-image:
+	@echo Pushing image to KinD cluster
+	kind load docker-image $(URL) --name test-discovery
+
+kind-create-cluster:
+	@echo "creating cluster"
+	kind create cluster --name test-discovery
+	# kind get kubeconfig --name test-discovery > $(PWD)/kubeconfig_managed
+	kubectl cluster-info --context kind-test-discovery
+
+kind-delete-cluster:
+	kind delete cluster --name test-discovery
+
+kind-deploy-testserver:
+	@echo Installing testserver
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace ${NAMESPACE}
+	$(KUSTOMIZE) build testserver/build/local-server | kubectl apply -f -
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace open-cluster-management
+	@echo "Patch testserver deployment image"
+	kubectl patch deployment mock-ocm-server -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"mock-ocm-server\",\"imagePullPolicy\":\"Never\"}]}}}}"
+	kubectl patch deployment mock-ocm-server -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"mock-ocm-server\",\"image\":\"$(SERVER_URL)\"}]}}}}"
+	kubectl rollout status -n $(NAMESPACE) deployment mock-ocm-server --timeout=60s
+
+kind-load-testserver-image:
+	@echo Pushing image to KinD cluster
+	kind load docker-image $(SERVER_URL) --name test-discovery
+
+kind-e2e-tests:
+	kubectl apply -f controllers/testdata/crds/clusters.open-cluster-management.io_managedclusters.yaml
+	# ginkgo -tags functional -v integration_tests/controller_tests -namespace $(NAMESPACE)
+	echo $(NAMESPACE)
+	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)

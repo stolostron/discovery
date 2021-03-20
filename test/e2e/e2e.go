@@ -16,7 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller_tests
+package e2e
 
 import (
 	"context"
@@ -51,7 +51,8 @@ var testEnv *envtest.Environment
 var reportFile string
 
 var (
-	scheme = runtime.NewScheme()
+	scheme             = runtime.NewScheme()
+	DiscoveryNamespace = flag.String("namespace", "open-cluster-management", "The namespace to run tests")
 )
 
 func init() {
@@ -64,13 +65,11 @@ func init() {
 }
 
 func init() {
-	flag.StringVar(&reportFile, "report-file", "../results/functional-results.xml", "Provide the path to where the junit results will be printed.")
+	flag.StringVar(&reportFile, "report-file", "./results/e2e-results.xml", "Provide the path to where the junit results will be printed.")
+	// flag.StringVar(&discoveryNamespace, "namespace", "open-cluster-management", "The namespace to run tests")
 }
 
-func TestAPIs(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+func RunE2ETests(t *testing.T) {
 	RegisterFailHandler(Fail)
 	junitReporter := reporters.NewJUnitReporter(reportFile)
 	RunSpecsWithDefaultAndCustomReporters(t,
@@ -128,7 +127,7 @@ var _ = AfterSuite(func() {
 	discoveredCluster := &discoveryv1.DiscoveredCluster{}
 	k8sClient.DeleteAllOf(ctx, discoveredCluster, client.InNamespace("open-cluster-management"))
 
-	secretKey := types.NamespacedName{Name: SecretName, Namespace: DiscoveryNamespace}
+	secretKey := types.NamespacedName{Name: SecretName, Namespace: discoveryNamespace}
 	secret := &corev1.Secret{}
 	_ = k8sClient.Get(ctx, secretKey, secret)
 	k8sClient.Delete(ctx, secret)

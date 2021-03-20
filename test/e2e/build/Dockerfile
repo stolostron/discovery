@@ -5,7 +5,7 @@ FROM golang:1.15 as builder
 WORKDIR /workspace
 
 COPY api/ api/
-COPY integration_tests/ integration_tests/
+COPY test/e2e/ test/e2e/
 COPY go.mod go.mod
 COPY go.sum go.sum
 # cache deps before building and copying source so that we don't need to re-download as much
@@ -14,7 +14,7 @@ COPY go.sum go.sum
 
 RUN go get github.com/onsi/ginkgo/ginkgo
 # RUN go get github.com/onsi/gomega/...
-RUN ginkgo build integration_tests/controller_tests
+RUN ginkgo build test/e2e
 
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
