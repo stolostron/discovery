@@ -107,7 +107,7 @@ fmt:
 
 # Run go vet against code
 vet:
-	go vet `go list ./... | grep -v integration_tests`
+	go vet `go list ./... | grep -v test`
 
 # Generate code
 generate: controller-gen
@@ -208,11 +208,13 @@ verify: test integration-tests manifests
 ############################################################
 # e2e test section
 ############################################################
-.PHONY: kind-bootstrap-cluster-dev
-kind-bootstrap-cluster-dev: kind-create-cluster kind-load-image kind-load-testserver-image kind-deploy-controller kind-deploy-testserver
+.PHONY: kind-bootstrap-cluster
+# Full setup of KinD cluster
+kind-bootstrap-cluster: kind-create-cluster kind-load-image kind-load-testserver-image kind-deploy-controller kind-deploy-testserver
 
+# Create deployment and configure it to never download image
 kind-deploy-controller:
-	@echo Installing config policy controller
+	@echo Installing discovery controller
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	
 	cd config/default && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
@@ -237,22 +239,17 @@ kind-create-cluster:
 kind-delete-cluster:
 	kind delete cluster --name test-discovery
 
-kind-deploy-testserver:
-	@echo Installing testserver
-	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace ${NAMESPACE}
-	$(KUSTOMIZE) build testserver/build/local-server | kubectl apply -f -
-	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace open-cluster-management
-	@echo "Patch testserver deployment image"
-	kubectl patch deployment mock-ocm-server -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"mock-ocm-server\",\"imagePullPolicy\":\"Never\"}]}}}}"
-	kubectl patch deployment mock-ocm-server -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"mock-ocm-server\",\"image\":\"$(SERVER_URL)\"}]}}}}"
-	kubectl rollout status -n $(NAMESPACE) deployment mock-ocm-server --timeout=60s
-
-kind-load-testserver-image:
-	@echo Pushing image to KinD cluster
-	kind load docker-image $(SERVER_URL) --name test-discovery
-
 kind-e2e-tests:
 	kubectl apply -f controllers/testdata/crds/clusters.open-cluster-management.io_managedclusters.yaml
-	# ginkgo -tags functional -v integration_tests/controller_tests -namespace $(NAMESPACE)
-	echo $(NAMESPACE)
 	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)
+
+## Build the functional test image
+tests/docker-build:
+	@echo "Building $(REGISTRY)/$(IMG)-tests:$(VERSION)"
+	docker build . -f test/e2e/build/Dockerfile -t $(REGISTRY)/$(IMG)-tests:$(VERSION)
+
+## Run the downstream functional tests
+tests/docker-run:
+	docker run --network host \
+		--volume ~/.kube/config:/opt/.kube/config \
+		$(REGISTRY)/$(IMG)-tests:$(VERSION)
