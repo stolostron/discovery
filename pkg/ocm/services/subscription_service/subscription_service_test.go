@@ -6,8 +6,8 @@ import (
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 
-	"github.com/open-cluster-management/discovery/pkg/api/domain/subscription_domain"
-	"github.com/open-cluster-management/discovery/pkg/api/providers/subscription_provider"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/providers/subscription_provider"
 	"github.com/stretchr/testify/assert"
 )
 

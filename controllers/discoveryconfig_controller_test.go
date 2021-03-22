@@ -10,12 +10,12 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/open-cluster-management/discovery/pkg/api/domain/auth_domain"
-	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
-	"github.com/open-cluster-management/discovery/pkg/api/domain/subscription_domain"
-	"github.com/open-cluster-management/discovery/pkg/api/services/auth_service"
-	"github.com/open-cluster-management/discovery/pkg/api/services/cluster_service"
-	"github.com/open-cluster-management/discovery/pkg/api/services/subscription_service"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/auth_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/cluster_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/services/auth_service"
+	"github.com/open-cluster-management/discovery/pkg/ocm/services/cluster_service"
+	"github.com/open-cluster-management/discovery/pkg/ocm/services/subscription_service"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 

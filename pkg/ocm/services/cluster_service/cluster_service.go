@@ -5,8 +5,8 @@ package cluster_service
 import (
 	"fmt"
 
-	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
-	"github.com/open-cluster-management/discovery/pkg/api/providers/cluster_provider"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/cluster_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/providers/cluster_provider"
 )
 
 var (

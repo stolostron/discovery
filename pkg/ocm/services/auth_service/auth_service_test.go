@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/open-cluster-management/discovery/pkg/api/domain/auth_domain"
-	"github.com/open-cluster-management/discovery/pkg/api/providers/auth_provider"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/auth_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/providers/auth_provider"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
-	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
-	"github.com/open-cluster-management/discovery/pkg/api/providers/cluster_provider"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/cluster_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/providers/cluster_provider"
 	"github.com/stretchr/testify/assert"
 )
 

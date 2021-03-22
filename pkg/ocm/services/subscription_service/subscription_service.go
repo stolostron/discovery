@@ -3,8 +3,8 @@ package subscription_service
 import (
 	"fmt"
 
-	"github.com/open-cluster-management/discovery/pkg/api/domain/subscription_domain"
-	"github.com/open-cluster-management/discovery/pkg/api/providers/subscription_provider"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/providers/subscription_provider"
 )
 
 var (

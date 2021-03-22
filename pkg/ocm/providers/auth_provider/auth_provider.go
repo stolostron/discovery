@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"net/url"
 
-	"github.com/open-cluster-management/discovery/pkg/api/clients/restclient"
-	"github.com/open-cluster-management/discovery/pkg/api/domain/auth_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/clients/restclient"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/auth_domain"
 )
 
 const (

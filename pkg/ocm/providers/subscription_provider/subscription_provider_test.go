@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/open-cluster-management/discovery/pkg/api/clients/restclient"
-	"github.com/open-cluster-management/discovery/pkg/api/domain/subscription_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/clients/restclient"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
 
 	"github.com/stretchr/testify/assert"
 )
