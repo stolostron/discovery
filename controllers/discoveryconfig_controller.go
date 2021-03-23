@@ -22,14 +22,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/circonus-labs/circonus-gometrics/api/config"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apimeta "k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	ref "k8s.io/client-go/tools/reference"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -67,6 +66,7 @@ type CloudRedHatProviderConnection struct {
 
 func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logr.FromContext(ctx)
+	log.Info("Reconciling DiscoveryConfig")
 
 	config := &discoveryv1.DiscoveryConfig{}
 	err := r.Get(ctx, req.NamespacedName, config)
@@ -82,11 +82,13 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, nil
 	}
 
-	if err = r.updateDiscoveredClusters(config); err != nil {
+	if err = r.updateDiscoveredClusters(ctx, config); err != nil {
+		log.Error(err, "Error updating DiscoveredClusters")
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
+	log.Info("Reconcile complete. Rescheduling.", "time", reconciler.RefreshInterval)
+	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
 }
 
 // SetupWithManager ...
@@ -115,28 +117,46 @@ func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return nil
 }
 
-func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(config *discoveryv1.DiscoveryConfig) error {
-	ctx := context.Background()
-	var allClusters map[string]discoveryv1.DiscoveredCluster
+func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context, config *discoveryv1.DiscoveryConfig) error {
+	allClusters := map[string]discoveryv1.DiscoveredCluster{}
+	log := logr.FromContext(ctx)
 
 	// Gather clusters from all provider connections
 	for _, secret := range config.Spec.ProviderConnections {
-		userToken, err := r.getUserToken(types.NamespacedName{secret, config.Namespace})
-
-		var baseURL string
-		if annotations := config.GetAnnotations(); annotations != nil {
-			baseURL = annotations["ocmBaseURL"]
+		// Parse user token from providerconnection secret
+		ocmSecret := &corev1.Secret{}
+		if err := r.Get(context.TODO(), types.NamespacedName{Name: secret, Namespace: config.Namespace}, ocmSecret); err != nil {
+			return err
 		}
-		filters := config.Spec.Filters
-		discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
+		userToken, err := parseUserToken(ocmSecret)
 		if err != nil {
 			return err
 		}
 
+		var baseURL string
+		if annotations := config.GetAnnotations(); annotations != nil {
+			baseURL = annotations["ocmBaseURL"]
+			log.Info("Base URL overridden", "Value", baseURL)
+		}
+		filters := config.Spec.Filters
+
+		log.Info("Beginning to discover clusters")
+		discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
+		if err != nil {
+			return err
+		}
+		log.Info("Clusters discovered", "Total", len(discovered))
+
+		// Get reference to secret used for authentication
+		secretRef, err := ref.GetReference(r.Scheme, ocmSecret)
+		if err != nil {
+			return errors.Wrapf(err, "unable to make reference to secret %s", secretRef)
+		}
+
 		for _, dc := range discovered {
 			dc.SetNamespace(config.Namespace)
-			id := dc.ClusterName
-			allClusters[id] = dc
+			dc.Spec.ProviderConnections = append(dc.Spec.ProviderConnections, *secretRef)
+			merge(allClusters, dc)
 		}
 	}
 
@@ -145,124 +165,49 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(config *discoveryv1
 	if err != nil {
 		return err
 	}
-	assignManagedStatus(allClusters, managed)
+	if managed != nil && len(managed) > 0 {
+		assignManagedStatus(allClusters, managed)
+	} else {
+		log.Info("No managed clusters available")
+	}
 
-	// Get map to check if discovered is already created
-	existing, err := r.getExistingClusterMap()
+	// Create map to check if cluster already discovered
+	existing, err := r.getExistingClusterMap(ctx, config)
 	if err != nil {
 		return err
 	}
+	if len(existing) == 0 {
+		log.Info("No existing DiscoveredClusters")
+	}
 
 	for _, discoveredCluster := range allClusters {
-		applyCluster(discoveredCluster, existing)
+		err := r.applyCluster(ctx, config, discoveredCluster, existing)
+		if err != nil {
+			return err
+		}
 		delete(existing, discoveredCluster.Spec.Name)
 	}
 
-	var createClusters []discoveryv1.DiscoveredCluster
-	var updateClusters []discoveryv1.DiscoveredCluster
-	var deleteClusters []discoveryv1.DiscoveredCluster
-	var unchangedClusters []discoveryv1.DiscoveredCluster
-
-	for _, cluster := range newClusters {
-		matchingSubscriptionSpec, ok := subscriptionSpecs[cluster.ExternalID]
-		if !ok {
-			// Ignore clusters without an active subscription
-			continue
-		}
-
-		// Build a DiscoveredCluster object from the cluster information
-		discoveredCluster := discoveredCluster(cluster)
-		discoveredCluster.SetNamespace(req.Namespace)
-
-		// Assign dummy status
-		discoveredCluster.Spec.Subscription = matchingSubscriptionSpec
-
-		// Assign managed status
-		if _, managed := managedClusterIDs[discoveredCluster.Spec.Name]; managed {
-			setManagedStatus(&discoveredCluster)
-		}
-
-		// // Add reference to secret used for authentication
-		// discoveredCluster.Spec.ProviderConnections = nil
-		// secretRef, err := ref.GetReference(r.Scheme, ocmSecret)
-		// if err != nil {
-		// 	log.Error(err, "unable to make reference to secret", "secret", secretRef)
-		// }
-		// discoveredCluster.Spec.ProviderConnections = append(discoveredCluster.Spec.ProviderConnections, *secretRef)
-
-		ind, exists := existing[discoveredCluster.Name]
-		if !exists {
-			// Newly discovered cluster
-			createClusters = append(createClusters, discoveredCluster)
-			delete(existing, discoveredCluster.Name)
-			continue
-		}
-		// Cluster has already been discovered. Check for changes.
-		if same(discoveredCluster, discoveredList.Items[ind]) {
-			unchangedClusters = append(unchangedClusters, discoveredCluster)
-			delete(existing, discoveredCluster.Name)
-		} else {
-			updated := discoveredList.Items[ind]
-			updated.Spec = discoveredCluster.Spec
-			updateClusters = append(updateClusters, updated)
-			delete(existing, discoveredCluster.Name)
+	// Everything remaining in existing should be deleted
+	log.Info("DiscoveredCluster remaining to delete", "Count", len(existing))
+	for _, c := range existing {
+		err := r.deleteCluster(ctx, c)
+		if err != nil {
+			return err
 		}
 	}
 
-	// Remaining clusters are no longer found by OCM and should be labeled for delete
-	for _, ind := range existing {
-		deleteClusters = append(deleteClusters, discoveredList.Items[ind])
-	}
-
-	// Create new clusters and clean up old ones
-	for _, cluster := range createClusters {
-		cluster := cluster
-		if err := ctrl.SetControllerReference(config, &cluster, r.Scheme); err != nil {
-			log.Error(err, "failed to set controller reference", "name", cluster.Name)
-			return ctrl.Result{}, err
-		}
-		if err := r.Create(ctx, &cluster); err != nil {
-			log.Error(err, "unable to create discovered cluster", "name", cluster.Name)
-			return ctrl.Result{}, err
-		}
-		log.Info("Created cluster", "Name", cluster.Name)
-	}
-	for _, cluster := range updateClusters {
-		cluster := cluster
-		if err := r.Update(ctx, &cluster); err != nil {
-			log.Error(err, "unable to update discovered cluster", "name", cluster.Name)
-			return ctrl.Result{}, err
-		}
-		log.Info("Updated cluster", "Name", cluster.Name)
-	}
-	for _, cluster := range deleteClusters {
-		cluster := cluster
-		if err := r.Delete(ctx, &cluster); err != nil {
-			log.Error(err, "unable to delete discovered cluster", "name", cluster.Name)
-			return ctrl.Result{}, err
-		}
-		log.Info("Deleted cluster", "Name", cluster.Name)
-	}
-
-	log.Info("Cluster categories", "Created", len(createClusters), "Updated", len(updateClusters), "Deleted", len(deleteClusters), "Unchanged", len(unchangedClusters))
-
-	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
+	return nil
 }
 
-// getUserToken takes a secret cotaining a Provider Connection. It fetches the secret,
-// parses it, and returns the stored OCM api token.
-func (r *DiscoveryConfigReconciler) getUserToken(secretName types.NamespacedName) (string, error) {
-	ocmSecret := &corev1.Secret{}
-	if err := r.Get(context.TODO(), secretName, ocmSecret); err != nil {
-		return "", err
-	}
-
-	if _, ok := ocmSecret.Data["metadata"]; !ok {
-		return "", fmt.Errorf("Secret '%' does not contain 'metadata' field", secretName)
+// getUserToken takes a secret cotaining a Provider Connection and returns the stored OCM api token.
+func parseUserToken(secret *corev1.Secret) (string, error) {
+	if _, ok := secret.Data["metadata"]; !ok {
+		return "", fmt.Errorf("Secret '%s' does not contain 'metadata' field", secret.Name)
 	}
 
 	providerConnection := &CloudRedHatProviderConnection{}
-	if err := yaml.Unmarshal(ocmSecret.Data["metadata"], providerConnection); err != nil {
+	if err := yaml.Unmarshal(secret.Data["metadata"], providerConnection); err != nil {
 		return "", err
 	}
 
@@ -290,16 +235,15 @@ func (r *DiscoveryConfigReconciler) getManagedClusters() ([]unstructured.Unstruc
 	managedList.SetGroupVersionKind(managedClusterGVK)
 	if err := r.List(ctx, managedList); err != nil {
 		// Capture case were ManagedClusters resource does not exist
-		if !apimeta.IsNoMatchError(err) {
-			return nil, errors.Wrapf(err, "error listing managed clusters")
+		if apimeta.IsNoMatchError(err) {
+			return nil, nil
 		}
+		return nil, errors.Wrapf(err, "error listing managed clusters")
 	}
 	return managedList.Items, nil
 }
 
-func (r *DiscoveryConfigReconciler) getExistingClusterMap() (map[string]discoveryv1.DiscoveredCluster, error) {
-	ctx := context.Background()
-
+func (r *DiscoveryConfigReconciler) getExistingClusterMap(ctx context.Context, config *discoveryv1.DiscoveryConfig) (map[string]discoveryv1.DiscoveredCluster, error) {
 	// List all existing discovered clusters
 	var discoveredList discoveryv1.DiscoveredClusterList
 	if err := r.List(ctx, &discoveredList, client.InNamespace(config.Namespace)); err != nil {
@@ -314,31 +258,71 @@ func (r *DiscoveryConfigReconciler) getExistingClusterMap() (map[string]discover
 
 // applyCluster creates the DiscoveredCluster resources or updates it if necessary. If the cluster already
 // exists and doesn't need updating then nothing changes.
-func applyCluster(ctx context.Context, config *discoveryv1.DiscoveryConfig, dc discoveryv1.DiscoveredCluster, existing map[string]discoveryv1.DiscoveredCluster) error {
+func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *discoveryv1.DiscoveryConfig, dc discoveryv1.DiscoveredCluster, existing map[string]discoveryv1.DiscoveredCluster) error {
+	log := logr.FromContext(ctx)
 	current, exists := existing[dc.Spec.Name]
 	if !exists {
 		// Newly discovered cluster
-		return createCluster(ctx, dc)
+		log.Info("DiscoveredCluster will be created.")
+		return r.createCluster(ctx, config, dc)
 	}
 
 	if same(dc, current) {
 		// Discovered cluster has not changed
+		log.Info("DiscoveredCluster is unchanged.")
 		return nil
 	}
 
 	// Cluster needs to be updated
-	return updateCluster(ctx, dc)
+	log.Info("Updating DiscoveredCluster.")
+	return r.updateCluster(ctx, config, dc, current)
 }
 
-func createCluster(ctx context.Context, config *discoveryv1.DiscoveryConfig, dc discoveryv1.DiscoveredCluster) error {
-	if err := ctrl.SetControllerReference(config, &cluster, r.Scheme); err != nil {
-		log.Error(err, "failed to set controller reference", "name", cluster.Name)
-		return ctrl.Result{}, err
+func (r *DiscoveryConfigReconciler) createCluster(ctx context.Context, config *discoveryv1.DiscoveryConfig, dc discoveryv1.DiscoveredCluster) error {
+	log := logr.FromContext(ctx)
+	if err := ctrl.SetControllerReference(config, &dc, r.Scheme); err != nil {
+		return errors.Wrapf(err, "Error setting controller reference on DiscoveredCluster %s", dc.Name)
 	}
-	if err := r.Create(ctx, &cluster); err != nil {
-		log.Error(err, "unable to create discovered cluster", "name", cluster.Name)
-		return ctrl.Result{}, err
+	if err := r.Create(ctx, &dc); err != nil {
+		return errors.Wrapf(err, "Error creating DiscoveredCluster %s", dc.Name)
 	}
+	log.Info("Created cluster", "Name", dc.Name)
+	return nil
+}
+
+func (r *DiscoveryConfigReconciler) updateCluster(ctx context.Context, config *discoveryv1.DiscoveryConfig, new, old discoveryv1.DiscoveredCluster) error {
+	log := logr.FromContext(ctx)
+	updated := old
+	updated.Spec = new.Spec
+	if err := r.Update(ctx, &updated); err != nil {
+		return errors.Wrapf(err, "Error updating DiscoveredCluster %s", updated.Name)
+	}
+	log.Info("Updated cluster", "Name", updated.Name)
+	return nil
+}
+
+func (r *DiscoveryConfigReconciler) deleteCluster(ctx context.Context, dc discoveryv1.DiscoveredCluster) error {
+	log := logr.FromContext(ctx)
+	if err := r.Delete(ctx, &dc); err != nil {
+		return errors.Wrapf(err, "Error deleting DiscoveredCluster %s", dc.Name)
+	}
+	log.Info("Deleted cluster", "Name", dc.Name)
+	return nil
+}
+
+// merge adds the cluster to the cluster map. If the cluster name is already in the map then it
+// appends the ProviderConnections to the cluster in the map
+func merge(clusters map[string]discoveryv1.DiscoveredCluster, dc discoveryv1.DiscoveredCluster) {
+	id := dc.Spec.Name
+	current, ok := clusters[id]
+	if !ok {
+		clusters[id] = dc
+		return
+	}
+
+	secretRef := dc.Spec.ProviderConnections
+	current.Spec.ProviderConnections = append(current.Spec.ProviderConnections, secretRef...)
+	clusters[id] = current
 }
 
 func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
