@@ -157,6 +157,11 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 		}
 	}
 
+	if len(allClusters) == 0 {
+		log.Info("No clusters discovered")
+		return nil
+	}
+
 	// Assign managed status
 	managed, err := r.getManagedClusters()
 	if err != nil {
@@ -173,10 +178,8 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	if err != nil {
 		return err
 	}
-	if len(existing) == 0 {
-		log.Info("No existing DiscoveredClusters")
-	}
 
+	// Apply clusters discovered
 	for _, discoveredCluster := range allClusters {
 		err := r.applyCluster(ctx, config, discoveredCluster, existing)
 		if err != nil {
@@ -186,7 +189,6 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	}
 
 	// Everything remaining in existing should be deleted
-	log.Info("DiscoveredCluster remaining to delete", "Count", len(existing))
 	for _, c := range existing {
 		err := r.deleteCluster(ctx, c)
 		if err != nil {
@@ -353,6 +355,14 @@ func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
 	}
 	if c1i.IsManagedCluster != c2i.IsManagedCluster {
 		return false
+	}
+	if len(c1i.ProviderConnections) != len(c2i.ProviderConnections) {
+		return false
+	}
+	for i := 0; i < len(c1i.ProviderConnections); i++ {
+		if c1i.ProviderConnections[i] != c2i.ProviderConnections[i] {
+			return false
+		}
 	}
 	return true
 }

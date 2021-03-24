@@ -8,7 +8,7 @@ import (
 	"path"
 
 	"github.com/gin-gonic/gin"
-	"github.com/open-cluster-management/discovery/pkg/api/domain/cluster_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/cluster_domain"
 )
 
 // GetCluster ...
