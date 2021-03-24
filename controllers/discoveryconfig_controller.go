@@ -136,16 +136,13 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 		var baseURL string
 		if annotations := config.GetAnnotations(); annotations != nil {
 			baseURL = annotations["ocmBaseURL"]
-			log.Info("Base URL overridden", "Value", baseURL)
 		}
 		filters := config.Spec.Filters
 
-		log.Info("Beginning to discover clusters")
 		discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
 		if err != nil {
 			return err
 		}
-		log.Info("Clusters discovered", "Total", len(discovered))
 
 		// Get reference to secret used for authentication
 		secretRef, err := ref.GetReference(r.Scheme, ocmSecret)
