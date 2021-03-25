@@ -1,6 +1,6 @@
 // Copyright Contributors to the Open Cluster Management project
 
-package controller_tests
+package e2e
 
 import (
 	"context"
@@ -24,7 +24,6 @@ import (
 // Define utility constants for object names and testing timeouts/durations and intervals.
 const (
 	DiscoveryConfigName = "discoveryconfig"
-	DiscoveryNamespace  = "open-cluster-management"
 	SecretName          = "test-connection-secret"
 	TestserverName      = "mock-ocm-server"
 
@@ -32,27 +31,42 @@ const (
 	interval = time.Millisecond * 250
 )
 
-var k8sClient client.Client
-
 var (
-	ctx             = context.Background()
+	ctx                = context.Background()
+	globalsInitialized = false
+	// discoveryNamespace = "discovery"
+	discoveryNamespace = ""
+	k8sClient          client.Client
+
+	discoveryConfig = types.NamespacedName{}
+	testserver      = types.NamespacedName{}
+	ocmSecret       = types.NamespacedName{}
+)
+
+func initializeGlobals() {
+	discoveryNamespace = *DiscoveryNamespace
 	discoveryConfig = types.NamespacedName{
 		Name:      DiscoveryConfigName,
-		Namespace: DiscoveryNamespace,
+		Namespace: discoveryNamespace,
 	}
 	testserver = types.NamespacedName{
 		Name:      TestserverName,
-		Namespace: DiscoveryNamespace,
+		Namespace: discoveryNamespace,
 	}
 	ocmSecret = types.NamespacedName{
 		Name:      SecretName,
-		Namespace: DiscoveryNamespace,
+		Namespace: discoveryNamespace,
 	}
-)
+}
 
 var _ = Describe("Discoveryconfig controller", func() {
 
 	BeforeEach(func() {
+		if !globalsInitialized {
+			initializeGlobals()
+			globalsInitialized = true
+		}
+
 		// verify testserver is present in namespace
 		getTestserverDeployment()
 	})
@@ -77,7 +91,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				return false
 			}
 			return apierrors.IsNotFound(err)
-		}, timeout, interval).Should(BeTrue())
+		}, timeout, interval).Should(BeTrue(), "There was an issue cleaning up the secret.")
 
 		// Once this succeeds, clean up has happened for all owned resources.
 		Eventually(func() bool {
@@ -86,7 +100,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				return false
 			}
 			return apierrors.IsNotFound(err)
-		}, timeout, interval).Should(BeTrue())
+		}, timeout, interval).Should(BeTrue(), "There was an issue cleaning up the DiscoveryConfig.")
 	})
 
 	Context("Creating a DiscoveryConfig", func() {
@@ -244,7 +258,8 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 // annotate adds an annotation to modify the baseUrl used with the discoveryconfig
 func annotate(dc *discoveryv1.DiscoveryConfig) *discoveryv1.DiscoveryConfig {
-	dc.SetAnnotations(map[string]string{"ocmBaseURL": "http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000"})
+	baseUrl := fmt.Sprintf("http://mock-ocm-server.%s.svc.cluster.local:3000", discoveryNamespace)
+	dc.SetAnnotations(map[string]string{"ocmBaseURL": baseUrl})
 	return dc
 }
 
@@ -266,7 +281,7 @@ func getTestserverDeployment() *appsv1.Deployment {
 func getTestserverPods() (*corev1.PodList, error) {
 	testserverPods := &corev1.PodList{}
 	err := k8sClient.List(ctx, testserverPods,
-		client.InNamespace(DiscoveryNamespace),
+		client.InNamespace(discoveryNamespace),
 		client.MatchingLabels{"app": "mock-ocm-server"})
 	return testserverPods, err
 }
@@ -298,14 +313,14 @@ func updateTestserverScenario(scenario string) {
 
 func listDiscoveredClusters() (*discoveryv1.DiscoveredClusterList, error) {
 	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
-	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(DiscoveryNamespace))
+	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(discoveryNamespace))
 	return discoveredClusters, err
 }
 
 func countManagedDiscoveredClusters() (int, error) {
 	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
 	err := k8sClient.List(ctx, discoveredClusters,
-		client.InNamespace(DiscoveryNamespace),
+		client.InNamespace(discoveryNamespace),
 		client.MatchingLabels{
 			"isManagedCluster": "true",
 		})
@@ -317,7 +332,7 @@ func countManagedDiscoveredClusters() (int, error) {
 
 func countDiscoveredClusters() (int, error) {
 	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
-	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(DiscoveryNamespace))
+	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(discoveryNamespace))
 	if err != nil {
 		return -1, err
 	}
@@ -332,7 +347,7 @@ func countManagedClusters() (int, error) {
 		Version: "v1",
 	})
 
-	err := k8sClient.List(ctx, managedClusters, client.InNamespace(DiscoveryNamespace))
+	err := k8sClient.List(ctx, managedClusters, client.InNamespace(discoveryNamespace))
 	if err != nil {
 		return -1, err
 	}
@@ -347,7 +362,7 @@ func byDeletingAllManagedCluster() {
 		Version: "v1",
 	})
 
-	Expect(k8sClient.List(ctx, managedClusters, client.InNamespace(DiscoveryNamespace))).To(Succeed())
+	Expect(k8sClient.List(ctx, managedClusters, client.InNamespace(discoveryNamespace))).To(Succeed())
 	for _, mc := range managedClusters.Items {
 		mc := mc
 		Expect(k8sClient.Delete(ctx, &mc)).Should(Succeed())
@@ -362,7 +377,7 @@ func dummySecret() *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      SecretName,
-			Namespace: DiscoveryNamespace,
+			Namespace: discoveryNamespace,
 		},
 		StringData: map[string]string{
 			"metadata": "ocmAPIToken: dummytoken",
@@ -374,7 +389,7 @@ func defaultDiscoveryConfig() *discoveryv1.DiscoveryConfig {
 	return &discoveryv1.DiscoveryConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      DiscoveryConfigName,
-			Namespace: DiscoveryNamespace,
+			Namespace: discoveryNamespace,
 		},
 		Spec: discoveryv1.DiscoveryConfigSpec{
 			ProviderConnections: []string{SecretName},
@@ -386,7 +401,7 @@ func defaultDiscoveredClusterRefresh() *discoveryv1.DiscoveredClusterRefresh {
 	return &discoveryv1.DiscoveredClusterRefresh{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "refresh",
-			Namespace: DiscoveryNamespace,
+			Namespace: discoveryNamespace,
 		},
 	}
 }
@@ -408,7 +423,7 @@ func newManagedCluster(name, clusterID string) *unstructured.Unstructured {
 			"kind":       "ManagedCluster",
 			"metadata": map[string]interface{}{
 				"name":      name,
-				"namespace": DiscoveryNamespace,
+				"namespace": discoveryNamespace,
 				"labels": map[string]string{
 					"clusterID": clusterID,
 				},

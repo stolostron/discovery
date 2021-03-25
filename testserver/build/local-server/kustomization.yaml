@@ -8,3 +8,5 @@ kind: Kustomization
 images:
 - name: testserver
   newName: mock-ocm-server
+  newTag: latest
+namespace: open-cluster-management

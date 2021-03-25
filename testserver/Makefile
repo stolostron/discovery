@@ -37,4 +37,28 @@ server/secret:
 server/deploy:
 	@echo "Deploying with image ${SERVER_URL}"
 	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="${SERVER_URL}"
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace ${NAMESPACE}
 	$(KUSTOMIZE) build testserver/build/local-server | kubectl apply -f -
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="mock-ocm-server:latest"
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace open-cluster-management
+
+
+############################################################
+# e2e test section
+############################################################
+
+# Create deployment and configure it to never download image
+kind-deploy-testserver:
+	@echo Installing mock server
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
+	$(KUSTOMIZE) build testserver/build/local-server | kubectl apply -f -
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace open-cluster-management
+
+	@echo "Patch mock server deployment image"
+	kubectl patch deployment mock-ocm-server -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"mock-ocm-server\",\"imagePullPolicy\":\"Never\"}]}}}}"
+	kubectl patch deployment mock-ocm-server -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"mock-ocm-server\",\"image\":\"$(SERVER_URL)\"}]}}}}"
+	kubectl rollout status -n $(NAMESPACE) deployment mock-ocm-server --timeout=60s
+
+kind-load-testserver-image:
+	@echo Pushing image to KinD cluster
+	kind load docker-image $(SERVER_URL) --name test-discovery
