@@ -1,0 +1,30 @@
+[
+    {
+        "id": "1ZJEZjTUtqlpNeRDGv4fBkVpobK",
+        "kind": "Subscription",
+        "href": "/api/accounts_mgmt/v1/subscriptions/1ZJEZjTUtqlpNeRDGv4fBkVpobK",
+        "plan": {
+            "id": "OCP",
+            "kind": "Plan",
+            "href": "/api/accounts_mgmt/v1/plans/OCP"
+        },
+        "cluster_id": "1bvvrtd8l74fgf7n2ffi3ie0s5qdn236",
+        "external_cluster_id": "24c22838-e774-4519-960b-5ab0583a2280",
+        "organization_id": "1Yu9TWVAfvJu9Cj5hbMT6iYkdk8",
+        "last_telemetry_date": "2020-03-19T13:28:15.648101Z",
+        "created_at": "2020-03-18T16:27:33.077427Z",
+        "updated_at": "2020-07-15T20:24:21.013384Z",
+        "support_level": "None",
+        "display_name": "24c22838-e774-4519-960b-5ab0583a2280",
+        "creator": {
+            "id": "1Yu9TMhpDebs1S6wjLPIgYLlOn4",
+            "kind": "Account",
+            "href": "/api/accounts_mgmt/v1/accounts/1Yu9TMhpDebs1S6wjLPIgYLlOn4"
+        },
+        "managed": false,
+        "status": "Active",
+        "provenance": "Telemetry",
+        "last_reconcile_date": "0001-01-01T00:00:00Z",
+        "last_released_at": "0001-01-01T00:00:00Z"
+    }
+]

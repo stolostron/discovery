@@ -11,6 +11,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// DiscoverClusters returns a list of DiscoveredClusters found in both the accounts_mgmt and
+// accounts_mgmt apis with the given filters
 func DiscoverClusters(token string, baseURL string, filters discoveryv1.Filter) ([]discoveryv1.DiscoveredCluster, error) {
 	// Request ephemeral access token with user token. This will be used for OCM requests
 	authRequest := auth_domain.AuthRequest{
@@ -22,6 +24,7 @@ func DiscoverClusters(token string, baseURL string, filters discoveryv1.Filter) 
 		return nil, err
 	}
 
+	// Get subscriptions from accounts_mgmt api
 	subscriptionRequestConfig := subscription_domain.SubscriptionRequest{
 		Token:   accessToken,
 		BaseURL: baseURL,
@@ -39,13 +42,13 @@ func DiscoverClusters(token string, baseURL string, filters discoveryv1.Filter) 
 		}
 	}
 
+	// Get clusters from clusters_mgmt api
 	requestConfig := cluster_domain.ClusterRequest{
 		Token:   accessToken,
 		BaseURL: baseURL,
 		Filter:  filters,
 	}
 	clusterClient := cluster_service.ClusterClientGenerator.NewClient(requestConfig)
-
 	newClusters, err := clusterClient.GetClusters()
 	if err != nil {
 		return nil, err
