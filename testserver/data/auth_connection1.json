@@ -1,0 +1,11 @@
+{
+    "access_token": "connection1",
+    "expires_in": 900,
+    "refresh_expires_in": 0,
+    "refresh_token": "refresh_token",
+    "token_type": "bearer",
+    "id_token": "id_token",
+    "not-before-policy": 0,
+    "session_state": "71f4d67c-9a78-49b5-a1fc-123abc456xyz",
+    "scope": "openid offline_access"
+}
