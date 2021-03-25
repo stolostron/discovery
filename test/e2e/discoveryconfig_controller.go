@@ -274,7 +274,7 @@ func getTestserverDeployment() *appsv1.Deployment {
 	testserverDeployment := &appsv1.Deployment{}
 	Eventually(func() error {
 		return k8sClient.Get(ctx, testserver, testserverDeployment)
-	}, timeout, interval).ShouldNot(HaveOccurred(), "Namespace "+discoveryNamespace)
+	}, timeout, interval).ShouldNot(HaveOccurred())
 	return testserverDeployment
 }
 
