@@ -14,14 +14,15 @@ import (
 
 // GetSubscriptions ...
 func GetSubscriptions(c *gin.Context) {
-	token := strings.Split(c.Request.Header["Authorization"][0], " ")[1]
+	header := c.Request.Header["Authorization"]
+	auth := strings.Join(header, " ")
 
 	var file []byte
 	var err error
-	if strings.Contains(token, "connection1") {
+	if strings.Contains(auth, "connection1") {
 		fmt.Println("Returning connection1 response")
 		file, err = ioutil.ReadFile(path.Join(dataFolder, "connection1/subscription_response.json"))
-	} else if strings.Contains(token, "connection2") {
+	} else if strings.Contains(auth, "connection2") {
 		fmt.Println("Returning connection2 response")
 		file, err = ioutil.ReadFile(path.Join(dataFolder, "connection2/subscription_response.json"))
 	} else {

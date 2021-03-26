@@ -2,7 +2,7 @@
     "access_token": "connection1",
     "expires_in": 900,
     "refresh_expires_in": 0,
-    "refresh_token": "refresh_token",
+    "refresh_token": "connection1",
     "token_type": "bearer",
     "id_token": "id_token",
     "not-before-policy": 0,

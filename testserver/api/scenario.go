@@ -20,6 +20,8 @@ var scenarios = map[string]string{
 	"fiveClusters": "data/scenarios/five_clusters",
 	// responds with 10 clusters: 8 active, 2 archived
 	"archivedClusters": "data/scenarios/archived_clusters",
+	// responds with one of two options, depending on auth header content
+	"multipleConnections": "data/scenarios/multiple_connections",
 }
 
 func init() {
