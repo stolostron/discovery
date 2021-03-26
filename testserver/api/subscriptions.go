@@ -6,15 +6,29 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
+	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/open-cluster-management/discovery/pkg/api/domain/subscription_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
 )
 
 // GetSubscriptions ...
 func GetSubscriptions(c *gin.Context) {
-	// file, err := ioutil.ReadFile("data/subscriptions.json")
-	file, err := ioutil.ReadFile(path.Join(dataFolder, "subscription_response.json"))
+	header := c.Request.Header["Authorization"]
+	auth := strings.Join(header, " ")
+
+	var file []byte
+	var err error
+	if strings.Contains(auth, "connection1") {
+		fmt.Println("Returning connection1 response")
+		file, err = ioutil.ReadFile(path.Join(dataFolder, "connection1/subscription_response.json"))
+	} else if strings.Contains(auth, "connection2") {
+		fmt.Println("Returning connection2 response")
+		file, err = ioutil.ReadFile(path.Join(dataFolder, "connection2/subscription_response.json"))
+	} else {
+		file, err = ioutil.ReadFile(path.Join(dataFolder, "subscription_response.json"))
+	}
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"msg": fmt.Sprintf("Error reading file: %s", err.Error()),

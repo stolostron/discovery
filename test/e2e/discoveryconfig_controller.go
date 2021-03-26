@@ -254,6 +254,90 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 	})
 
+	Context("Multiple Provider Connections", func() {
+		AfterEach(func() {
+			err := k8sClient.Delete(ctx, customSecret("connection1", "connection1"))
+			if err != nil {
+				Expect(apierrors.IsNotFound(err)).To(BeTrue())
+			}
+			err = k8sClient.Delete(ctx, customSecret("connection2", "connection2"))
+			if err != nil {
+				Expect(apierrors.IsNotFound(err)).To(BeTrue())
+			}
+		})
+
+		It("Should create DiscoveredClusters from multiple Connections", func() {
+			By("Configuring testserver to return multiple responses", func() {
+				updateTestserverScenario("multipleConnections")
+			})
+
+			By("Creating a DiscoveryConfig with two Provider Connections", func() {
+				Expect(k8sClient.Create(ctx, customSecret("connection1", "connection1"))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, customSecret("connection2", "connection2"))).Should(Succeed())
+				config := defaultDiscoveryConfig()
+				config.Spec.ProviderConnections = []string{"connection1", "connection2"}
+				Expect(k8sClient.Create(ctx, annotate(config))).Should(Succeed())
+			})
+
+			By("By checking 6 discovered clusters have been created (where two overlap)", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(6))
+			})
+
+			By("By checking that clusters under two provider connections display both", func() {
+				dc, err := getDiscoveredClusterByID("69aced7c-286d-471c-9482-eac8a1cd2e17")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(dc.Spec.ProviderConnections).To(HaveLen(2))
+				dc, err = getDiscoveredClusterByID("2a874968-3c5d-4f5b-b565-1b983c36c2b8")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(dc.Spec.ProviderConnections).To(HaveLen(2))
+			})
+		})
+
+		It("Should delete DiscoveredClusters when a Provider Connection is removed", func() {
+			By("Configuring testserver to return multiple responses", func() {
+				updateTestserverScenario("multipleConnections")
+			})
+
+			By("Creating a DiscoveryConfig with two Provider Connections", func() {
+				Expect(k8sClient.Create(ctx, customSecret("connection1", "connection1"))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, customSecret("connection2", "connection2"))).Should(Succeed())
+				config := defaultDiscoveryConfig()
+				config.Spec.ProviderConnections = []string{"connection1", "connection2"}
+				Expect(k8sClient.Create(ctx, annotate(config))).Should(Succeed())
+			})
+
+			By("By checking 6 discovered clusters have been created (where two overlap)", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(6))
+			})
+
+			By("Removing a Provider Connection from the DiscoveryConfig", func() {
+				config := &discoveryv1.DiscoveryConfig{}
+				Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
+				config.Spec.ProviderConnections = config.Spec.ProviderConnections[:1]
+				Expect(k8sClient.Update(ctx, config)).Should(Succeed())
+			})
+
+			By("By checking only 4 discovered clusters remain", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(4))
+			})
+
+			By("By checking references to the old provider connection are removed from the discovered clusters", func() {
+				dc, err := getDiscoveredClusterByID("69aced7c-286d-471c-9482-eac8a1cd2e17")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(dc.Spec.ProviderConnections).To(HaveLen(1))
+				dc, err = getDiscoveredClusterByID("2a874968-3c5d-4f5b-b565-1b983c36c2b8")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(dc.Spec.ProviderConnections).To(HaveLen(1))
+			})
+		})
+	})
+
 })
 
 // annotate adds an annotation to modify the baseUrl used with the discoveryconfig
@@ -315,6 +399,20 @@ func listDiscoveredClusters() (*discoveryv1.DiscoveredClusterList, error) {
 	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
 	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(discoveryNamespace))
 	return discoveredClusters, err
+}
+
+func getDiscoveredClusterByID(id string) (*discoveryv1.DiscoveredCluster, error) {
+	discoveredClusters, err := listDiscoveredClusters()
+	if err != nil {
+		return nil, err
+	}
+	for _, dc := range discoveredClusters.Items {
+		dc := dc
+		if dc.Spec.Name == id {
+			return &dc, nil
+		}
+	}
+	return nil, fmt.Errorf("Cluster not found")
 }
 
 func countManagedDiscoveredClusters() (int, error) {
@@ -381,6 +479,18 @@ func dummySecret() *corev1.Secret {
 		},
 		StringData: map[string]string{
 			"metadata": "ocmAPIToken: dummytoken",
+		},
+	}
+}
+
+func customSecret(name, token string) *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: discoveryNamespace,
+		},
+		StringData: map[string]string{
+			"metadata": fmt.Sprintf("ocmAPIToken: %s", token),
 		},
 	}
 }
