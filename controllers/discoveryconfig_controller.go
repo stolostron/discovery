@@ -44,6 +44,11 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+var (
+	// baseURLAnnotation is the annotation set in a DiscoveryConfig that overrides the URL base used to find clusters
+	baseURLAnnotation = "ocmBaseURL"
+)
+
 // DiscoveryConfigReconciler reconciles a DiscoveryConfig object
 type DiscoveryConfigReconciler struct {
 	client.Client
@@ -133,12 +138,8 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 			return err
 		}
 
-		var baseURL string
-		if annotations := config.GetAnnotations(); annotations != nil {
-			baseURL = annotations["ocmBaseURL"]
-		}
+		baseURL := getURLOverride(config)
 		filters := config.Spec.Filters
-
 		discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
 		if err != nil {
 			return err
@@ -258,22 +259,18 @@ func (r *DiscoveryConfigReconciler) getExistingClusterMap(ctx context.Context, c
 // applyCluster creates the DiscoveredCluster resources or updates it if necessary. If the cluster already
 // exists and doesn't need updating then nothing changes.
 func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *discoveryv1.DiscoveryConfig, dc discoveryv1.DiscoveredCluster, existing map[string]discoveryv1.DiscoveredCluster) error {
-	log := logr.FromContext(ctx)
 	current, exists := existing[dc.Spec.Name]
 	if !exists {
 		// Newly discovered cluster
-		log.Info("DiscoveredCluster will be created.")
 		return r.createCluster(ctx, config, dc)
 	}
 
 	if same(dc, current) {
 		// Discovered cluster has not changed
-		log.Info("DiscoveredCluster is unchanged.")
 		return nil
 	}
 
 	// Cluster needs to be updated
-	log.Info("Updating DiscoveredCluster.")
 	return r.updateCluster(ctx, config, dc, current)
 }
 
@@ -307,6 +304,13 @@ func (r *DiscoveryConfigReconciler) deleteCluster(ctx context.Context, dc discov
 	}
 	log.Info("Deleted cluster", "Name", dc.Name)
 	return nil
+}
+
+func getURLOverride(config *discoveryv1.DiscoveryConfig) string {
+	if annotations := config.GetAnnotations(); annotations != nil {
+		return annotations[baseURLAnnotation]
+	}
+	return ""
 }
 
 // merge adds the cluster to the cluster map. If the cluster name is already in the map then it

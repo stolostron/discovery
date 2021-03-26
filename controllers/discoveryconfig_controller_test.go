@@ -267,3 +267,40 @@ func Test_same(t *testing.T) {
 		})
 	}
 }
+
+func Test_getURLOverride(t *testing.T) {
+	tests := []struct {
+		name   string
+		config *discoveryv1.DiscoveryConfig
+		want   string
+	}{
+		{
+			name: "Override annotated",
+			config: &discoveryv1.DiscoveryConfig{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        "testconfig",
+					Namespace:   "test",
+					Annotations: map[string]string{baseURLAnnotation: "http://mock-ocm-server.test.svc.cluster.local:3000"},
+				},
+			},
+			want: "http://mock-ocm-server.test.svc.cluster.local:3000",
+		},
+		{
+			name: "No override specified",
+			config: &discoveryv1.DiscoveryConfig{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "testconfig",
+					Namespace: "test",
+				},
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getURLOverride(tt.config); got != tt.want {
+				t.Errorf("getURLOverride() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
