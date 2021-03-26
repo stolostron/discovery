@@ -62,7 +62,7 @@ unit-tests:
 
 # Run tests
 integration-tests: install deploy server/deploy
-	kubectl apply -f controllers/testdata/crds/clusters.open-cluster-management.io_managedclusters.yaml
+	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
 	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n $(NAMESPACE)
 	kubectl wait --for=condition=available --timeout=60s deployment/mock-ocm-server -n $(NAMESPACE)
 	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)
@@ -236,7 +236,7 @@ kind-delete-cluster:
 	kind delete cluster --name test-discovery
 
 kind-e2e-tests:
-	kubectl apply -f controllers/testdata/crds/clusters.open-cluster-management.io_managedclusters.yaml
+	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
 	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)
 
 ## Build the functional test image
