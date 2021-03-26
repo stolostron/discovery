@@ -271,7 +271,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				updateTestserverScenario("multipleConnections")
 			})
 
-			By("Creating a DiscoveryConfig", func() {
+			By("Creating a DiscoveryConfig with two Provider Connections", func() {
 				Expect(k8sClient.Create(ctx, customSecret("connection1", "connection1"))).Should(Succeed())
 				Expect(k8sClient.Create(ctx, customSecret("connection2", "connection2"))).Should(Succeed())
 				config := defaultDiscoveryConfig()
@@ -292,6 +292,48 @@ var _ = Describe("Discoveryconfig controller", func() {
 				dc, err = getDiscoveredClusterByID("2a874968-3c5d-4f5b-b565-1b983c36c2b8")
 				Expect(err).ToNot(HaveOccurred())
 				Expect(dc.Spec.ProviderConnections).To(HaveLen(2))
+			})
+		})
+
+		It("Should delete DiscoveredClusters when a Provider Connection is removed", func() {
+			By("Configuring testserver to return multiple responses", func() {
+				updateTestserverScenario("multipleConnections")
+			})
+
+			By("Creating a DiscoveryConfig with two Provider Connections", func() {
+				Expect(k8sClient.Create(ctx, customSecret("connection1", "connection1"))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, customSecret("connection2", "connection2"))).Should(Succeed())
+				config := defaultDiscoveryConfig()
+				config.Spec.ProviderConnections = []string{"connection1", "connection2"}
+				Expect(k8sClient.Create(ctx, annotate(config))).Should(Succeed())
+			})
+
+			By("By checking 6 discovered clusters have been created (where two overlap)", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(6))
+			})
+
+			By("Removing a Provider Connection from the DiscoveryConfig", func() {
+				config := &discoveryv1.DiscoveryConfig{}
+				Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
+				config.Spec.ProviderConnections = config.Spec.ProviderConnections[:1]
+				Expect(k8sClient.Update(ctx, config)).Should(Succeed())
+			})
+
+			By("By checking only 4 discovered clusters remain", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(4))
+			})
+
+			By("By checking references to the old provider connection are removed from the discovered clusters", func() {
+				dc, err := getDiscoveredClusterByID("69aced7c-286d-471c-9482-eac8a1cd2e17")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(dc.Spec.ProviderConnections).To(HaveLen(1))
+				dc, err = getDiscoveredClusterByID("2a874968-3c5d-4f5b-b565-1b983c36c2b8")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(dc.Spec.ProviderConnections).To(HaveLen(1))
 			})
 		})
 	})

@@ -82,11 +82,6 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	if len(config.Spec.ProviderConnections) == 0 {
-		log.Info("No provider connections in config. Returning.")
-		return ctrl.Result{}, nil
-	}
-
 	if err = r.updateDiscoveredClusters(ctx, config); err != nil {
 		log.Error(err, "Error updating DiscoveredClusters")
 		return ctrl.Result{}, err
@@ -155,11 +150,6 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 			dc.Spec.ProviderConnections = append(dc.Spec.ProviderConnections, *secretRef)
 			merge(allClusters, dc)
 		}
-	}
-
-	if len(allClusters) == 0 {
-		log.Info("No clusters discovered")
-		return nil
 	}
 
 	// Assign managed status
