@@ -100,7 +100,6 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	c, err := ctrl.NewControllerManagedBy(mgr).
 		For(&discoveryv1.DiscoveryConfig{}).
-		// Watches(&source.Kind{Type: &discoveryv1.DiscoveryConfig{}}, &handler.EnqueueRequestForObject{}).
 		WithEventFilter(predicate.Funcs{
 			// Skip delete events
 			DeleteFunc: func(e event.DeleteEvent) bool {
