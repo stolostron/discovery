@@ -32,7 +32,7 @@ endif
 BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
 # Image URL to use all building/pushing image targets
-REGISTRY ?= quay.io/rhibmcollab
+REGISTRY ?= quay.io/open-cluster-management
 IMG ?= discovery-operator
 URL ?= $(REGISTRY)/$(IMG):$(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
