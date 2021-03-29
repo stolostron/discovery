@@ -9,9 +9,6 @@ resources:
 - group: discovery
   kind: DiscoveryConfig
   version: v1
-- group: discovery
-  kind: DiscoveredClusterRefresh
-  version: v1
 version: 3-alpha
 plugins:
   go.sdk.operatorframework.io/v2-alpha: {}

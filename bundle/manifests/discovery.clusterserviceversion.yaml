@@ -1,21 +1,9 @@
-# Copyright Contributors to the Open Cluster Management project
-
 apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
     alm-examples: |-
       [
-        {
-          "apiVersion": "discovery.open-cluster-management.io/v1",
-          "kind": "DiscoveredClusterRefresh",
-          "metadata": {
-            "name": "discoveredclusterrefresh-sample"
-          },
-          "spec": {
-            "foo": "bar"
-          }
-        },
         {
           "apiVersion": "discovery.open-cluster-management.io/v1",
           "kind": "DiscoveryConfig",
@@ -35,10 +23,8 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.3.2
-    operators.operatorframework.io/internal-objects: |-
-      ["discoveredclusterrefreshes.discovery.open-cluster-management.io",
-       "discoveredclusters.discovery.open-cluster-management.io"]
+    operators.operatorframework.io/builder: operator-sdk-v1.3.0
+    operators.operatorframework.io/internal-objects: '["discoveredclusters.discovery.open-cluster-management.io"]'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
     support: Red Hat
   name: discovery.v0.0.1
@@ -47,11 +33,6 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: DiscoveredClusterRefresh is the Schema for the discoveredclusterrefreshes API
-      displayName: Discovered Cluster Refresh
-      kind: DiscoveredClusterRefresh
-      name: discoveredclusterrefreshes.discovery.open-cluster-management.io
-      version: v1
     - description: DiscoveredCluster is the Schema for the discoveredclusters API
       displayName: Discovered Cluster
       kind: DiscoveredCluster
@@ -87,26 +68,6 @@ spec:
           - get
           - list
           - watch
-        - apiGroups:
-          - discovery.open-cluster-management.io
-          resources:
-          - discoveredclusterrefreshes
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - discovery.open-cluster-management.io
-          resources:
-          - discoveredclusterrefreshes/status
-          verbs:
-          - get
-          - patch
-          - update
         - apiGroups:
           - discovery.open-cluster-management.io
           resources:

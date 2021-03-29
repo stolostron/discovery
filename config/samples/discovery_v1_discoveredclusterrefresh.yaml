@@ -1,9 +1,0 @@
-# Copyright Contributors to the Open Cluster Management project
-
-apiVersion: discovery.open-cluster-management.io/v1
-kind: DiscoveredClusterRefresh
-metadata:
-  name: discoveredclusterrefresh-sample
-spec:
-  # Add fields here
-  foo: bar

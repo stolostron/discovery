@@ -86,15 +86,7 @@ func main() {
 		Scheme:  mgr.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "DiscoveredClusterRefresh")
-		os.Exit(1)
-	}
-	if err = (&controllers.DiscoveredClusterRefreshReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Trigger: events,
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "DiscoveredClusterRefresh")
+		setupLog.Error(err, "unable to create controller", "controller", "DiscoveryConfig")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

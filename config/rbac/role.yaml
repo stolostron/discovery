@@ -25,26 +25,6 @@ rules:
 - apiGroups:
   - discovery.open-cluster-management.io
   resources:
-  - discoveredclusterrefreshes
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - discovery.open-cluster-management.io
-  resources:
-  - discoveredclusterrefreshes/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - discovery.open-cluster-management.io
-  resources:
   - discoveredclusters
   verbs:
   - create
