@@ -201,7 +201,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			})
 
 			By("Forcing the DiscoveryConfig to be reconciled on", func() {
-				Expect(k8sClient.Create(ctx, defaultDiscoveredClusterRefresh())).Should(Succeed())
+				byTriggeringReconcile()
 			})
 
 			By("By checking that discovered clusters have changed", func() {
@@ -471,6 +471,18 @@ func byDeletingAllManagedCluster() {
 	}, timeout, interval).Should(Equal(0))
 }
 
+func byTriggeringReconcile() {
+	config := &discoveryv1.DiscoveryConfig{}
+	Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
+	a := config.GetAnnotations()
+	if a == nil {
+		a = map[string]string{}
+	}
+	a["triggerTime"] = time.Now().String()
+	config.SetAnnotations(a)
+	Expect(k8sClient.Update(ctx, config)).Should(Succeed())
+}
+
 func dummySecret() *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -503,15 +515,6 @@ func defaultDiscoveryConfig() *discoveryv1.DiscoveryConfig {
 		},
 		Spec: discoveryv1.DiscoveryConfigSpec{
 			ProviderConnections: []string{SecretName},
-		},
-	}
-}
-
-func defaultDiscoveredClusterRefresh() *discoveryv1.DiscoveredClusterRefresh {
-	return &discoveryv1.DiscoveredClusterRefresh{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "refresh",
-			Namespace: discoveryNamespace,
 		},
 	}
 }
