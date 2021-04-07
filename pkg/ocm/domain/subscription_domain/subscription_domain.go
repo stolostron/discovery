@@ -2,6 +2,7 @@ package subscription_domain
 
 import (
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // StandardKind ...
@@ -11,6 +12,11 @@ type StandardKind struct {
 	Href string `href:"kind,omitempty"`
 }
 
+// Metrics ...
+type Metrics struct {
+	OpenShiftVersion string `json:"openshift_version,omitempty"`
+}
+
 // Subscription ...
 type Subscription struct {
 	ID                string       `json:"id"`
@@ -18,18 +24,21 @@ type Subscription struct {
 	Href              string       `json:"href"`
 	Plan              StandardKind `json:"plan,omitempty"`
 	ClusterID         string       `json:"cluster_id,omitempty"`
+	ConsoleURL        string       `json:"console_url,omitempty"`
 	ExternalClusterID string       `json:"external_cluster_id,omitempty"`
 	OrganizationID    string       `json:"organization_id,omitempty"`
 	LastTelemetryDate string       `json:"last_telemetry_date,omitempty"`
-	CreatedAt         string       `json:"created_at,omitempty"`
-	UpdatedAt         string       `json:"updated_at,omitempty"`
+	CreatedAt         *metav1.Time `json:"created_at,omitempty"`
+	UpdatedAt         *metav1.Time `json:"updated_at,omitempty"`
+	Metrics           []Metrics    `json:"metrics,omitempty"`
+	CloudProviderID   string       `json:"cloud_provider_id,omitempty"`
 	SupportLevel      string       `json:"support_level,omitempty"`
 	DisplayName       string       `json:"display_name,omitempty"`
 	Creator           StandardKind `json:"creator"`
 	Managed           bool         `json:"managed,omitempty"`
 	Status            string       `json:"status"`
 	Provenance        string       `json:"provenance,omitempty"`
-	LastReconcileDate string       `json:"last_reconcile_date,omitempty"`
+	LastReconcileDate *metav1.Time `json:"last_reconcile_date,omitempty"`
 	LastReleasedAt    string       `json:"last_released_at,omitempty"`
 }
 

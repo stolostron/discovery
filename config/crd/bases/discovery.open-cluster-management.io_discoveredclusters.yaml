@@ -39,8 +39,6 @@ spec:
               activity_timestamp:
                 format: date-time
                 type: string
-              apiUrl:
-                type: string
               cloudProvider:
                 type: string
               console:
@@ -48,15 +46,11 @@ spec:
               creation_timestamp:
                 format: date-time
                 type: string
-              healthState:
-                type: string
               isManagedCluster:
                 type: boolean
               name:
                 type: string
               openshiftVersion:
-                type: string
-              product:
                 type: string
               providerConnections:
                 items:
@@ -120,29 +114,10 @@ spec:
                       type: string
                   type: object
                 type: array
-              region:
+              status:
                 type: string
-              state:
-                type: string
-              subscription:
-                properties:
-                  creator_id:
-                    type: string
-                  managed:
-                    type: boolean
-                  status:
-                    type: string
-                  support_level:
-                    type: string
-                required:
-                - creator_id
-                - managed
-                - status
-                type: object
             required:
-            - openshiftVersion
             - providerConnections
-            - subscription
             type: object
           status:
             description: DiscoveredClusterStatus defines the observed state of DiscoveredCluster

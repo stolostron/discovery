@@ -40,5 +40,5 @@ func TestGetSubscriptionsNoError(t *testing.T) {
 	response, err := SubscriptionProvider.GetSubscriptions(subscription_domain.SubscriptionRequest{})
 	assert.NotNil(t, response)
 	assert.Nil(t, err)
-	assert.EqualValues(t, 3, len(response.Items))
+	assert.EqualValues(t, 1, len(response.Items))
 }

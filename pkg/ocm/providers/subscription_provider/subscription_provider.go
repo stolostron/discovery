@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 
+	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	"github.com/open-cluster-management/discovery/pkg/ocm/clients/restclient"
 	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
 )
@@ -31,6 +33,7 @@ func (c *subscriptionProvider) GetSubscriptions(request subscription_domain.Subs
 	query := &url.Values{}
 	query.Add("size", fmt.Sprintf("%d", request.Size))
 	query.Add("page", fmt.Sprintf("%d", request.Page))
+	applyPreFilters(query, request.Filter)
 
 	getRequest, err := http.NewRequest("GET", getURL, nil)
 	getRequest.URL.RawQuery = query.Encode()
@@ -77,4 +80,20 @@ func (c *subscriptionProvider) GetSubscriptions(request subscription_domain.Subs
 	}
 
 	return &result, nil
+}
+
+// applyPreFilters adds fields to the http query to limit the number of items returned
+func applyPreFilters(query *url.Values, filters discoveryv1.Filter) {
+	if filters.LastActive != 0 {
+		query.Add("search", fmt.Sprintf("updated_at >= '%s'", lastActiveDate(time.Now(), filters.LastActive)))
+	}
+}
+
+// return the date that is `daysAgo` days before `currentDate` in 'YYYY-MM-DD' format
+func lastActiveDate(currentDate time.Time, daysAgo int) string {
+	if daysAgo < 0 {
+		daysAgo = 0
+	}
+	cutoffDay := currentDate.AddDate(0, 0, -daysAgo)
+	return cutoffDay.Format("2006-01-02")
 }

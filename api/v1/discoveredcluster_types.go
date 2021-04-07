@@ -27,27 +27,14 @@ import (
 type DiscoveredClusterSpec struct {
 	Name              string       `json:"name,omitempty" yaml:"name,omitempty"`
 	Console           string       `json:"console,omitempty" yaml:"console,omitempty"`
-	APIURL            string       `json:"apiUrl,omitempty" yaml:"apiUrl,omitempty"`
 	CreationTimestamp *metav1.Time `json:"creation_timestamp,omitempty" yaml:"creation_timestamp,omitempty"`
 	ActivityTimestamp *metav1.Time `json:"activity_timestamp,omitempty" yaml:"activity_timestamp,omitempty"`
-	OpenshiftVersion  string       `json:"openshiftVersion" yaml:"openshiftVersion"`
-	Region            string       `json:"region,omitempty" yaml:"region,omitempty"`
+	OpenshiftVersion  string       `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
 	CloudProvider     string       `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
-	HealthState       string       `json:"healthState,omitempty" yaml:"healthState,omitempty"`
-	State             string       `json:"state,omitempty" yaml:"state,omitempty"`
-	Product           string       `json:"product,omitempty" yaml:"product,omitempty"`
+	Status            string       `json:"status,omitempty" yaml:"status,omitempty"`
 	IsManagedCluster  bool         `json:"isManagedCluster,omitempty" yaml:"isManagedCluster,omitempty"`
 
 	ProviderConnections []corev1.ObjectReference `json:"providerConnections"`
-
-	Subscription SubscriptionSpec `json:"subscription" yaml:"subscription"`
-}
-
-type SubscriptionSpec struct {
-	Status       string `json:"status" yaml:"status"`
-	SupportLevel string `json:"support_level,omitempty" yaml:"support_level,omitempty"`
-	Managed      bool   `json:"managed" yaml:"managed"`
-	CreatorID    string `json:"creator_id" yaml:"creator_id"`
 }
 
 // DiscoveredClusterStatus defines the observed state of DiscoveredCluster

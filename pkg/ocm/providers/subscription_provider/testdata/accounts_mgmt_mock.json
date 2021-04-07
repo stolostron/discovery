@@ -1,37 +1,9 @@
 {
     "kind": "SubscriptionList",
     "page": 1,
-    "size": 3,
+    "size": 1,
     "total": 28489,
     "items": [
-        {
-            "id": "1a02UsUX9x4v6efw5gThNWSZNhs",
-            "kind": "Subscription",
-            "href": "/api/accounts_mgmt/v1/subscriptions/1a02UsUX9x4v6efw5gThNWSZNhs",
-            "plan": {
-                "id": "OCP",
-                "kind": "Plan",
-                "href": "/api/accounts_mgmt/v1/plans/OCP"
-            },
-            "cluster_id": "1c9vh8c1teqnv0e6kkli7elpnueu5r07",
-            "external_cluster_id": "bac00074-3804-468c-ae7a-2c38331d8b0a",
-            "organization_id": "1H1PQMDtwzAUsjPxgoWRjhSpNGD",
-            "last_telemetry_date": "2020-04-03T08:58:49.574714Z",
-            "created_at": "2020-04-02T20:10:09.185967Z",
-            "updated_at": "2020-07-15T20:10:45.32943Z",
-            "support_level": "None",
-            "display_name": "bac00074-3804-468c-ae7a-2c38331d8b0a",
-            "creator": {
-                "id": "1IGgKv4wJJJXBf7aWLe1fw1k710",
-                "kind": "Account",
-                "href": "/api/accounts_mgmt/v1/accounts/1IGgKv4wJJJXBf7aWLe1fw1k710"
-            },
-            "managed": false,
-            "status": "Archived",
-            "provenance": "Telemetry",
-            "last_reconcile_date": "0001-01-01T00:00:00Z",
-            "last_released_at": "0001-01-01T00:00:00Z"
-        },
         {
             "id": "1aAhK44xKMxSnXN3ToNjxdDYRD1",
             "kind": "Subscription",
@@ -170,41 +142,6 @@
                 }
             ],
             "cloud_provider_id": "vsphere",
-            "cluster_billing_model": "standard"
-        },
-        {
-            "id": "1aAxzoSEbqMULQb2nxF1Kygpb0C",
-            "kind": "Subscription",
-            "href": "/api/accounts_mgmt/v1/subscriptions/1aAxzoSEbqMULQb2nxF1Kygpb0C",
-            "plan": {
-                "id": "OCP",
-                "kind": "Plan",
-                "href": "/api/accounts_mgmt/v1/plans/OCP"
-            },
-            "cluster_id": "1cch4k0jcrr9tu25f1dbrtc485oq7k83",
-            "external_cluster_id": "01001814-c69b-4d00-9414-ce9d08687fc0",
-            "organization_id": "1H1PQMDtwzAUsjPxgoWRjhSpNGD",
-            "last_telemetry_date": "2020-04-07T14:04:10.892637Z",
-            "created_at": "2020-04-06T17:01:04.374794Z",
-            "updated_at": "2021-02-09T12:33:18.1945Z",
-            "support_level": "Self-Support",
-            "service_level": "L1-L3",
-            "usage": "Production",
-            "system_units": "Cores/vCPU",
-            "cpu_total": 24,
-            "socket_total": 1,
-            "display_name": "01001814-c69b-4d00-9414-ce9d08687fc0",
-            "creator": {
-                "id": "1L0bM59OpDROteG3DlsYpA3zGJZ",
-                "kind": "Account",
-                "href": "/api/accounts_mgmt/v1/accounts/1L0bM59OpDROteG3DlsYpA3zGJZ"
-            },
-            "managed": false,
-            "status": "Stale",
-            "provenance": "Telemetry",
-            "last_reconcile_date": "2021-02-09T12:33:18.19445Z",
-            "consumer_uuid": "01001814-c69b-4d00-9414-ce9d08687fc0",
-            "last_released_at": "0001-01-01T00:00:00Z",
             "cluster_billing_model": "standard"
         }
     ]
