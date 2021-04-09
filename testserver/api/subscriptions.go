@@ -16,6 +16,8 @@ import (
 func GetSubscriptions(c *gin.Context) {
 	header := c.Request.Header["Authorization"]
 	auth := strings.Join(header, " ")
+	params := c.Request.URL.Query()
+	page := params.Get("page")
 
 	var file []byte
 	var err error
@@ -26,7 +28,7 @@ func GetSubscriptions(c *gin.Context) {
 		fmt.Println("Returning connection2 response")
 		file, err = ioutil.ReadFile(path.Join(dataFolder, "connection2/subscription_response.json"))
 	} else {
-		file, err = ioutil.ReadFile(path.Join(dataFolder, "subscription_response.json"))
+		file, err = ioutil.ReadFile(paginate(path.Join(dataFolder, "subscription_response.json"), page))
 	}
 
 	if err != nil {
@@ -47,4 +49,16 @@ func GetSubscriptions(c *gin.Context) {
 	}
 
 	c.Data(http.StatusOK, "application/json", file)
+}
+
+// paginate appends the page number to the filename when page > 1
+func paginate(file, page string) string {
+	if page == "" || page == "1" {
+		return file
+	}
+
+	extension := path.Ext(file)
+	newPath := strings.TrimSuffix(file, extension)
+
+	return fmt.Sprintf("%s_%s%s", newPath, page, extension)
 }
