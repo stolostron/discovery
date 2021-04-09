@@ -220,9 +220,7 @@ func Test_same(t *testing.T) {
 		Spec: discoveryv1.DiscoveredClusterSpec{
 			Name:          "c1",
 			CloudProvider: "aws",
-			Subscription: discoveryv1.SubscriptionSpec{
-				Status: "Active",
-			},
+			Status:        "Active",
 		},
 	}
 	cluster2 := discoveryv1.DiscoveredCluster{
@@ -234,9 +232,7 @@ func Test_same(t *testing.T) {
 		Spec: discoveryv1.DiscoveredClusterSpec{
 			Name:          "c2",
 			CloudProvider: "aws",
-			Subscription: discoveryv1.SubscriptionSpec{
-				Status: "Active",
-			},
+			Status:        "Active",
 		},
 	}
 

@@ -319,31 +319,16 @@ func merge(clusters map[string]discoveryv1.DiscoveredCluster, dc discoveryv1.Dis
 
 func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
 	c1i, c2i := c1.Spec, c2.Spec
-	if c1i.APIURL != c2i.APIURL {
-		return false
-	}
 	if c1i.CloudProvider != c2i.CloudProvider {
 		return false
 	}
 	if c1i.Console != c2i.Console {
 		return false
 	}
-	if c1i.HealthState != c2i.HealthState {
-		return false
-	}
 	if c1i.Name != c2i.Name {
 		return false
 	}
 	if c1i.OpenshiftVersion != c2i.OpenshiftVersion {
-		return false
-	}
-	if c1i.Product != c2i.Product {
-		return false
-	}
-	if c1i.Region != c2i.Region {
-		return false
-	}
-	if c1i.State != c2i.State {
 		return false
 	}
 	if c1i.IsManagedCluster != c2i.IsManagedCluster {

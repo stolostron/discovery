@@ -141,7 +141,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			})
 
 			By("Creating a ManagedCluster", func() {
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc1", "69aced7c-286d-471c-9482-eac8a1cd2e17"))).To(Succeed())
+				Expect(k8sClient.Create(ctx, newManagedCluster("testmc1", "844b3bf1-8d70-469c-a113-f1cd5db45c63"))).To(Succeed())
 			})
 
 			By("Checking that a DiscoveredCluster is now labeled as managed", func() {
@@ -153,11 +153,11 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 		It("Should unmark discovered clusters when they are no longer managed", func() {
 			By("Creating ManagedClusters", func() {
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc1", "69aced7c-286d-471c-9482-eac8a1cd2e17"))).To(Succeed())
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc2", "2a874968-3c5d-4f5b-b565-1b983c36c2b8"))).To(Succeed())
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc3", "24c22838-e774-4519-960b-5ab0583a2280"))).To(Succeed())
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc4", "595ba5bb-69ed-49d8-9aad-48e7b21ff211"))).To(Succeed())
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc5", "cf487b43-89fd-4a57-96a2-63ae9129b3f7"))).To(Succeed())
+				Expect(k8sClient.Create(ctx, newManagedCluster("testmc1", "844b3bf1-8d70-469c-a113-f1cd5db45c63"))).To(Succeed())
+				Expect(k8sClient.Create(ctx, newManagedCluster("testmc2", "dbcbbeeb-7a15-4c64-9975-6f6c331255c8"))).To(Succeed())
+				Expect(k8sClient.Create(ctx, newManagedCluster("testmc3", "6429154f-583e-4d95-b74d-2cd02b266ecf"))).To(Succeed())
+				Expect(k8sClient.Create(ctx, newManagedCluster("testmc4", "d36f6dc3-84b0-4bc6-b126-9f30766f9fae"))).To(Succeed())
+				Expect(k8sClient.Create(ctx, newManagedCluster("testmc5", "f1083487-e6ae-4388-9408-af09fcc9c7fc"))).To(Succeed())
 			})
 
 			By("Creating discovered clusters", func() {
@@ -286,10 +286,10 @@ var _ = Describe("Discoveryconfig controller", func() {
 			})
 
 			By("By checking that clusters under two provider connections display both", func() {
-				dc, err := getDiscoveredClusterByID("69aced7c-286d-471c-9482-eac8a1cd2e17")
+				dc, err := getDiscoveredClusterByID("844b3bf1-8d70-469c-a113-f1cd5db45c63")
 				Expect(err).ToNot(HaveOccurred())
 				Expect(dc.Spec.ProviderConnections).To(HaveLen(2))
-				dc, err = getDiscoveredClusterByID("2a874968-3c5d-4f5b-b565-1b983c36c2b8")
+				dc, err = getDiscoveredClusterByID("dbcbbeeb-7a15-4c64-9975-6f6c331255c8")
 				Expect(err).ToNot(HaveOccurred())
 				Expect(dc.Spec.ProviderConnections).To(HaveLen(2))
 			})
@@ -328,10 +328,10 @@ var _ = Describe("Discoveryconfig controller", func() {
 			})
 
 			By("By checking references to the old provider connection are removed from the discovered clusters", func() {
-				dc, err := getDiscoveredClusterByID("69aced7c-286d-471c-9482-eac8a1cd2e17")
+				dc, err := getDiscoveredClusterByID("844b3bf1-8d70-469c-a113-f1cd5db45c63")
 				Expect(err).ToNot(HaveOccurred())
 				Expect(dc.Spec.ProviderConnections).To(HaveLen(1))
-				dc, err = getDiscoveredClusterByID("2a874968-3c5d-4f5b-b565-1b983c36c2b8")
+				dc, err = getDiscoveredClusterByID("dbcbbeeb-7a15-4c64-9975-6f6c331255c8")
 				Expect(err).ToNot(HaveOccurred())
 				Expect(dc.Spec.ProviderConnections).To(HaveLen(1))
 			})
