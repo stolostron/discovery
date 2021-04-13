@@ -1,4 +1,4 @@
-package subscription_provider
+package subscription
 
 import (
 	"context"
@@ -10,25 +10,54 @@ import (
 	"time"
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
-	"github.com/open-cluster-management/discovery/pkg/ocm/clients/restclient"
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
 )
 
 const (
 	subscriptionURL = "%s/api/accounts_mgmt/v1/subscriptions"
 )
 
-type subscriptionProvider struct{}
-
-type ISubscriptionProvider interface {
-	GetSubscriptions(request subscription_domain.SubscriptionRequest) (*subscription_domain.SubscriptionResponse, *subscription_domain.SubscriptionError)
-}
-
 var (
-	SubscriptionProvider ISubscriptionProvider = &subscriptionProvider{}
+	httpClient           SubscriptionGetInterface = &subscriptionRestClient{}
+	SubscriptionProvider ISubscriptionProvider    = &subscriptionProvider{}
 )
 
-func (c *subscriptionProvider) GetSubscriptions(request subscription_domain.SubscriptionRequest) (*subscription_domain.SubscriptionResponse, *subscription_domain.SubscriptionError) {
+type SubscriptionGetInterface interface {
+	Get(*http.Request) (*http.Response, error)
+}
+
+type subscriptionRestClient struct{}
+
+func (c *subscriptionRestClient) Get(request *http.Request) (*http.Response, error) {
+	client := http.Client{}
+	return client.Do(request)
+}
+
+type ISubscriptionProvider interface {
+	GetSubscriptions(request SubscriptionRequest) (*SubscriptionResponse, *SubscriptionError)
+}
+
+type subscriptionProvider struct{}
+
+func (c *subscriptionProvider) GetSubscriptions(request SubscriptionRequest) (*SubscriptionResponse, *SubscriptionError) {
+	getRequest, err := prepareRequest(request)
+	if err != nil {
+		return nil, &SubscriptionError{
+			Error: err,
+		}
+	}
+
+	response, err := httpClient.Get(getRequest)
+	if err != nil {
+		return nil, &SubscriptionError{
+			Error: err,
+		}
+	}
+	defer response.Body.Close()
+
+	return parseResponse(response)
+}
+
+func prepareRequest(request SubscriptionRequest) (*http.Request, error) {
 	getURL := fmt.Sprintf(subscriptionURL, request.BaseURL)
 	query := &url.Values{}
 	query.Add("size", fmt.Sprintf("%d", request.Size))
@@ -36,30 +65,27 @@ func (c *subscriptionProvider) GetSubscriptions(request subscription_domain.Subs
 	applyPreFilters(query, request.Filter)
 
 	getRequest, err := http.NewRequest("GET", getURL, nil)
+	if err != nil {
+		return nil, err
+	}
 	getRequest.URL.RawQuery = query.Encode()
 	getRequest.Header.Add("Authorization", fmt.Sprintf("Bearer %s", request.Token))
 	getRequest = getRequest.WithContext(context.Background())
+	return getRequest, nil
+}
 
-	response, err := restclient.SubscriptionHTTPClient.Get(getRequest)
-	if err != nil {
-		return nil, &subscription_domain.SubscriptionError{
-			Error: err,
-		}
-	}
-	defer response.Body.Close()
-
+func parseResponse(response *http.Response) (*SubscriptionResponse, *SubscriptionError) {
 	bytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, &subscription_domain.SubscriptionError{
+		return nil, &SubscriptionError{
 			Error: err,
 		}
 	}
 
-	// The api owner can decide to change datatypes, etc. When this happen, it might affect the error format returned
 	if response.StatusCode > 299 {
-		var errResponse subscription_domain.SubscriptionError
+		var errResponse SubscriptionError
 		if err := json.Unmarshal(bytes, &errResponse); err != nil {
-			return nil, &subscription_domain.SubscriptionError{
+			return nil, &SubscriptionError{
 				Error:    err,
 				Response: bytes}
 		}
@@ -71,9 +97,9 @@ func (c *subscriptionProvider) GetSubscriptions(request subscription_domain.Subs
 		return nil, &errResponse
 	}
 
-	var result subscription_domain.SubscriptionResponse
+	var result SubscriptionResponse
 	if err := json.Unmarshal(bytes, &result); err != nil {
-		return nil, &subscription_domain.SubscriptionError{
+		return nil, &SubscriptionError{
 			Error:    fmt.Errorf("error unmarshaling response"),
 			Response: bytes,
 		}

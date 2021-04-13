@@ -1,12 +1,9 @@
 // Copyright Contributors to the Open Cluster Management project
 
-package auth_service
+package auth
 
 import (
 	"fmt"
-
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/auth_domain"
-	"github.com/open-cluster-management/discovery/pkg/ocm/providers/auth_provider"
 )
 
 var authBaseURL = "https://sso.redhat.com"
@@ -14,18 +11,18 @@ var authBaseURL = "https://sso.redhat.com"
 type authClient struct{}
 
 type TokenGetter interface {
-	GetToken(auth_domain.AuthRequest) (string, error)
+	GetToken(AuthRequest) (string, error)
 }
 
 var (
 	AuthClient TokenGetter = &authClient{}
 )
 
-func (client authClient) GetToken(request auth_domain.AuthRequest) (string, error) {
+func (client authClient) GetToken(request AuthRequest) (string, error) {
 	if request.BaseURL == "" {
 		request.BaseURL = authBaseURL
 	}
-	response, err := auth_provider.AuthProvider.GetToken(request)
+	response, err := AuthProvider.GetToken(request)
 
 	if err != nil {
 		return "", fmt.Errorf("Couldn't get token: %s", err.Description)

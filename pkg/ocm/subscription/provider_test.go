@@ -1,13 +1,10 @@
-package subscription_provider
+package subscription
 
 import (
 	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
-
-	"github.com/open-cluster-management/discovery/pkg/ocm/clients/restclient"
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,7 +21,7 @@ func (cm *getClientMock) Get(request *http.Request) (*http.Response, error) {
 }
 
 //When the everything is good
-func TestGetSubscriptionsNoError(t *testing.T) {
+func TestProviderGetSubscriptionsNoError(t *testing.T) {
 	getRequestFunc = func(*http.Request) (*http.Response, error) {
 		file, err := os.Open("testdata/accounts_mgmt_mock.json")
 		if err != nil {
@@ -35,9 +32,9 @@ func TestGetSubscriptionsNoError(t *testing.T) {
 			Body:       ioutil.NopCloser(file),
 		}, nil
 	}
-	restclient.SubscriptionHTTPClient = &getClientMock{} //without this line, the real api is fired
+	httpClient = &getClientMock{} //without this line, the real api is fired
 
-	response, err := SubscriptionProvider.GetSubscriptions(subscription_domain.SubscriptionRequest{})
+	response, err := SubscriptionProvider.GetSubscriptions(SubscriptionRequest{})
 	assert.NotNil(t, response)
 	assert.Nil(t, err)
 	assert.EqualValues(t, 1, len(response.Items))

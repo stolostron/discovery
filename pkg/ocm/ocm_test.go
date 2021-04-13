@@ -6,23 +6,21 @@ import (
 	"testing"
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/auth_domain"
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
-	"github.com/open-cluster-management/discovery/pkg/ocm/services/auth_service"
-	"github.com/open-cluster-management/discovery/pkg/ocm/services/subscription_service"
+	"github.com/open-cluster-management/discovery/pkg/ocm/auth"
+	"github.com/open-cluster-management/discovery/pkg/ocm/subscription"
 )
 
 var (
-	getTokenFunc func(auth_domain.AuthRequest) (string, error)
+	getTokenFunc func(auth.AuthRequest) (string, error)
 
-	getSubscriptionsFunc func() ([]subscription_domain.Subscription, error)
+	getSubscriptionsFunc func() ([]subscription.Subscription, error)
 	subscriptionGetter   = subscriptionGetterMock{}
 )
 
 // This mocks the authService request and returns a dummy access token
 type authServiceMock struct{}
 
-func (m *authServiceMock) GetToken(request auth_domain.AuthRequest) (string, error) {
+func (m *authServiceMock) GetToken(request auth.AuthRequest) (string, error) {
 	return getTokenFunc(request)
 }
 
@@ -30,22 +28,22 @@ func (m *authServiceMock) GetToken(request auth_domain.AuthRequest) (string, err
 // to an external datasource
 type subscriptionGetterMock struct{}
 
-func (m *subscriptionGetterMock) GetSubscriptions() ([]subscription_domain.Subscription, error) {
+func (m *subscriptionGetterMock) GetSubscriptions() ([]subscription.Subscription, error) {
 	return getSubscriptionsFunc()
 }
 
 // This mocks the NewClient function and returns an instance of the subscriptionGetterMock
 type subscriptionClientGeneratorMock struct{}
 
-func (m *subscriptionClientGeneratorMock) NewClient(config subscription_domain.SubscriptionRequest) subscription_service.SubscriptionGetter {
+func (m *subscriptionClientGeneratorMock) NewClient(config subscription.SubscriptionRequest) subscription.SubscriptionGetter {
 	return &subscriptionGetter
 }
 
 // clustersResponse takes in a file with subscription data and returns a new mock function
-func subscriptionResponse(testdata string) func() ([]subscription_domain.Subscription, error) {
-	return func() ([]subscription_domain.Subscription, error) {
+func subscriptionResponse(testdata string) func() ([]subscription.Subscription, error) {
+	return func() ([]subscription.Subscription, error) {
 		file, _ := ioutil.ReadFile(testdata)
-		subscriptions := []subscription_domain.Subscription{}
+		subscriptions := []subscription.Subscription{}
 		err := json.Unmarshal([]byte(file), &subscriptions)
 		return subscriptions, err
 	}
@@ -59,15 +57,15 @@ func TestDiscoverClusters(t *testing.T) {
 	}
 	tests := []struct {
 		name             string
-		authfunc         func(auth_domain.AuthRequest) (string, error)
-		subscriptionFunc func() ([]subscription_domain.Subscription, error)
+		authfunc         func(auth.AuthRequest) (string, error)
+		subscriptionFunc func() ([]subscription.Subscription, error)
 		args             args
 		want             int
 		wantErr          bool
 	}{
 		{
 			name: "Complete subscription",
-			authfunc: func(auth_domain.AuthRequest) (string, error) {
+			authfunc: func(auth.AuthRequest) (string, error) {
 				// this mock return a dummy token
 				return "valid_access_token", nil
 			},
@@ -83,7 +81,7 @@ func TestDiscoverClusters(t *testing.T) {
 		},
 		{
 			name: "Two complete subscriptions, one incomplete",
-			authfunc: func(auth_domain.AuthRequest) (string, error) {
+			authfunc: func(auth.AuthRequest) (string, error) {
 				// this mock return a dummy token
 				return "valid_access_token", nil
 			},
@@ -100,8 +98,8 @@ func TestDiscoverClusters(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			auth_service.AuthClient = &authServiceMock{}                                          // Mocks out the call to auth service
-			subscription_service.SubscriptionClientGenerator = &subscriptionClientGeneratorMock{} // Mocks out the subscription client creation
+			auth.AuthClient = &authServiceMock{}                                          // Mocks out the call to auth service
+			subscription.SubscriptionClientGenerator = &subscriptionClientGeneratorMock{} // Mocks out the subscription client creation
 
 			getTokenFunc = tt.authfunc
 			getSubscriptionsFunc = tt.subscriptionFunc
