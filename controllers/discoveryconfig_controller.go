@@ -127,6 +127,10 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 		// Parse user token from providerconnection secret
 		ocmSecret := &corev1.Secret{}
 		if err := r.Get(context.TODO(), types.NamespacedName{Name: secret, Namespace: config.Namespace}, ocmSecret); err != nil {
+			if apierrors.IsNotFound(err) {
+				log.Info("Secret does not exist. Continue.")
+				continue
+			}
 			return err
 		}
 		userToken, err := parseUserToken(ocmSecret)

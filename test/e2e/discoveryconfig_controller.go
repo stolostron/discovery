@@ -338,6 +338,87 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 	})
 
+	Context("Credentials become invalid", func() {
+		AfterEach(func() {
+			err := k8sClient.Delete(ctx, customSecret("badsecret", ""))
+			if err != nil {
+				Expect(apierrors.IsNotFound(err)).To(BeTrue())
+			}
+		})
+
+		It("Should delete discovered clusters when secret changes to an invalid one", func() {
+			By("Setting the testserver's response", func() {
+				updateTestserverScenario("tenClusters")
+			})
+
+			By("By creating a secret with OCM credentials", func() {
+				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
+			})
+
+			By("By creating a new DiscoveryConfig", func() {
+				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+			})
+
+			By("By checking 10 discovered clusters have been created", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(10))
+			})
+
+			By("Change secret to an invalid one", func() {
+				Expect(k8sClient.Create(ctx, customSecret("badsecret", ""))).Should(Succeed())
+
+				config := &discoveryv1.DiscoveryConfig{}
+				Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
+				config.Spec.ProviderConnections = []string{"badsecret"}
+				Expect(k8sClient.Update(ctx, config)).Should(Succeed())
+			})
+
+			By("Checking all discovered clusters are gone", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(0))
+			})
+		})
+
+		It("Should delete discovered clusters after secret is deleted", func() {
+			By("Setting the testserver's response", func() {
+				updateTestserverScenario("tenClusters")
+			})
+
+			By("By creating a secret with OCM credentials", func() {
+				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
+			})
+
+			By("By creating a new DiscoveryConfig", func() {
+				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+			})
+
+			By("By checking 10 discovered clusters have been created", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(10))
+			})
+
+			By("Deleting the secret", func() {
+				err := k8sClient.Delete(ctx, dummySecret())
+				if err != nil {
+					Expect(apierrors.IsNotFound(err)).To(BeTrue())
+				}
+			})
+
+			By("Forcing the DiscoveryConfig to be reconciled on", func() {
+				byTriggeringReconcile()
+			})
+
+			By("Checking all discovered clusters are gone", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(0))
+			})
+		})
+	})
+
 })
 
 // annotate adds an annotation to modify the baseUrl used with the discoveryconfig
