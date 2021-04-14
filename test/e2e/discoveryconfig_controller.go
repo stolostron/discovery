@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+	
+	
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -27,7 +29,7 @@ const (
 	SecretName          = "test-connection-secret"
 	TestserverName      = "mock-ocm-server"
 
-	timeout  = time.Second * 30
+	timeout  = time.Second * 120
 	interval = time.Millisecond * 250
 )
 
@@ -125,6 +127,28 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 	})
 
+	Context("Creating greater than 999 Clusters", func() {
+		It("Should create discovered clusters ", func() {
+			By("Setting the testserver's response", func() {
+				updateTestserverScenario("onekClusters")
+			})
+			By("By creating a secret with OCM credentials", func() {
+				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
+			})
+
+			By("By creating a new DiscoveryConfig", func() {
+				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+			})
+			By("By checking 10 discovered clusters have been created", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters()
+				}, timeout, interval).Should(Equal(999))
+			})
+		})
+	})
+
+	
+
 	Context("Tracking ManagedClusters", func() {
 		It("Should mark matching discovered clusters as being managed", func() {
 			By("Creating unmanaged discovered clusters", func() {
@@ -150,6 +174,8 @@ var _ = Describe("Discoveryconfig controller", func() {
 				}, timeout, interval).Should(Equal(1))
 			})
 		})
+	
+		
 
 		It("Should unmark discovered clusters when they are no longer managed", func() {
 			By("Creating ManagedClusters", func() {
@@ -345,7 +371,7 @@ func annotate(dc *discoveryv1.DiscoveryConfig) *discoveryv1.DiscoveryConfig {
 	baseUrl := fmt.Sprintf("http://mock-ocm-server.%s.svc.cluster.local:3000", discoveryNamespace)
 	dc.SetAnnotations(map[string]string{"ocmBaseURL": baseUrl})
 	return dc
-}
+} 
 
 // func byAddingTimestampAnnotation() {
 // 	dc := &discoveryv1.DiscoveryConfig{}
@@ -548,3 +574,26 @@ func newManagedCluster(name, clusterID string) *unstructured.Unstructured {
 		},
 	}
 }
+
+
+// func parseK8sYaml(file_loc string) []runtime.Object {
+// 	file, _ := ioutil.ReadFile(file_loc)
+//     fileAsString := string(file[:])
+//     sepYamlfiles := strings.Split(fileAsString, "---")
+//     retVal := make([]runtime.Object, 0, len(sepYamlfiles))
+//     for _, f := range sepYamlfiles {
+//         if f == "\n" || f == "" {
+//             // ignore empty cases
+//             continue
+//         }
+//         obj := &unstructured.Unstructured{}
+//         dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+//         objc, _, _ := dec.Decode([]byte(f), nil, obj)
+       
+
+        
+//         retVal = append(retVal, objc)
+
+//     }
+//     return retVal
+// }
