@@ -4,6 +4,7 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -17,6 +18,8 @@ const (
 var (
 	httpClient   AuthPostInterface = &authRestClient{}
 	AuthProvider IAuthProvider     = &authProvider{}
+
+	ErrInvalidToken = errors.New("invalid token")
 )
 
 type AuthPostInterface interface {
@@ -51,6 +54,10 @@ func (a *authProvider) GetToken(request AuthRequest) (*AuthTokenResponse, *AuthE
 	}
 	defer response.Body.Close()
 
+	return parseResponse(response)
+}
+
+func parseResponse(response *http.Response) (*AuthTokenResponse, *AuthError) {
 	bytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, &AuthError{
@@ -58,7 +65,6 @@ func (a *authProvider) GetToken(request AuthRequest) (*AuthTokenResponse, *AuthE
 		}
 	}
 
-	// The api owner can decide to change datatypes, etc. When this happen, it might affect the error format returned
 	if response.StatusCode > 299 {
 		var errResponse AuthError
 		if err := json.Unmarshal(bytes, &errResponse); err != nil {
@@ -74,6 +80,11 @@ func (a *authProvider) GetToken(request AuthRequest) (*AuthTokenResponse, *AuthE
 			errResponse.Error = fmt.Errorf("invalid json response body")
 			errResponse.Response = bytes
 		}
+
+		if errResponse.Description == "Invalid refresh token" {
+			errResponse.Error = ErrInvalidToken
+		}
+
 		return nil, &errResponse
 	}
 

@@ -42,14 +42,14 @@ func (c *subscriptionProvider) GetSubscriptions(request SubscriptionRequest) (*S
 	getRequest, err := prepareRequest(request)
 	if err != nil {
 		return nil, &SubscriptionError{
-			Error: err,
+			Error: fmt.Errorf("%s: %w", "error forming request", err),
 		}
 	}
 
 	response, err := httpClient.Get(getRequest)
 	if err != nil {
 		return nil, &SubscriptionError{
-			Error: err,
+			Error: fmt.Errorf("%s: %w", "error during request", err),
 		}
 	}
 	defer response.Body.Close()
@@ -78,7 +78,7 @@ func parseResponse(response *http.Response) (*SubscriptionResponse, *Subscriptio
 	bytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, &SubscriptionError{
-			Error: err,
+			Error: fmt.Errorf("%s: %w", "couldn't read response body", err),
 		}
 	}
 
@@ -86,12 +86,13 @@ func parseResponse(response *http.Response) (*SubscriptionResponse, *Subscriptio
 		var errResponse SubscriptionError
 		if err := json.Unmarshal(bytes, &errResponse); err != nil {
 			return nil, &SubscriptionError{
-				Error:    err,
-				Response: bytes}
+				Error:    fmt.Errorf("%s: %w", "couldn't unmarshal subscription error response", err),
+				Response: bytes,
+			}
 		}
 
 		if errResponse.Reason == "" {
-			errResponse.Error = fmt.Errorf("invalid json response body")
+			errResponse.Error = fmt.Errorf("unexpected json response body")
 			errResponse.Response = bytes
 		}
 		return nil, &errResponse
@@ -100,7 +101,7 @@ func parseResponse(response *http.Response) (*SubscriptionResponse, *Subscriptio
 	var result SubscriptionResponse
 	if err := json.Unmarshal(bytes, &result); err != nil {
 		return nil, &SubscriptionError{
-			Error:    fmt.Errorf("error unmarshaling response"),
+			Error:    fmt.Errorf("%s: %w", "couldn't unmarshal subscription response", err),
 			Response: bytes,
 		}
 	}

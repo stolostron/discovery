@@ -52,7 +52,7 @@ func (client *subscriptionClient) GetSubscriptions() ([]Subscription, error) {
 	for {
 		discoveredList, err := SubscriptionProvider.GetSubscriptions(request)
 		if err != nil {
-			return nil, fmt.Errorf(err.Reason)
+			return nil, fmt.Errorf(err.Error.Error())
 		}
 
 		for _, sub := range discoveredList.Items {

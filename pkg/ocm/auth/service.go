@@ -3,6 +3,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -25,7 +26,10 @@ func (client authClient) GetToken(request AuthRequest) (string, error) {
 	response, err := AuthProvider.GetToken(request)
 
 	if err != nil {
-		return "", fmt.Errorf("Couldn't get token: %s", err.Description)
+		if errors.Is(err.Error, ErrInvalidToken) {
+			// something wasn't found
+		}
+		return "", fmt.Errorf("%s: %w", "couldn't get token", err.Error)
 	}
 	if response.AccessToken == "" {
 		return "", fmt.Errorf("missing `access_token` in response")

@@ -60,7 +60,8 @@ type SubscriptionRequest struct {
 	Filter  discoveryv1.Filter
 }
 
-// SubscriptionError represents the error format response by OCM on a subscription request
+// SubscriptionError represents the error format response by OCM on a subscription request.
+// Full list of responses available at https://api.openshift.com/api/accounts_mgmt/v1/errors/
 type SubscriptionError struct {
 	Kind   string `json:"kind"`
 	ID     string `json:"id"`

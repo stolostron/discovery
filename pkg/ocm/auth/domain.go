@@ -24,6 +24,8 @@ type AuthError struct {
 	Code         int    `json:"code"`
 	ErrorMessage string `json:"error"`
 	Description  string `json:"error_description"`
-	Error        error  `json:"-"`
-	Response     []byte `json:"-"`
+	// Error is for setting an internal error for tracking
+	Error error `json:"-"`
+	// Response is for storing the raw response on an error
+	Response []byte `json:"-"`
 }

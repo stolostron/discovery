@@ -1,6 +1,8 @@
 package ocm
 
 import (
+	"errors"
+
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	"github.com/open-cluster-management/discovery/pkg/ocm/auth"
 	"github.com/open-cluster-management/discovery/pkg/ocm/subscription"
@@ -71,4 +73,13 @@ func formatCluster(sub subscription.Subscription) (discoveryv1.DiscoveredCluster
 		},
 	}
 	return discoveredCluster, true
+}
+
+// IsUnrecoverable returns true if the specified error is not temporary
+// and will continue to occur with the current state.
+func IsUnrecoverable(err error) bool {
+	if errors.Is(err, auth.ErrInvalidToken) {
+		return true
+	}
+	return false
 }
