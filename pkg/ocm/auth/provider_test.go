@@ -3,6 +3,7 @@
 package auth
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -55,6 +56,7 @@ func TestGetTokenInvalidApiKey(t *testing.T) {
 		assert.EqualValues(t, http.StatusBadRequest, err.Code)
 		assert.EqualValues(t, "invalid_grant", err.ErrorMessage)
 		assert.EqualValues(t, "Invalid refresh token", err.Description)
+		assert.True(t, errors.Is(err.Error, ErrInvalidToken))
 	})
 
 	t.Run("Empty string token", func(t *testing.T) {
