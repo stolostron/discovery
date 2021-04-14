@@ -1,0 +1,6501 @@
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc0
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: e677ukz9-reauu3f9-ayuj-8nd1-fb2p-wby6yfxxfk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc1
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: js37lwfd-22g1c2jt-7gsm-tyln-1kjr-lshavsf6ly
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc2
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: q8rsq9sq-uggflxgb-z8jn-6e81-2kus-x2rjpbivdv
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc3
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: s9dazwty-l1s592fy-65si-gy8l-nx6g-l4vrbszvq6
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc4
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: dga5eqcu-bjam9u3a-zuav-fjcl-yxg3-zbugylo1vm
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc5
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: obcurh7r-u4uyclkg-xwaq-fcpm-qtb4-lh1ndlx9q1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc6
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: kfoog4su-8gmfv7x1-r9yq-2umc-veg2-67tit7fi19
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc7
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: w8oxqkcx-aa76pbxl-84u1-kjo6-g5wj-85r3fdcsvw
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc8
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ds55yunt-wg1de3vz-9dfu-83ty-d9x9-5v4ibormtz
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc9
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lemdhdia-r7rm5wen-qnpp-lzgd-gag4-klz3z1yvqx
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc10
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7i6q57en-xa8uhrxn-vytn-sbrl-vwag-vw6brkymng
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc11
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ekfgn4ta-126wtn1b-skkv-v9z8-ytdy-l7hrstecsm
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc12
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3za2e56r-xgkyu655-ahnv-l7fj-ugbf-qewa7rvbpi
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc13
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8ovkv6jx-l4fhhzox-8w9a-qc73-zo3f-xwba3d2tu4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc14
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: sjfxk9gk-6k7gj8zn-e4ss-geb2-pnd2-563sgk1mfp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc15
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: e4thngor-uludb9k6-bbou-kxvn-2zyi-ucd4cb4lnk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc16
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: q8loawcf-vyye7na5-vo9f-atf8-1hhl-d59ir5spvl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc17
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xtanvw1c-actkzn78-tr7d-tm2n-lgh5-uzyussc7lm
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc18
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ma3fm7ab-3xybrcc3-zfm3-5yfl-v6ev-ehhrvxxp6d
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc19
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3965ccbe-r6xexch6-bfk1-v3tn-5je9-ed29cd28nz
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc20
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: g7y1rs39-y9xv4dyo-2r3n-93ax-wggs-p5911t7kl2
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc21
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ohav1sye-qzzykqr6-kkx1-mg1v-z6ms-y2gtc1dlxd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc22
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: x7bkhyap-bjmaepjc-lkug-6a9a-s8ns-vs8x94rybd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc23
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3ryl8q83-lul3xz4t-twii-a11e-kwp8-p92jxw4crp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc24
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1ndinliw-cd3zpz2a-sz5b-trwa-q7oo-98vnuytq3a
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc25
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: zhvwb6n5-jw5ttq2w-beqg-fu7j-rtwf-nhqxafiu6r
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc26
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: d4etymqr-m52v7bse-uu4g-pyia-ewjt-pp2m64l4wi
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc27
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vhvre7cj-buzojuni-wlhp-p2mq-cjpw-dursclu8h2
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc28
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: r2mosuvc-nwll2tlq-7dl9-19gi-rb7g-xz8xol6rae
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc29
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lbczukem-2hrp1odm-iym7-rs5n-zzxu-9mmlnrdsn4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc30
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8e5eaunb-f95i1ysp-p4l4-h5ya-mlm5-a6x4jsxu1i
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc31
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: eu4tv77l-bxx2l5tq-fild-oo1w-27jr-6d468jdyjd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc32
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xjq7d5rl-7w2lk1z6-c5y7-b7vf-mb4j-p6ra1r8ltf
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc33
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: hnsgtate-7b41dz27-mcy3-1xs7-1bnn-27uagmre2r
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc34
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mcmbe9kp-5ls9aqd2-cdte-wt6u-hxct-979b8edlxk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc35
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 58sanvja-xmss949p-f8pn-y5hf-z28h-p8htfyec2q
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc36
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7ep1a4qa-mzxonf1u-bkfc-uqni-5t37-ohfqj8ilq2
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc37
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: sod4bc8o-gu4lbh82-js9p-ijng-1bzj-x56pcqsyml
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc38
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 2k3hv2xr-5hucms1n-8ukt-65qx-tbwm-7yl1d1s8s9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc39
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: za7bsu69-42128mi3-jm6k-r3bz-4ri3-izobxyx8lu
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc40
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: n4cxx22w-qy7a1yr3-db3x-tpjg-9euz-vewldk4ujl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc41
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: he96bsm9-ctubpccj-pmgg-banu-9hwm-1yiugwr6oc
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc42
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6paexreh-flvk9frv-7yzp-6t3k-vyjr-kar99kccg3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc43
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: edtvm519-bggv25v9-chgg-7qoq-78zx-oh2j5n69la
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc44
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: v9m1jdhj-o1s38viq-brkf-tfbe-uivi-mlgrnv1blt
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc45
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qrsq9rb6-5lwzte5p-i7mg-c91a-wkr5-t3l7sc6xsv
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc46
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: h8ht57n5-92wjvppw-vo9s-u7gw-xirs-zbtpni1a86
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc47
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vsjkhvj2-5dplxxd9-kupr-qup5-8cgq-5dokzx26tl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc48
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: utik329f-2dhyjo5r-1w84-laoe-na2r-j5u1cuyx4q
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc49
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: kz4c7ls4-3562h7qs-nwq1-3a5y-1p3a-qok2o19p4h
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc50
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: clmhn3ua-odvnm5eq-wzdo-14tw-6ic7-nnr5cfmcsw
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc51
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: h1zk7vav-xhjikszt-ylsw-rpve-kvn9-puyc8dke3e
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc52
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vfnd63u3-ug5z93q6-9f2f-uuyp-4fe4-sirjjztb7h
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc53
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: m87kc4n1-6cijrmav-l8b5-cggz-qy2u-2codcntdzx
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc54
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1hpn2wo4-cgy7eaff-yc66-66a4-vd51-wd9cfboopf
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc55
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: kxzk33k2-llo1qh9n-ppmd-uih8-qtx7-14gbcp283k
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc56
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8ejnp9e2-21oabm97-7yp2-y1bz-eb32-qrn41avzc4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc57
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: izwm8tgq-hji4iajh-p261-hrcw-j1d5-t3tdiugf3o
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc58
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: wdkbuagz-cm77drhv-7lbs-d6gk-a3ff-3qej73o913
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc59
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gryxm6qa-m6zaasf9-ooj7-v6ni-dsgm-33zb6m34ip
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc60
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: iv33ferd-z3pa2vik-6tob-4bzj-had1-snhglswq96
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc61
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7u5671uv-5pdy1vwl-qbdt-l6gl-nne2-zl2rfdogzt
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc62
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: bnvwy4bv-3ytpudpk-1ojb-rfbq-yh9l-vdn52o7zcf
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc63
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6xcatcd3-ibcqatdc-y5sr-71e6-e8it-4qb5cuan4l
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc64
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: zlx15c9a-4hct8o89-itbu-bbmf-fxir-z9nlx3szw4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc65
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gc9qqxup-kh3fjxu3-a1x6-4dwx-2hst-k4oo7e7was
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc66
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7va33mg8-7lnb1url-841e-mzvx-alhm-v6drysox2j
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc67
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 2ww1pjc7-fpopxtwo-e9ak-cgps-gfnk-91yfp1ix44
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc68
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lb95k6cr-2d976o5h-ui4y-hl1k-ghn4-rb89qy4xtq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc69
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ppnqmelk-346gsbif-w8k9-wwat-pnwj-u3tdv61mee
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc70
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ouecyrl9-ge7bou8j-q8ni-qd6w-kzju-5qkjaalwvl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc71
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 5e54gqec-ao4lwl1w-w1xt-as7z-dyr2-i5ttqbpswx
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc72
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 37slcd88-fo3rbtzt-7v78-owsq-frbl-va46hqwzyx
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc73
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: f7r6ghar-6v9bm2fy-pj29-c68i-75ai-5s2i71r1wd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc74
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 79umy9a5-97y6ew5c-e28d-p4zf-ff25-a6fp8ekzu5
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc75
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9r2uukha-7b5wphrs-rihs-kupa-1mbm-rrlcuhy1rg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc76
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8v4mfbtg-i43fc6vb-1lun-pk14-81zf-aideiv1tyq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc77
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: x3fxdydj-bu1qp8ww-gau1-4f85-y4bt-pbfp4ad8ay
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc78
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: awwaqaky-3pje7tne-gqze-q3dy-kahw-wluip24laq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc79
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: h6nlvcqo-lu2cxca4-jyml-x52b-7s5v-ptlhcbz2mu
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc80
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: uhireybm-q6qf88qe-fb9z-4s57-kn33-6x7vys9smk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc81
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lit9ph6h-s1489ual-yzf8-d5di-a4x1-yr7owzsaoo
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc82
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: c9jpod4j-fr9y6zm6-iw2e-jqhs-7o6i-36s253bkde
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc83
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: bu9rm6pd-buegvtuy-g42f-pnuj-qkb1-cqmo59g5po
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc84
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: fhrnqdl2-6q8ad838-37s9-vo8z-u97l-g65rtiulrv
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc85
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ihr2oy9f-4tgan5gq-zuet-snyw-4n1n-va2i6l9d39
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc86
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 47htfl2o-aknnxpx3-6rxr-fjrt-o86t-xcx7ssioih
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc87
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xk5iv3au-wd41a3lp-9qb9-rohv-c4so-zpqd1im5md
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc88
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 5t5c8luq-wm3rev2p-y1jo-ts2g-hgwb-ikeulwqnso
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc89
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lq8cu26k-uj4d6l9u-e2xk-wwqf-s2nf-9l2grnap9p
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc90
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 22rzveln-5an3txss-npjo-ox4x-ltnp-jzzpox3ayl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc91
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: i96egx2o-vynix4lo-yf61-6j87-k6me-iwfsgwcap3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc92
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ezu1noe3-ox7ru7hu-hdzf-g8lb-x5cs-92dpm5kx33
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc93
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: cnlp36vh-s9mvwpot-x9q4-78a8-mzbv-kxmu9l5y1x
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc94
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6stcosir-dfnsmnz4-tui3-82ek-qv8q-d24s9y11ib
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc95
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9f7kkgrh-r9rvn8x7-bg42-3t4v-kqma-dqoviy475y
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc96
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3tf8ptef-y1it1n2z-w34c-h45o-rre5-lodtxzalvp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc97
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: pcy3aiax-6mbvylyu-zs2w-6v1n-jjfe-rdd9w63bfe
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc98
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1ydid5vo-qi3onqw4-msn8-k5j8-72mz-s3zfzn1m1h
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc99
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qrq27hjs-xyjm9bsu-rban-l24b-o16v-1x25gu1pti
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc100
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: x4u1ef88-4kpjh2ry-7iui-gmjj-kogq-5i2ikwkfvu
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc101
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 33evnd4d-cdce1ol4-crp6-eo3z-klt7-ejtz77u6eb
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc102
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qgv6pbpa-qlak8smn-rfpt-ig4q-rdyr-9r6ga8oxap
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc103
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7e82z5w2-9lz2zqvy-iw5u-faxz-ayr7-wm4jc31a49
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc104
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: pse8asjd-osleg2eu-qkmj-542j-c2ye-6i9v794a52
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc105
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 2u9o3c2x-k8ymhumv-m3zn-eemh-kepj-gofosmf5j4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc106
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: kupm3oul-5hvr62nb-ft1o-cyi4-8nf8-56q3pzvpmb
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc107
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 4oyjpyav-69m2lvy6-2xae-bqwt-ejyp-9o34nvrwni
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc108
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: l5zyucoh-qnqlboxw-g3k8-y95z-y42p-t6gws578o8
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc109
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ejyz3dul-fl4crgtf-wrf6-qzyh-hrs5-ggcq16s1s3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc110
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: y7afti7a-jxlpun96-ik8b-uzmc-i3oi-e5u9oubhn4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc111
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: pmposms8-5v7nr8a3-cr6a-ykh1-ezwk-xsil36ce8e
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc112
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: scjj7a7r-mtku3u18-e5oo-2hm5-wgi2-5qdlg37f4u
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc113
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qhsgdwrg-7r9s1wj7-11r2-1e22-gj5t-3mfuw99bnt
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc114
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 56kckkpx-x5xggxqi-r1cv-r95y-qm4u-wyyhxpec8j
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc115
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: m5no4a19-7lntqjel-2qby-h4x7-7tt3-ax8hp5iprg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc116
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 4e8oqn79-6ram5dap-t2xy-tf1j-jlzy-kq2sq3bfeh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc117
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: visjgz6e-apwlavhy-sexc-e28t-wrkz-mj3rd9qvjb
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc118
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gm4qjgg6-aqyrhiyn-enkc-rgkt-784a-2e7fxnlx9r
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc119
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 2ex2m875-1aox3st8-sfr8-7paq-7jy1-6hfclmezpt
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc120
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: hld7xexi-d4wkp8en-elf8-3nh3-ssiw-n2ndvc7ye8
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc121
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: s8n3pfhg-4lo4i3wa-xztk-f33f-h5ia-naqlcmpjtm
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc122
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 2qf8r58t-c9i12ebp-5qks-9nf1-hhwc-dqdmjruny3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc123
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9fexer2c-qlg2995y-gmqj-799y-cnq5-7tdxjhlazd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc124
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: zs4vt62d-vl7he71t-u8vc-uc2i-8qra-bftszix2i7
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc125
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 22cwb4yy-yy6dnzn9-l4zy-kn7m-h38b-nymy4z1xk9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc126
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: cbt5jj5c-3mi7l6da-xmbn-v7be-l6tc-kvqx5z9knu
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc127
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: p21xol4d-8nlspbcr-xtwq-jmqj-o2vq-62qyoleyij
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc128
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: s6x5bnpi-5x1jd9rl-hfva-baix-63ca-v74oagguuk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc129
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: tu557o6b-kqqvshrf-c15t-v4hn-drpe-ckx4gwqqb9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc130
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: iu66br49-mf5wsvxk-ov14-8c19-zlgt-ybicgvk5g3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc131
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 598ga4dx-5tsaf7o1-387x-do4s-rsh8-cz2ol13sxz
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc132
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xxwefrib-vd96kcqi-qtej-6fju-spnu-gz5a99ssjl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc133
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7mlkzsdo-rggk5cdl-3ja3-acuw-5lek-s4wo6nxu99
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc134
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: byhu4u4q-uqfwus3c-1977-hzb8-r4rn-311pr7fhkj
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc135
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3pqqwfqk-id54jmgo-gita-o43q-pkd7-tn1urhdc3b
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc136
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: deqgzvtw-2rgynbpp-f96x-uyl8-jesa-88rytmgtvg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc137
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: f7379jrp-7xdjkqmb-ho8x-1r38-qm5y-dtkeav4uza
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc138
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: slt31em8-lhj3lqpc-bfte-x7rm-stdh-67heb3xe52
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc139
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6318n33q-agjrqqz2-pqsh-c2jt-78rg-cnj2abvj48
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc140
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: tf8doop6-yjs425kd-qfy2-f562-z44c-tqgu6ed1d1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc141
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: tlay1yxz-npytluqj-wix5-iz2l-2688-2z9ytvcp1g
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc142
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: rc323gxv-fb1lotk6-p6u5-vh6s-fpcc-3vewadu8lh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc143
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mjh5oxqn-recr99e2-o3gw-zjbu-dsf4-33wb2wygta
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc144
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7iii7opb-7tsduldq-3yjx-3uzq-tmbn-1wz45nwb55
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc145
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: c5r1lwc3-3n1wy4qo-kfy8-x9qf-alv1-ufsyttb773
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc146
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: zkcywydi-kw87or2o-2nl2-t32s-eyee-fr8dt3cvge
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc147
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 28h9djvo-z3d6xhw5-t246-ve8l-x71u-vbsn797htg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc148
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: v5vuvy2g-om8c2qkh-9fgu-zz4f-ynqp-39leirqncj
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc149
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ni72l4v9-umdbj2k9-kdep-wi6x-hygf-ns7ngdw3vs
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc150
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mux1trak-cmrlsjqv-d9oh-ys1i-abn5-b3avpxodcq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc151
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ripyybwr-mdpg182e-fod9-g77v-an8n-k3bc6e36b3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc152
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8l7yx14g-na3zx5u9-yxkk-52nu-wik8-88g7y2kgyy
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc153
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8m3bsoj9-8f8jgqvr-n67g-l8zv-zs39-zdarx9b65r
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc154
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 2p8gc6pe-s4311nre-lanl-qqtc-y7qs-cgqbc1y3fp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc155
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: syklnnxw-b6dcg58h-frkh-juej-ex1f-pp8bpob976
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc156
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ks7i24fp-r28ebjoo-4e31-wt2m-7k4g-ycjq4vi4w4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc157
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ygfo4vid-azxhc3tz-urg2-mu76-hzg3-v1779ple9r
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc158
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: auqiwcox-kgmdu81e-lmon-syww-hsb9-5oin46yvnz
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc159
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xdahtrg3-p9hwzl9f-g9yz-ew63-g3qy-7awpimf5lp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc160
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: sjau7qz6-jleddnpd-5u89-by8k-u96c-upqu6qbvkc
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc161
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ngcn5kxu-gz321is4-95b1-n9vm-l9cn-8deirr2m9s
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc162
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mfpmsja3-xiu2h2ng-j14c-bdcw-sox1-pdmarf197c
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc163
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: a9nfjsla-mbfqneko-ufnx-ny1s-o6yu-ul15k11jih
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc164
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: l2h46paq-5pq9d6km-h4ef-615v-69ur-tvmptahaal
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc165
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: g6txk74v-j6ji4zxu-jr5t-gw36-c75i-h7bovaeq77
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc166
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 849uqoad-34sdeaot-l9h1-g1nh-mcvr-2j19q6flqr
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc167
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xbnh698h-m2dxpsbo-dhpj-wyc5-ljzl-smz4pyl9i1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc168
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: i3gbyejd-s5p6fv65-zpo9-ai18-pmzy-83jm2zux2p
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc169
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vksl1urw-lo8cz9xc-qrk6-1efm-kac2-gcehzyax7q
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc170
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3plg6yg5-4tjmjfra-ns2h-u54k-d4s3-hturxoo1dw
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc171
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 77pe97gz-yw7cxlab-jdsz-32vx-shlm-tgwx1wrr4w
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc172
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lqu95s2x-b5eysume-apmr-v28t-ezdi-yomjtdp52d
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc173
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7dp9drak-6xeth631-lci3-uy3t-y1uf-4xem588e21
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc174
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 77eeo6fl-i1k3kzmb-fsnk-hbbl-13vr-dkvfrok6cz
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc175
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8qj63puy-fnb23vuz-hqww-u3aj-j6aj-j1zybhtvvf
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc176
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: wek4rrm5-9w2hkj1t-9jb1-x9yb-3hly-78khrpzqr4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc177
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: zfd687c9-rq8w7ccg-1ldx-fenb-rhvt-8957mlgtcj
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc178
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: wqd8mp2v-faity77l-1eqy-ocx3-5hqv-hlymnolqi9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc179
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: aqednsaa-4cqu9ppv-mrmj-wea1-ybph-pb22r44kwy
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc180
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: cd8lxe63-tiltoxxe-rjce-9bnu-n3lf-kgmvdefgak
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc181
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: u18jb8yt-3nmi9fj5-ugnq-yf7u-qjs2-9ozz41lmit
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc182
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mrl2wo4d-wem7qmvq-mu6m-y9ju-6jqn-c2jd2fvdi1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc183
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: dpo2vtml-715jnzvd-hhrk-l31x-sdps-lp6jjwxgbt
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc184
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: na3p8e8j-b62dtlhi-jzvk-x3fh-a3mp-79ovjsud14
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc185
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: u5ajf76k-5cadpqxw-56p3-noab-e5q8-rfbv74je34
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc186
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: fbuhs2h4-nnpwysbt-8v3u-wjip-yid5-aujy24k5bz
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc187
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: yjkgt32d-dhzlpi44-m5ji-pjfm-4z3t-hmuep4xrfa
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc188
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: oxenbflv-9p975cbg-gbdu-ku2z-i4cz-uwhmy9wd4w
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc189
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 4vd25uhj-fqx5xw4l-gudb-bpmo-lqrs-x1j1tp4gts
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc190
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ajjam1dm-gz86vzmp-jjtu-2xol-bp32-pm3b412ogg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc191
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: dstq8wj5-n4h1ztmu-npdq-qur5-vwu8-uhicnic5fn
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc192
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 16ncvdbt-5er3sw4h-lohq-3zyy-p1rl-mlu9lgo992
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc193
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1mzhohfw-56hqhjae-y6k4-9183-for8-uezb7v1p5i
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc194
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: fi3xl4lh-k6zv1y14-xhah-l5ah-cd4w-8hchefn3mu
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc195
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vtjnasbv-179bu1il-kxh4-hb85-psez-wu4ca6btxv
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc196
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 39lwh1qz-5omjj51a-cclx-at6u-npty-8bm27xcbn4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc197
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 5sc5qjpg-a9vxjmu2-jmzx-hwnc-5dmd-cqbihqfb7s
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc198
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: tg5ogmvz-wi1p95xd-2edo-6vsj-bt4t-me81fgnf9m
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc199
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: r3aa24zb-xjl9gx9d-yldh-2v5h-4xaf-r79zofro5k
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc200
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9e9zqkne-i5x8tm6e-vg26-drlc-c9j7-1zpp7obm8k
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc201
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7j67ydtm-kfdewm4r-3fof-q2if-d4ff-mcfljpe1bh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc202
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ucz6vup9-kzbyndgy-529u-m3e9-jlct-9tuhz1vak5
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc203
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mldunpc6-tc9a9wut-j84b-rjz6-3qti-7qcgvthdb2
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc204
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qbbesy3g-kn3ymqzg-byjt-jm45-senf-j7o7omg7eh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc205
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 4kjaweeb-9sw59qcg-353n-wa4q-78k6-y2nvmxcixl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc206
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: m2s17pbb-58j17p37-5i6k-l1oc-2i9i-9buy126ypc
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc207
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ukvqnffy-lgrgg1z8-w1pb-7oau-3yhx-c7epixeieg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc208
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ml4w2ahf-nz1i1zu8-6lup-d5hi-j6q3-e3q1n6fmgj
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc209
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ymxs9h5q-87zg53pa-9xtn-hfrb-s3s8-75bh73agfc
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc210
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qsp849d9-ifhef4dt-vmtx-48dy-obyp-q2pjv8bwox
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc211
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: c68iwdnt-lmfe3nsv-ont6-5boq-uzk6-ka8tboy7si
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc212
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7dm1a78z-cvwil6nb-v85m-bkds-kzou-ogi5vm8d9i
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc213
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qo664p5m-dfogev4f-waof-chad-xvnn-i3klzfvitq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc214
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 5vtcbbfi-szizm4ed-w7vo-yjix-xv7w-5llk5vgcj9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc215
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: iiy7phua-7s99xhjc-oh3t-m2s1-l8vv-2skac8umep
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc216
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6mw89uok-hy45717u-d4ck-xeob-xfkl-5jrqiuw6rl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc217
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qgdykbpd-b6c3mjqn-xwvv-8lzz-sy3h-ajbyqfsr9b
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc218
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mxhau4an-9lkbs7vg-qqcr-h98x-y8pg-7lbkrji76k
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc219
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6qmcnvq3-rlda75jm-73kg-rdk1-2pul-2fc7k9yqlb
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc220
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: j9443322-ec7sju5q-hado-lxmg-e3km-e2bdk7xyaf
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc221
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9asizbsg-qgjnsh1x-ucda-h877-ijlo-nvwmwm55wx
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc222
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: c1yerlbe-tlxmwo83-15j9-kbfs-p3ex-geqcz4wh76
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc223
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ka194wrt-6qfsxqjg-3v6h-sjfi-swlz-bsq6g16m35
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc224
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ecuo6zq5-j4kn1nok-haj2-faw7-sc2c-rg478l6s5c
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc225
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: bry4c54k-v7g29qz8-9god-oeua-kupf-495923mdor
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc226
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: g7uc7mvq-wus62tne-bxae-4znm-4m88-61boz9kgge
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc227
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gihy6zv7-llk8gk1s-p41e-wjk2-11x8-ykzsilkamk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc228
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gxay9khb-8f4c87id-qfz6-r5t6-e58v-rff4wvsnhe
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc229
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 26iclrms-6pxwkhvt-ldsc-8kip-4azs-4p5gk1jduy
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc230
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xk7ajdqf-19bhq8a5-1e7m-d4hq-hg4z-v461us3l5c
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc231
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: riymtohb-7toujdky-nd7q-r7cs-8hz7-tk77nyp89z
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc232
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: wujipvyv-hsz99eib-2vdw-ue9a-ybow-1c3sspbmxy
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc233
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: r5s9eh7t-3aivvdhk-tf41-idgt-ygxg-aobx4r3ien
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc234
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ojl5nhsf-64c29ie3-3mq1-wyhq-2tku-vlcib66778
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc235
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: m8zx83db-aec7g4z6-9qup-nsgj-8xtw-nvfp4xo3h1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc236
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: f3pxs9j6-ksvupi9d-32c8-58z3-6foc-ow5e81ug8h
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc237
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: g3mafe6r-3tzfwigl-ofub-j7f9-nj2q-344hscvu4k
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc238
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: rjax9isc-tmzt3ggy-1b7t-epi4-6ory-b68bczr4gt
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc239
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8fajv3w5-c21ed83a-e9s4-ozwx-i1z9-a3753lauk7
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc240
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7d5korte-c3n6ul5n-asze-eguo-uwgz-wb4xr7bh3p
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc241
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gtxhp9bn-t4xmaie6-b45n-zzfd-8j6q-bp2tnaamfv
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc242
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: svlfvs2l-sjuzzqfn-ecnm-teig-3s1w-jiaa95ftdy
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc243
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: aozx5gy4-f19cwa2c-mzco-5jit-5z77-v3xr3cp17o
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc244
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3lpurfjr-kgopoq7k-y3oq-pdts-as92-pkfmhwhb99
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc245
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: pdf7ph3o-cxxvpr8i-3uw1-42q7-bad8-ipagg2e978
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc246
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xl1ejxcb-rc3p2x1f-6y4s-fary-rm7m-6so3k6k5i1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc247
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: q4x69sk5-9v6yug3p-7xyp-iji9-dqca-q4m8x8y9eq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc248
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vegr4scn-o1h2ejox-qdm8-zqjz-5wbr-f88rykgyew
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc249
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: p6aetdgy-vudu89wo-1249-7y8g-vbs6-5w5aau51vp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc250
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: kl15d857-i225pg98-dp3v-ba6f-kml3-vxf69fhsea
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc251
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: pt1ounpf-254x9mnw-a9h2-aet9-49p3-bcl5to8aol
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc252
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: galznuh1-wd563355-2zux-2ybc-cogi-omcm1bfgxt
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc253
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: m52jd3pr-54j6iuni-tzqc-86fk-kvm8-hyimps8147
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc254
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: oktve1fb-toqeb46d-wfjy-vnjf-cgew-fsbfh6gx1x
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc255
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: pytxe2la-778j4ho6-ccv5-momb-5d7z-kg7b8ndph6
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc256
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 76uvsb1r-zonr2ncv-p4yp-gu4m-omy6-cehd9ueydn
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc257
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: tb2ldx34-g1uetlgj-wavs-ieoo-cycc-2yzxnmfejx
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc258
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 4kxgoiml-3xrlh8s7-khbt-3w3f-r9ow-mta3g8nf1m
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc259
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vjoghdfl-1k2m7a4a-47lx-dd1x-24uo-4y66q8my15
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc260
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xt89xjbw-ngb5wn2u-9bzy-xj27-j2ho-tkx5vtmtay
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc261
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: q73zlayr-kii6uejm-ae65-wybb-syag-gwyv8uvdrb
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc262
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: rkbqm4zk-1yp72pgf-9239-ui8u-pshj-71grlu8sko
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc263
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: i9kcksd7-s4kdh779-co7m-xx8s-wd2a-phkok1hg84
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc264
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ufd8ir2l-3mdtkus9-gkpk-2ql4-wwao-cmid9vd7lf
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc265
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: u1qzt2zp-611numzu-2xkq-x3q6-v7qy-wag56wz9al
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc266
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: fk4rq8v5-ohnxkevh-d789-mzgq-wxrc-27t1mfjlcy
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc267
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ptn8otm2-12axv2kn-rv9x-rmu3-mg5c-ydefhfp8wg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc268
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 57vzeh2q-nxwe3tyd-kfun-fw2d-soqn-benkzrngtb
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc269
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 31hci8sn-qxmu1psk-p6md-llqw-1f82-jh7iosmeb8
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc270
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: f6govq22-n1tlzlbr-a6f4-wtfr-vblg-hly4a9xg5d
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc271
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: dgomlvgr-pniobsi5-obo9-9hao-nnmc-9ji8bpgkug
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc272
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: a7tw8p9w-fhhlgeol-7qfd-77jg-alzc-7xmu4uzco1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc273
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7bk39fsm-np8aj3qn-u9g6-va8r-wnnf-1ifnaxgb71
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc274
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: omlytpav-uhvws5cb-lnu1-2ptm-71w4-j8wsejh221
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc275
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 28l9ber8-t1ocu83t-vkfj-xqdo-mgea-yxlmn4dfmn
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc276
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gyroq7yh-jjj6xlkq-ydw2-cwib-ytr6-9qrmcklvi1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc277
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: rhiyez2p-qpltvbr1-ipty-bpt5-vgn4-t4p798vyns
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc278
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: rcpmn7nh-65wpcnx1-gbnv-eg2h-79ij-9tiy8l7ka3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc279
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7x5rgyq5-1hdfmjvu-vfb4-2z5u-78dz-e78wd8vh47
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc280
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: d76k6tdc-znnvznl7-zowc-v3uu-9skx-ztv894cpzc
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc281
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: e41d4whk-ecpf3dsm-5ipg-askk-kb2o-31i3nnfvv3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc282
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: g9dbznvh-rz9yvqra-yznk-blai-k9xp-naszxoy1n2
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc283
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6derzzs8-35cozlve-5j6s-bikn-vs51-zyhibkg89y
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc284
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vym34bh5-6hfkwr6d-877e-bjgd-hndd-6jrybdad6j
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc285
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: agm5a7i8-zfkqn64l-e9t1-crn7-tl1n-1z2lrvnmsn
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc286
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8rc6e3vx-pog7n4nd-dima-4dou-snaa-b62872jlac
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc287
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 45x74b25-xey8ox7q-2evy-vylp-ear8-pgsm94lld8
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc288
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 563m6zbv-nkpa299b-6uvd-a26h-ugik-twif9sqtrr
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc289
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gytr1frt-1ncmtd8c-bruh-r3rx-d1p3-usvwag4l17
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc290
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: c9qjh1nq-kzqi7umr-jxsr-efr3-m6zw-h871eps4qa
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc291
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: tzjip4xg-p2519b24-swtw-995l-poqz-kspvhsujay
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc292
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: n5r4b8qk-2vdbutp2-u8jp-tpnf-6o9o-kivv9pal3k
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc293
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 61w5olg1-jnpc4q1a-hzvo-jj8z-1zgn-85s5yvc2ov
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc294
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: azf9joj1-zkzi2q94-sp7s-hcyc-eh88-j7rox2iq9p
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc295
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: a4xsmt49-d6siaasa-2qhu-yg94-6y3q-y55ar5soux
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc296
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: p5gnd767-p7dr6fr3-fz2r-7twb-bhih-npwp74il7c
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc297
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: r1jblkus-oi1mgi4s-lj18-ew26-blj7-6c91v5j3dq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc298
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ctqvicuc-2jjclsgf-ribn-neo3-wipy-l1neffrywy
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc299
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: cxbwlt9s-1uuevc1x-hmt9-ecgg-3ehv-ev17yfmk8i
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc300
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lmigyar2-l3fb3chh-xzgh-d7pp-py4s-6qo34g4get
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc301
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: bb3obxud-5pqaxeog-wjag-kzep-dxjk-3rzwfykek2
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc302
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 61azj8dp-j4211hch-f5ig-e8ux-5t7c-d123rcfz8y
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc303
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6ffm2msd-mhy584nu-cbsr-5gvj-1wqm-cgnmcu6ro5
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc304
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: l1grb9yh-nyoej67x-4mph-b1zi-qmjx-jmcmg1r1tg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc305
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3rzbl7af-8slesse4-24w3-mag8-m4gk-xnqwpkndb3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc306
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qv1b2mgn-o55uexma-ue8z-ui3u-ujwx-mpk7tcpv8l
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc307
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xkz3f91e-qqkboj85-qzyf-ocsd-ex7n-36nxupe6re
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc308
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xmmiq7g4-9j29tm52-1zph-t3m5-a9uu-81bdpwwv2v
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc309
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 13tzp4sf-f32q1533-7nfn-3n7j-8o7o-fqstglhsnf
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc310
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 59bprt28-3i87g5kh-x8og-jdwt-irpq-dpa11cgc8o
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc311
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: hzpinigp-xzzoaitg-svbl-d74c-ouad-v8jkteoga4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc312
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: imq7a3pi-pgshd5ld-vqwp-pehg-o5nz-qfnkx2v7qk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc313
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1ylznvl6-5519vaic-f9tv-wf7w-2har-lfytri4p7m
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc314
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: rbbbxsnp-795q4kvl-yype-onaq-lf51-37uw42p2vp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc315
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lvdp23xp-jkmda85t-8l8b-1b9t-5afb-1q3brkijlz
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc316
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 2ygm9w1c-9z2vjzz3-t8x4-fjjn-pa6y-4xc382vka7
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc317
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8mciski1-2rpfbhe2-48p3-upw1-wbqc-7mgos181h7
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc318
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: s22pmog3-7h9e2j9f-8lvq-hfh1-gl1g-a96iagg6ar
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc319
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3c3h66k7-7s39x4f4-hcbl-b7yy-ddes-wvsq3jtiab
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc320
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: b5ja7fse-11gasv6b-tgsa-ell8-lfj7-4la9k4uilr
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc321
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: chjrnj52-6nsgc4wc-45vh-k2jo-tvoo-1red2iggzb
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc322
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: jvfheegc-3kbjqb2h-okgu-hbqt-77ze-4wr1d8wz23
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc323
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mhezudgv-g4o1jyj3-331a-fjja-v8uk-r9nm3bvx3d
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc324
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: rxmduh2j-v5hd9ets-uiz8-n4x5-kb1t-sb5pxqbb9j
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc325
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ud3oudpb-vtievmwg-8rrv-9ip6-c56z-9zxy98c1ee
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc326
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ho8x32q8-k2qc2ufu-qtrj-j2n3-6req-yzp4rw7vmd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc327
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: su583g4c-7aok1dxw-yul8-51d8-etpc-v7v6wyp5fu
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc328
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ye2vb1d4-n3y4fh6r-4f85-95ii-dlje-79bt1mmtfh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc329
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: fq9u3ojq-q7tdr1rk-k85e-sb4h-5gp5-gfe2g7t1al
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc330
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3q9xjrvw-hmgpz27i-tg5a-pkjq-kvel-s4x3dacqpb
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc331
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: l631r4sd-9yt7f94u-grf1-r6op-i5af-w372y9fgd9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc332
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: egfnxzmu-gum5gfgr-578d-vi6z-solg-75bnxsa9x8
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc333
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: bcsunz5a-i1g5m71f-d7im-nfmp-u9mh-f7upvdh799
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc334
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9kdkm663-25d833u5-xmdk-u5nh-6cfi-1lhfcw9vpp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc335
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8qime25w-w7ub7iy8-h1fs-q7sj-vpnw-3db684yknp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc336
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: oanwcymi-truxag4b-pcpv-d3v8-qrnn-mgtgbap4as
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc337
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: l3pkbhec-44hymjyo-hf9n-6t9d-3vps-fz6phkri6j
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc338
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ojutu8ef-h5blhwk1-m15y-alrq-2h5m-sjtx4xhoww
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc339
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: a3zdvjuw-a7e72wz9-1e6l-2qsr-itnq-ikdl2k5d86
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc340
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ca97h2ia-7cbng154-96fz-d2an-k9ji-ht5u31irhg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc341
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: torfb1mu-gmo9i59c-n8u2-cme1-iaat-8n6imt95pp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc342
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: tblfo6nu-uz26nbuq-qplh-np2q-vkas-w9qeplvrg7
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc343
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: q33s4hry-mej3em6j-cj96-8kmu-96yz-zigdsgu5ei
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc344
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lf948pnz-8qfs1m7a-mgtm-qj9k-rj4g-6aw69fdl7b
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc345
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7ghwwgci-sewdz834-f72c-xrki-kkut-3vjke2p5um
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc346
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: fgl46ijt-rjslo5it-dm8h-k93o-da9k-lswl737xmo
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc347
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: uvby739n-ct4m2ovq-usqy-9kvi-2fiz-vkra91pl6m
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc348
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: e8ejh6dc-mgat7tdb-wzog-e6fi-yi9m-hgei6ntwmk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc349
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: k6rnvx23-24ae4r1x-wavd-s77o-2a1t-ym7hntqwlp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc350
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1t88odzv-biqwnc6a-rzpb-uwql-yfey-9tccsbxsxr
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc351
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 62tzx9hl-c7i5acag-ukcu-vqw9-9klj-nas2etrwqo
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc352
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7yefmvw4-yfxam6vl-tdcf-1o28-og2b-a5plxnn3eu
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc353
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: d6o3ob1l-at5u5l9b-oryx-2h9j-811q-by5kw46t2b
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc354
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 84mr936e-4obrqkeo-wzoe-cdky-1xn4-tgivg2fu74
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc355
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: fb4c8rmf-6jhm63ce-xi6b-n856-w3wm-tuur5gqgos
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc356
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: jikd1ulu-8td32aw2-1s4k-keb8-a5m1-4fmue9b654
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc357
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: why4nyb8-jzk9lzb1-hn2p-2nd1-1qvt-bztccq72mw
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc358
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: pggdpodq-4x9bm336-m7po-53xg-8odj-2dpov72ukm
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc359
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vjcx5ldv-419rltde-pwil-t865-l1h4-w9o8mn6epd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc360
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3wtlurxc-ntmgzxyn-cpkl-ukyi-dt4x-u9fki429de
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc361
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 44r5chwq-9a7z1y9l-l4tf-f2a7-mmx6-c6ai23zr6o
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc362
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: e4vo4hox-kmomyuba-vrug-eh6d-uilb-qri6vum6ms
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc363
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: qj61ao7x-ef3sl7o6-p74d-xjm5-bob6-otklw2od53
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc364
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: tjvvf879-ocowvql6-3ysp-8gai-9d3a-7ia94rsnbh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc365
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8ugsprpi-bttv74fq-bvr6-ccwf-8glt-r71m87iesh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc366
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: l7isaa8a-s6ku1mwm-qps6-g6pe-fyms-5975f6mxqw
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc367
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ciq6qxo6-u3tv7yvl-h12m-elyn-zv89-xhbhdxkbnc
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc368
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9nmr8z85-ar52qi26-pai5-qekd-mytg-a2vbzcctrq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc369
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: rhwf6xdf-1rabtzyb-hqbq-fbj7-jx9g-711hdhuv6g
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc370
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 19ombjxk-xki3cop1-hixo-nbvg-uh8i-384thgqmnq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc371
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: m34z7i82-5f9c1lqo-kxx9-ohep-5ger-e71gkvgl2v
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc372
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: trvjkm2j-qvxtrom2-co6h-kt2c-3597-ulzcsz3n2z
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc373
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6a29f6r7-w55lcm1c-jpbs-1dpt-ir2u-89thrjki8z
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc374
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: cmmfc6e7-72kfquek-z9be-4vss-r69j-prfx6c68ta
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc375
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3smrz4b4-qlljvb92-fqda-tb22-dpbq-dznbd2xp5p
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc376
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: aj1xnr55-emx9x25g-jkyr-aokk-mhrz-b1h55egm6u
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc377
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: oudx3s9c-lmoflwwm-qf9h-hpbu-uyk2-881nnacym9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc378
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: og7x7eea-gupw4me4-x6u6-tmsh-7mah-byxrd4zrqh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc379
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: psms1ckx-92fwwsg6-s5xf-bcxq-g7py-poz3x1apfv
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc380
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: xel9mycl-cs91y3fq-unen-t1lv-sgtx-mq5pmlk9gs
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc381
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: eyecz1kp-j619cwzl-z3nt-9dpa-sybm-tv533iolbr
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc382
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7r87k5ay-1acqgxt8-ehgf-kpjk-f35p-nc9jmoe7yq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc383
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: k6yqewx8-dxwxsqty-d2mf-q7um-i9qy-8y436ee14h
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc384
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: jivqd532-dlqve1le-ywa2-1k23-45nh-iavk2zl22i
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc385
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8ar9m2er-bjbq5gcz-n3e9-on2k-7ud3-pj2a77g8ho
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc386
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 35ge1e5q-37m4qz2h-agbm-uepe-c8z4-a4aopjcg5p
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc387
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: w4q8ypzt-kwnpms1z-h9dq-mkip-6i6x-bo2g2caqop
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc388
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7l7vylf7-l38tgaux-x9sn-g4zt-yn4u-orpbo5clme
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc389
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 47t7ttou-m3jnh2dn-pqak-2arn-y9zj-245acrameo
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc390
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8y6tf4zt-yaw8heif-xa3n-doiv-axpi-ocmrcnw5ca
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc391
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mj94v5od-78zcifuv-27wb-fdi3-pcjh-mshkxcaqp9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc392
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 76zckwqd-ng8numxk-t186-7nn1-b8z2-f9f2cvryhh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc393
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7n8l4h4r-u8jcd4gk-cxba-s42u-6yf6-ps529f5z41
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc394
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: uzj9klqf-267s34nk-69mi-ivkq-mdy1-a7jlc9rr9u
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc395
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: yrvesye7-dpulhx4h-xwct-cve4-jld9-jqzyehbtqd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc396
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: s15omoqi-3syjy7c8-sn1d-6o9l-968q-3nfowbv9yl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc397
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: zgucpp4h-va5i3q5p-4ash-iags-zgc9-bqpgi5tq7k
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc398
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9mw81dzp-joke6kbb-f7h6-u4ik-c4qs-rud341qclr
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc399
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: sysfdp7n-tm14qa34-9wto-ku9f-127h-oiu8dg6mt1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc400
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: mycu6aam-y28llf8k-8whh-e8pj-t2i1-gzia1rxte4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc401
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: freisljv-9l3g4s6g-zn4u-ig7f-72ba-5d3jm5cump
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc402
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: hvdj84cs-pk8m2jqd-9wy3-3vld-uf1p-qrjcurfr7y
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc403
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 68rzmg9f-1i5ckt9a-se1o-iw1p-99e7-gere9kkhgd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc404
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: z7wkk5jn-mtw8p26k-aovm-wvm5-1m3x-s8ufcexnuv
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc405
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: d32emyiy-fiykh34c-5k2b-k61h-i8rm-aqlem4iw9c
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc406
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: s1kw6bou-crdxuftu-n6tt-pb2a-x9xz-xy9grudrvj
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc407
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: tpb4uk4k-9fwff784-b7y3-jtdo-cqpr-rwtt4utvys
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc408
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7rt9hvj5-xpvqyjj6-deo1-ivk1-m6m1-rpj9zszcw1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc409
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9lt7eh72-7zxcxug5-9mnk-pjbh-xgbv-fti7kwgkig
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc410
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 254q3n4x-5ougbnp9-utks-fj45-t2gu-un2ckw2fzh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc411
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: v7o4jkm3-yu85spun-sbss-nnqv-1bl7-oothtgt9cp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc412
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ij5a3c56-m31cvwab-92op-u4ng-hc5p-w7wh9pyz2n
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc413
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: x76xpgwr-1g5c4wm7-s863-gced-cwt4-rug7gusva9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc414
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: sq6g7lz3-4l94uixr-chnd-dtfe-2fme-etiiiitfqp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc415
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: jz1xo96r-gwgy9cya-prh9-5vbh-6l9x-ghb2dupnsw
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc416
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: afqvpaey-druqzic6-y6kf-tvq5-evow-ljipazgkzn
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc417
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: o2hbv5fd-t99xidh7-3o1w-6zfr-yy6b-ywr79jgk3l
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc418
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: b1i1ledn-ingb74jy-h9ay-cj3q-hjkh-6cxxtqoyd3
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc419
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: fn67gbum-5doe84jh-jrr5-k1q8-e5n2-95ksnfw3mm
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc420
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: q9dlun2n-36w6ksed-74or-uyev-xb3c-bbvedhidgw
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc421
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: d8y5wubb-zuqrr65c-9d55-e2zw-f63e-arvem7dd8d
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc422
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: m5i2hiam-hgmaq2o7-szv1-prne-r5b6-knnzjor23v
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc423
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: hepayn89-kpdv7otf-pjj9-2sw2-zcwn-vnplh9vb3r
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc424
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: j7cniajp-ug4wfp99-dn2r-y5yr-xpn1-fpqpuvqmnq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc425
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: itsl4cd8-373myjuu-cuym-pk6i-gclu-4bn4jrrej2
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc426
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6nkuc8qm-33qh2nmp-xz9p-ppp4-ka36-eunpsfjboj
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc427
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: p3l7qcsg-tchq4y1l-8g1y-7vyb-61pa-eb4htncpq4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc428
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1luorc5p-e3jiibdz-mi7d-1jjs-gcld-yyhqx44f6k
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc429
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: bjvtvuud-cp5o5nvd-rvfa-4sbv-yrv8-d6nxpt4xn7
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc430
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: hfv1e62o-31gj89qz-wqbb-9ywh-29p6-chmkkhtp4b
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc431
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: bk9aabm3-uiphc9qb-xb8m-nnhm-cer6-ccv1nffypq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc432
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8nh6m4ry-bdeuks4s-fdsv-hcqg-tda1-7rag245tpf
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc433
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: wq5p926q-njvlnbk9-ht4b-e47y-o63f-d71vklsj7o
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc434
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: s178fr9b-s5kn625d-oigj-9ter-3c6f-yzzpugyt4l
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc435
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vqxu4chv-o952irxo-xeqs-f6b4-exhc-q7b6ik7obx
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc436
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 22g2taxh-fjp7qztm-kj72-pdyf-a9di-u9dfzgnksq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc437
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9r2qi1l8-cciv2xq3-5nro-1tyf-yhfm-time7tmbly
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc438
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gtadx5zv-4mmr31zp-kbls-4grf-7avy-17dxt9x6yg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc439
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: h4r4pn3i-4w4vvch4-zz6d-c4k5-rflf-qi5dovfcaw
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc440
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: e4uqubuu-wzdrti34-aofo-6l3h-mt2k-v1ra5j431m
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc441
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: f39nmnmm-aclhe6v7-pa1x-oexu-k45f-85mc61kk48
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc442
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: f52drxb2-ve38q6bp-cgiy-7euk-fj2v-rojw4rd6s4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc443
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: z7uzq75x-4zu1z15q-2h9z-xvns-my2t-e6zumrbc44
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc444
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: rw7hy1jq-lczr3oa1-lsbt-jzlb-qfs3-i7vnbms251
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc445
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: n5e9vj3u-lhssuxzm-lsra-kdoa-573j-chgz7qmrgx
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc446
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 3fdf2qua-uxpnykl4-eixv-d4c4-cmlf-cag3yhuwv7
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc447
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1o9rdmpb-caaaanvx-ec47-vagc-5xk9-1p91zjlbtp
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc448
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: nosgxvot-jdkx6t6f-sg3l-9oql-p12m-vbepxcczam
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc449
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 52hwo1o6-en2izxeg-b9au-zleq-pcga-ny7puw6off
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc450
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: zd3v1shu-3iezycei-82mb-xa87-vi6y-lp8ki3q9tm
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc451
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: nnc5qbq6-92a8jjh9-ghmk-lovp-hj8d-9z8c32tku1
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc452
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gtfoes86-q6jolz7w-r2wb-e24l-r7uh-dsr8qttvyg
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc453
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: hyk7ir8h-uyd7qc3q-cj32-4blg-pg99-o199jxsnzy
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc454
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ybli5y68-elljdgrz-nm6h-tp4b-o39z-7wcpalip9g
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc455
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: uhpe2nbu-cmfwx8ol-ghd9-ntnb-xfr2-am2hz81vxu
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc456
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: kvt91u75-5we9licq-f8x9-m8on-6ehm-ov3kyagrod
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc457
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: uubi25r1-ge4514sv-uhoq-g3gv-8tgv-5lls9g9goq
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc458
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: faj9a8r9-4hg784yb-li9g-z3kx-3r63-fhobeo9s7a
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc459
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9nsbtqpm-kdg4w4mv-puf9-lxfh-3p7i-au6hpwv7ya
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc460
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: un2vz8ws-2m2o7l96-if3c-er46-pyvc-8k7364ek5z
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc461
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 4zaqwtkb-jgeqnvwp-5gjz-j6dj-vcqw-xaelvlhew6
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc462
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 7e3ni6hg-665qam1t-vgje-24fj-6pq3-tt5nnd1wv6
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc463
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: vy2hkevz-879e95s9-bl78-uv6a-8kld-znrwz6o9ot
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc464
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: chthd3xh-byjb1njz-wahd-va8a-lhf3-5kb9wil6xt
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc465
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ktg1kgyv-1bt1wvf6-ts5a-g351-wrtq-shqoeeukmr
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc466
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: q7n1nf82-v91isu8v-55hk-glsc-4bxx-pq4bvnu7kj
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc467
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8r4olrj7-se69u55k-6ecu-zuyp-22fq-ue8iqfytbd
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc468
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: znji338x-vv6kjuad-k2rr-zrdz-e5kn-ovidvnvztl
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc469
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: b6v3wvqr-37kyln9k-gajg-nczn-mueh-vrufqlgkv6
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc470
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 2byvlr5d-beq1wdqm-jhlt-lnnq-eix4-i9289tsz7c
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc471
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: ggagypqe-uz4d2csi-6ymr-jw1x-fbhv-ydubr71t6y
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc472
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: usid48ps-sw181ed6-ltz9-ttvq-9on8-2bol518jwc
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc473
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: lszzf5ux-ni8fl3ng-hrcz-zetf-po7o-9huguah4j9
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc474
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: n5yv52v2-cbmvm8k5-m5sl-brlz-9816-3p36trarq7
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc475
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8ltja33n-q2p39ljo-gbk8-iswe-t2dc-dak64iwq8f
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc476
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 4z9lbghf-vnt67p1o-peep-i3g8-yhvx-yatu2irqt2
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc477
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: iq3gg6kc-u3dcqrsi-xdr7-a696-k2sm-zr216il5hz
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc478
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: o3jd9rvd-o59ceibs-6qu6-ibr3-f4k4-t8c6q9ul9g
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc479
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: dkeca5ot-puh348rt-9a6x-zlik-hncw-kedzle7s7q
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc480
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: s28odljz-hleju5zb-ugi7-gxtt-bi5v-2vqpauka1i
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc481
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: c224ml7r-jjys11yv-6t96-dr9m-zd3t-z2qepygr8k
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc482
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: f7vnxocu-lw56o1lx-xxer-93qb-dkvx-lqrrfb9zvi
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc483
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1yxk9hom-45xvoc3s-5vrx-bp4h-ik74-kfsszxh1dk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc484
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8o3xvsq4-czq2qlfi-776s-mw83-8ew2-rtlisrcv4g
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc485
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: arbk3xuu-dufkhu17-6ii4-xe7v-nbp4-scl8rrqfhh
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc486
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: jsui4gwe-283w8hic-35zr-xibq-i7sl-knvh87yhtk
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc487
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 6yk99o8q-5f4hze8e-br1h-53bd-up56-1e7tf9rbko
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc488
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 8jae8t1u-p53dpnz8-f14l-xxd6-lm4i-6zavgd4z4f
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc489
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: wgpxy6lt-fu59iqds-fj8q-i6gd-on79-motywg5u2i
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc490
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: z5w5sib3-cn7yrztt-dh8p-uev4-ui6g-ixp33kx2or
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc491
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 5jjtuib2-gj37g1vv-2ezb-g2mq-yav2-9icfnkiqcf
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc492
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 9r3dfnl9-h8gdel9s-bj1q-185v-35sn-e4sgvjwc5t
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc493
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 1lawosjg-lbkwbryp-bw69-etkp-xu51-zftfr4tsdm
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc494
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: nubxbfzl-ujbpxl92-v1p9-f2jt-xcc1-eq9o12hdxa
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc495
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: gvb46ck1-gtkfsvr1-5b2f-y9jn-fjl8-2sw93e24gt
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc496
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: or4jnp55-s68wdb7d-dqjo-raoh-rgpm-5xtpkumqww
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc497
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 32mujzza-rxzklc29-7i78-ut6f-kdmw-7oknkdbt98
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc498
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: z1aysqoh-7eqlamqh-77pg-6cwh-1ycs-jh9hbvs733
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: testmc499
+  labels:
+    local-cluster: "false"
+    cloud: auto-detect
+    vendor: auto-detect
+    clusterID: 5b8uaq53-yrcuqq4d-ua2r-egdw-6bwc-p1fs5zquq4
+spec:
+  hubAcceptsClient: true
+  leaseDurationSeconds: 60
+---
