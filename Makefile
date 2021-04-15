@@ -75,7 +75,7 @@ manager: generate fmt vet
 run: generate fmt vet manifests
 	go run ./main.go
 
-# Install CRDs into a cluster
+# Install CRDs into a cluster 
 install: manifests kustomize
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
 
