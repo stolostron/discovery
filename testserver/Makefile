@@ -3,6 +3,7 @@
 .PHONY: local-server
 
 SERVER_IMG := mock-ocm-server
+REGISTRY=quay.io/nathanweatherly
 SERVER_URL ?= $(REGISTRY)/$(SERVER_IMG):$(VERSION)
 
 ## Build Mock OCM Server Binary

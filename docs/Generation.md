@@ -1,24 +1,21 @@
 ## Test Generation Details
 
-There are now two generation scripts which can now be used to create a large number of randomly named mock discoveredclusters and a subset of managed clusters, all of which are used in our mock server. These scripts are located at:
-`testserver/generate.go`
+There are now two generation scripts which can now be used to create a Subscriptions API response with a large number of randomly named clusters and a subset of managed cluster yamls objects, all of which are used in our mock server. These scripts are located at:
+`testserver/generate-scripts`
 
-## Generate Discovered Clusters
+## Generate Subscription Response 
 
-In order to generate the json which can be used to generate large numbers of mock discovered clusters, a sample command would be:
-`./testserver/generate.go -tot=999 -d=24`
+In order to generate the json which can be used to generate a mock subscription response with a large numbers of clusters, a sample command would be:
+`go run ./testserver/generate-scripts/generate.go -tot=999 -d=24 -output=example-subscription-response.json`
 In this case the "tot" will represent the total number of clusters we are generating. The "d" indicates a time period for randomly generating the used by each cluster. If we pass 24 for this value, every generated date will be within the last 24 days from the time the script is run.
-The output of the script is a file located at: `testserver/data/scenarios/onek_clusters/subscription_response.json`
+The output file is written to a file specified via the "-output" flag.
 It takes the form of a json outline for a SubscriptionList which is recognized by the mock server and the discovery operator.
-
-In order to point the mock server to this new list of discovered clusters, we need to edit the mock server deployment so that the scenario is equal to "onekClusters"
-
 ## Generate Managed Clusters
 
 In order to generate a large number of mock managed clusters, a sample command would be:
-`./testserver/generate_managed.go -tot=500`
-Again, the "tot" will indicate the total number of clusters we are generating. There is a validation to ensure that the number of managed clusters is fewer than the number of discovered clusters in our SubscriptionList json. These managed clusters take the form of buffer separated yaml which use the cluster IDs found in our SubscriptionList json. Because these id's will match, once we have created the managed clusters, a label will be applied to the corresponding discovered cluster indicating that it is managed. In order for the managed clusters to actually be created, we will use:
-`oc apply -f testserver/data/sample_managed_clusters.yaml`
+`go run ./testserver/generate-scripts/generate_managed.go -tot=500 -input=example-subscription-response.json -output=example-managed-clusters.yaml`
+Again, the "tot" will indicate the total number of clusters we are generating. There is a validation to ensure that the number of managed clusters is fewer than the number of discovered clusters in our SubscriptionList json. These managed clusters take the form of buffer separated yaml which use the cluster IDs found in our SubscriptionList json (passed in via the `-input` flag). Because these id's will match, once we have created the managed clusters, a label will be applied to the corresponding discovered cluster indicating that it is managed. In order for the managed clusters to actually be created, we will use:
+`oc apply -f <output-file-from-generate-managed>`
 
 
 ## Testing

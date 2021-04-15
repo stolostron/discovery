@@ -5,4 +5,4 @@ build:
 	go build -o bin/manager main.go
 
 unit-tests:
-	go test ./... -short -v
+	go test `go list ./... | grep -v testserver/generate-scripts`

@@ -58,7 +58,7 @@ test: generate fmt vet manifests
 
 # Run fast tests that don't require extra binary
 unit-tests:
-	go test ./... -short -v
+	go test `go list ./... | grep -v testserver/generate-scripts`
 
 # Run tests
 integration-tests: install deploy server/deploy
