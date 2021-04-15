@@ -5,4 +5,8 @@ build:
 	go build -o bin/manager main.go
 
 unit-tests:
+<<<<<<< HEAD
 	go test ./... -short -v 
+=======
+	go test `go list ./... | grep -v testserver/generate-scripts`
+>>>>>>> 68d11cab4f05622016995e8c979bc40a56a03041
