@@ -32,7 +32,7 @@ endif
 BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
 # Image URL to use all building/pushing image targets
-REGISTRY ?= quay.io/rhibmcollab
+REGISTRY ?= quay.io/cameronmwall
 IMG ?= discovery-operator
 URL ?= $(REGISTRY)/$(IMG):$(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
@@ -75,7 +75,7 @@ manager: generate fmt vet
 run: generate fmt vet manifests
 	go run ./main.go
 
-# Install CRDs into a cluster
+# Install CRDs into a cluster 
 install: manifests kustomize
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
 
