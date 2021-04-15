@@ -49,6 +49,8 @@ var (
 	baseURLAnnotation = "ocmBaseURL"
 )
 
+var ErrBadFormat = errors.New("bad format")
+
 // DiscoveryConfigReconciler reconciles a DiscoveryConfig object
 type DiscoveryConfigReconciler struct {
 	client.Client
@@ -125,17 +127,26 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 		// Parse user token from providerconnection secret
 		ocmSecret := &corev1.Secret{}
 		if err := r.Get(context.TODO(), types.NamespacedName{Name: secret, Namespace: config.Namespace}, ocmSecret); err != nil {
+			if apierrors.IsNotFound(err) {
+				log.Info("Secret does not exist. Continue.")
+				continue
+			}
 			return err
 		}
 		userToken, err := parseUserToken(ocmSecret)
 		if err != nil {
-			return err
+			log.Error(err, "Error parsing token from secret")
+			continue
 		}
 
 		baseURL := getURLOverride(config)
 		filters := config.Spec.Filters
 		discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
 		if err != nil {
+			if ocm.IsUnrecoverable(err) {
+				log.Info("Error is unrecoverable. Continue and cleanup clusters.")
+				continue
+			}
 			return err
 		}
 
@@ -192,12 +203,13 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 // getUserToken takes a secret cotaining a Provider Connection and returns the stored OCM api token.
 func parseUserToken(secret *corev1.Secret) (string, error) {
 	if _, ok := secret.Data["metadata"]; !ok {
-		return "", fmt.Errorf("Secret '%s' does not contain 'metadata' field", secret.Name)
+		// return "", fmt.Errorf("Secret '%s' does not contain 'metadata' field", secret.Name)
+		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
 	}
 
 	providerConnection := &CloudRedHatProviderConnection{}
 	if err := yaml.Unmarshal(secret.Data["metadata"], providerConnection); err != nil {
-		return "", err
+		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
 	}
 
 	return providerConnection.OCMApiToken, nil

@@ -1,10 +1,7 @@
-package subscription_service
+package subscription
 
 import (
 	"fmt"
-
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
-	"github.com/open-cluster-management/discovery/pkg/ocm/providers/subscription_provider"
 )
 
 var (
@@ -19,14 +16,14 @@ var (
 type clientGenerator struct{}
 
 type ClientGenerator interface {
-	NewClient(config subscription_domain.SubscriptionRequest) SubscriptionGetter
+	NewClient(config SubscriptionRequest) SubscriptionGetter
 }
 
-func (client *clientGenerator) NewClient(config subscription_domain.SubscriptionRequest) SubscriptionGetter {
+func (client *clientGenerator) NewClient(config SubscriptionRequest) SubscriptionGetter {
 	return NewClient(config)
 }
 
-func NewClient(config subscription_domain.SubscriptionRequest) SubscriptionGetter {
+func NewClient(config SubscriptionRequest) SubscriptionGetter {
 	client := &subscriptionClient{
 		Config: config,
 	}
@@ -40,22 +37,22 @@ func NewClient(config subscription_domain.SubscriptionRequest) SubscriptionGette
 }
 
 type subscriptionClient struct {
-	Config subscription_domain.SubscriptionRequest
+	Config SubscriptionRequest
 }
 
 type SubscriptionGetter interface {
-	GetSubscriptions() ([]subscription_domain.Subscription, error)
+	GetSubscriptions() ([]Subscription, error)
 }
 
-func (client *subscriptionClient) GetSubscriptions() ([]subscription_domain.Subscription, error) {
-	discovered := []subscription_domain.Subscription{}
+func (client *subscriptionClient) GetSubscriptions() ([]Subscription, error) {
+	discovered := []Subscription{}
 	request := client.Config
 
 	request.Page = 1
 	for {
-		discoveredList, err := subscription_provider.SubscriptionProvider.GetSubscriptions(request)
+		discoveredList, err := SubscriptionProvider.GetSubscriptions(request)
 		if err != nil {
-			return nil, fmt.Errorf(err.Reason)
+			return nil, fmt.Errorf(err.Error.Error())
 		}
 
 		for _, sub := range discoveredList.Items {

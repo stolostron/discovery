@@ -1,6 +1,6 @@
 // Copyright Contributors to the Open Cluster Management project
 
-package auth_domain
+package auth
 
 // AuthTokenResponse ...
 type AuthTokenResponse struct {
@@ -18,4 +18,14 @@ type AuthTokenResponse struct {
 type AuthRequest struct {
 	BaseURL string
 	Token   string
+}
+
+type AuthError struct {
+	Code         int    `json:"code"`
+	ErrorMessage string `json:"error"`
+	Description  string `json:"error_description"`
+	// Error is for setting an internal error for tracking
+	Error error `json:"-"`
+	// Response is for storing the raw response on an error
+	Response []byte `json:"-"`
 }

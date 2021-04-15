@@ -1,4 +1,4 @@
-package subscription_domain
+package subscription
 
 import (
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
@@ -58,4 +58,18 @@ type SubscriptionRequest struct {
 	Page    int
 	Size    int
 	Filter  discoveryv1.Filter
+}
+
+// SubscriptionError represents the error format response by OCM on a subscription request.
+// Full list of responses available at https://api.openshift.com/api/accounts_mgmt/v1/errors/
+type SubscriptionError struct {
+	Kind   string `json:"kind"`
+	ID     string `json:"id"`
+	Href   string `json:"href"`
+	Code   string `json:"code"`
+	Reason string `json:"reason"`
+	// Error is for setting an internal error for tracking
+	Error error `json:"-"`
+	// Response is for storing the raw response on an error
+	Response []byte `json:"-"`
 }

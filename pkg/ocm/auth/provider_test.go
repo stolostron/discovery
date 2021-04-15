@@ -1,16 +1,15 @@
 // Copyright Contributors to the Open Cluster Management project
 
-package auth_provider
+package auth
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
 
-	"github.com/open-cluster-management/discovery/pkg/ocm/clients/restclient"
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/auth_domain"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,9 +32,9 @@ func TestGetTokenNoError(t *testing.T) {
 			Body:       ioutil.NopCloser(strings.NewReader(`{"access_token":"ephemeral_access_token","not-before-policy":0,"session_state":"random-session-state","scope":"openid offline_access"}`)),
 		}, nil
 	}
-	restclient.AuthHTTPClient = &postClientMock{} //without this line, the real api is fired
+	httpClient = &postClientMock{} //without this line, the real api is fired
 
-	response, err := AuthProvider.GetToken(auth_domain.AuthRequest{Token: "this_is_my_token"})
+	response, err := AuthProvider.GetToken(AuthRequest{Token: "this_is_my_token"})
 	assert.NotNil(t, response)
 	assert.Nil(t, err)
 	assert.EqualValues(t, "ephemeral_access_token", response.AccessToken)
@@ -49,14 +48,15 @@ func TestGetTokenInvalidApiKey(t *testing.T) {
 				Body:       ioutil.NopCloser(strings.NewReader(`{"error":"invalid_grant","error_description":"Invalid refresh token"}`)),
 			}, nil
 		}
-		restclient.AuthHTTPClient = &postClientMock{} //without this line, the real api is fired
+		httpClient = &postClientMock{} //without this line, the real api is fired
 
-		response, err := AuthProvider.GetToken(auth_domain.AuthRequest{Token: "this_is_an_invalid_token"})
+		response, err := AuthProvider.GetToken(AuthRequest{Token: "this_is_an_invalid_token"})
 		assert.NotNil(t, err)
 		assert.Nil(t, response)
 		assert.EqualValues(t, http.StatusBadRequest, err.Code)
 		assert.EqualValues(t, "invalid_grant", err.ErrorMessage)
 		assert.EqualValues(t, "Invalid refresh token", err.Description)
+		assert.True(t, errors.Is(err.Error, ErrInvalidToken))
 	})
 
 	t.Run("Empty string token", func(t *testing.T) {
@@ -66,9 +66,9 @@ func TestGetTokenInvalidApiKey(t *testing.T) {
 				Body:       ioutil.NopCloser(strings.NewReader(`{"error":"invalid_grant","error_description":"Invalid refresh token"}`)),
 			}, nil
 		}
-		restclient.AuthHTTPClient = &postClientMock{} //without this line, the real api is fired
+		httpClient = &postClientMock{} //without this line, the real api is fired
 
-		response, err := AuthProvider.GetToken(auth_domain.AuthRequest{Token: ""})
+		response, err := AuthProvider.GetToken(AuthRequest{Token: ""})
 		assert.NotNil(t, err)
 		assert.Nil(t, response)
 		assert.EqualValues(t, http.StatusBadRequest, err.Code)
@@ -85,9 +85,9 @@ func TestGetTokenMissingFormData(t *testing.T) {
 				Body:       ioutil.NopCloser(strings.NewReader(`{"error":"invalid_request","error_description":"Missing form parameter: grant_type"}`)),
 			}, nil
 		}
-		restclient.AuthHTTPClient = &postClientMock{} //without this line, the real api is fired
+		httpClient = &postClientMock{} //without this line, the real api is fired
 
-		response, err := AuthProvider.GetToken(auth_domain.AuthRequest{Token: "this_is_my_token"})
+		response, err := AuthProvider.GetToken(AuthRequest{Token: "this_is_my_token"})
 		assert.NotNil(t, err)
 		assert.Nil(t, response)
 		assert.EqualValues(t, http.StatusBadRequest, err.Code)
@@ -101,9 +101,9 @@ func TestGetTokenMissingFormData(t *testing.T) {
 				Body:       ioutil.NopCloser(strings.NewReader(`{"error":"unauthorized_client","error_description":"INVALID_CREDENTIALS: Invalid client credentials"}`)),
 			}, nil
 		}
-		restclient.AuthHTTPClient = &postClientMock{} //without this line, the real api is fired
+		httpClient = &postClientMock{} //without this line, the real api is fired
 
-		response, err := AuthProvider.GetToken(auth_domain.AuthRequest{Token: "this_is_my_token"})
+		response, err := AuthProvider.GetToken(AuthRequest{Token: "this_is_my_token"})
 		assert.NotNil(t, err)
 		assert.Nil(t, response)
 		assert.EqualValues(t, http.StatusBadRequest, err.Code)
@@ -121,9 +121,9 @@ func TestGetTokenInvalidErrorInterface(t *testing.T) {
 			Body:       ioutil.NopCloser(strings.NewReader(unexpectedJSONResponse)),
 		}, nil
 	}
-	restclient.AuthHTTPClient = &postClientMock{} //without this line, the real api is fired
+	httpClient = &postClientMock{} //without this line, the real api is fired
 
-	response, err := AuthProvider.GetToken(auth_domain.AuthRequest{Token: "this_is_my_token"})
+	response, err := AuthProvider.GetToken(AuthRequest{Token: "this_is_my_token"})
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.NotNil(t, err.Error)
@@ -139,9 +139,9 @@ func TestGetTokenInvalidResponseInterface(t *testing.T) {
 			Body:       ioutil.NopCloser(strings.NewReader(unexpectedJSONResponse)),
 		}, nil
 	}
-	restclient.AuthHTTPClient = &postClientMock{} //without this line, the real api is fired
+	httpClient = &postClientMock{} //without this line, the real api is fired
 
-	response, err := AuthProvider.GetToken(auth_domain.AuthRequest{Token: "this_is_my_token"})
+	response, err := AuthProvider.GetToken(AuthRequest{Token: "this_is_my_token"})
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.NotNil(t, err.Error)
@@ -157,9 +157,9 @@ func TestGetTokenNoAccessToken(t *testing.T) {
 			Body:       ioutil.NopCloser(strings.NewReader(missingTokenJSONResponse)),
 		}, nil
 	}
-	restclient.AuthHTTPClient = &postClientMock{} //without this line, the real api is fired
+	httpClient = &postClientMock{} //without this line, the real api is fired
 
-	response, err := AuthProvider.GetToken(auth_domain.AuthRequest{Token: "this_is_my_token"})
+	response, err := AuthProvider.GetToken(AuthRequest{Token: "this_is_my_token"})
 	assert.NotNil(t, response)
 	assert.Nil(t, err)
 

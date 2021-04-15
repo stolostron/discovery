@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
+	"github.com/open-cluster-management/discovery/pkg/ocm/subscription"
 )
 
 // GetSubscriptions ...
@@ -37,7 +37,7 @@ func GetSubscriptions(c *gin.Context) {
 	}
 
 	// Validate file can be unmarshalled into SubscriptionResponse
-	var subscriptionList subscription_domain.SubscriptionResponse
+	var subscriptionList subscription.SubscriptionResponse
 	err = json.Unmarshal(file, &subscriptionList)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

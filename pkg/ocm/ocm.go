@@ -1,11 +1,11 @@
 package ocm
 
 import (
+	"errors"
+
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/auth_domain"
-	"github.com/open-cluster-management/discovery/pkg/ocm/domain/subscription_domain"
-	"github.com/open-cluster-management/discovery/pkg/ocm/services/auth_service"
-	"github.com/open-cluster-management/discovery/pkg/ocm/services/subscription_service"
+	"github.com/open-cluster-management/discovery/pkg/ocm/auth"
+	"github.com/open-cluster-management/discovery/pkg/ocm/subscription"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -13,22 +13,22 @@ import (
 // accounts_mgmt apis with the given filters
 func DiscoverClusters(token string, baseURL string, filters discoveryv1.Filter) ([]discoveryv1.DiscoveredCluster, error) {
 	// Request ephemeral access token with user token. This will be used for OCM requests
-	authRequest := auth_domain.AuthRequest{
+	authRequest := auth.AuthRequest{
 		Token:   token,
 		BaseURL: baseURL,
 	}
-	accessToken, err := auth_service.AuthClient.GetToken(authRequest)
+	accessToken, err := auth.AuthClient.GetToken(authRequest)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get subscriptions from accounts_mgmt api
-	subscriptionRequestConfig := subscription_domain.SubscriptionRequest{
+	subscriptionRequestConfig := subscription.SubscriptionRequest{
 		Token:   accessToken,
 		BaseURL: baseURL,
 		Filter:  filters,
 	}
-	subscriptionClient := subscription_service.SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
+	subscriptionClient := subscription.SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
 	subscriptions, err := subscriptionClient.GetSubscriptions()
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func DiscoverClusters(token string, baseURL string, filters discoveryv1.Filter) 
 }
 
 // formatCluster converts a cluster from OCM form to DiscoveredCluster form, or returns false if it is not valid
-func formatCluster(sub subscription_domain.Subscription) (discoveryv1.DiscoveredCluster, bool) {
+func formatCluster(sub subscription.Subscription) (discoveryv1.DiscoveredCluster, bool) {
 	discoveredCluster := discoveryv1.DiscoveredCluster{}
 	if len(sub.Metrics) == 0 {
 		return discoveredCluster, false
@@ -73,4 +73,13 @@ func formatCluster(sub subscription_domain.Subscription) (discoveryv1.Discovered
 		},
 	}
 	return discoveredCluster, true
+}
+
+// IsUnrecoverable returns true if the specified error is not temporary
+// and will continue to occur with the current state.
+func IsUnrecoverable(err error) bool {
+	if errors.Is(err, auth.ErrInvalidToken) {
+		return true
+	}
+	return false
 }
