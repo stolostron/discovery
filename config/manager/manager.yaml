@@ -42,3 +42,4 @@ spec:
       terminationGracePeriodSeconds: 10
       imagePullSecrets:
         - name: discovery-operator-pull-secret
+      serviceAccountName: discovery-operator
