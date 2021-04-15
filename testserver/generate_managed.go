@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"flag"
+	"fmt"
 	"strconv"
 	"io/ioutil"
 	"github.com/go-yaml/yaml"
@@ -128,17 +129,20 @@ type Spec struct {
 }
 
 func main() {
-	e := os.Remove("./testserver/data/sample_managed_clusters.yaml")
+	
+	input := flag.String("input", "./testserver/data/scenarios/onek_clusters/subscription_response.json", "File location to save location of input discovered clusters file")
+	output := flag.String("output", "./testserver/data/sample_managed_clusters.yaml", "File location to save output of managed clusters")
+	var numFlag = flag.Int("tot", 1, "The total number of managedclusters will be created. Default is 50")
+	flag.Parse()
+	e := os.Remove(*output)
     if e != nil {
-        panic(e)
+        fmt.Println("No file was deleted" )
     }
-    fo, err := os.Create("./testserver/data/sample_managed_clusters.yaml")
+    fo, err := os.Create(*output)
     if err != nil {
         panic(err)
     }
-	var numFlag = flag.Int("tot", 1, "The total number of managedclusters will be created. Default is 50")
-	flag.Parse()
-	file, _ := ioutil.ReadFile("./testserver/data/scenarios/onek_clusters/subscription_response.json")
+	file, _ := ioutil.ReadFile(*input)
  
 	data := SubscriptionList{}
  

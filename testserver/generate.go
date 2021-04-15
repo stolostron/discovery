@@ -9,6 +9,7 @@ import (
 	"flag"
 	"time"
 	"os"
+	"fmt"
 		
 
 
@@ -153,13 +154,16 @@ func collectRandomExtId(n int) []string {
 func main() {
 	
 	
-	e := os.Remove("./testserver/data/scenarios/onek_clusters/subscription_response.json")
-    if e != nil {
-        panic(e)
-    }
+	
+	wordPtr := flag.String("output", "./testserver/data/scenarios/onek_clusters/subscription_response.json", "File location to save output")
 	var numFlag = flag.Int("tot", 50, "The total number of clusters will be created. Default is 50")
 	var num = flag.Int("d", 10, "The number of days back we want our earliest possible created date to be")
 	flag.Parse()
+	e := os.Remove(*wordPtr)
+    if e != nil {
+        fmt.Println("No file was deleted")
+		
+    }
 	ids := collectRandomId(*numFlag, 27)
 	clusterIds := collectRandomId(*numFlag, 32)
 	extIds := collectRandomExtId(*numFlag)
@@ -192,5 +196,5 @@ func main() {
 	}
 	total := SubscriptionList{"SubscriptionList", 1, *numFlag, *numFlag, test}
 	b, _ := json.MarshalIndent(total, "", "    ")
-	_ = ioutil.WriteFile("./testserver/data/scenarios/onek_clusters/subscription_response.json", b, 0777)
+	_ = ioutil.WriteFile(*wordPtr, b, 0777)
 }

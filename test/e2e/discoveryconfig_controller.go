@@ -127,10 +127,10 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 	})
 
-	Context("Creating greater than 999 Clusters", func() {
+	Context("Creating 999 Clusters", func() {
 		It("Should create discovered clusters ", func() {
 			By("Setting the testserver's response", func() {
-				updateTestserverScenario("onekClusters")
+				updateTestserverScenario("nineninenineClusters")
 			})
 			By("By creating a secret with OCM credentials", func() {
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
