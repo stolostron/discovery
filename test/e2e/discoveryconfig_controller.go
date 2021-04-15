@@ -139,7 +139,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("By creating a new DiscoveryConfig", func() {
 				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
 			})
-			By("By checking 10 discovered clusters have been created", func() {
+			By("By checking 999 discovered clusters have been created", func() {
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters()
 				}, timeout, interval).Should(Equal(999))
