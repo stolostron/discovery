@@ -6,8 +6,6 @@ import (
 	"context"
 	"fmt"
 	"time"
-	
-	
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -29,7 +27,7 @@ const (
 	SecretName          = "test-connection-secret"
 	TestserverName      = "mock-ocm-server"
 
-	timeout  = time.Second * 120
+	timeout  = time.Second * 30
 	interval = time.Millisecond * 250
 )
 
@@ -127,27 +125,25 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 	})
 
-	Context("Creating 999 Clusters", func() {
-		It("Should create discovered clusters ", func() {
-			By("Setting the testserver's response", func() {
-				updateTestserverScenario("nineninenineClusters")
-			})
-			By("By creating a secret with OCM credentials", func() {
-				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
-			})
+	// Context("Creating 999 Clusters", func() {
+	// 	It("Should create discovered clusters ", func() {
+	// 		By("Setting the testserver's response", func() {
+	// 			updateTestserverScenario("nineninenineClusters")
+	// 		})
+	// 		By("By creating a secret with OCM credentials", func() {
+	// 			Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
+	// 		})
 
-			By("By creating a new DiscoveryConfig", func() {
-				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
-			})
-			By("By checking 999 discovered clusters have been created", func() {
-				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
-				}, timeout, interval).Should(Equal(999))
-			})
-		})
-	})
-
-	
+	// 		By("By creating a new DiscoveryConfig", func() {
+	// 			Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+	// 		})
+	// 		By("By checking 999 discovered clusters have been created", func() {
+	// 			Eventually(func() (int, error) {
+	// 				return countDiscoveredClusters()
+	// 			}, timeout, interval).Should(Equal(999))
+	// 		})
+	// 	})
+	// })
 
 	Context("Tracking ManagedClusters", func() {
 		It("Should mark matching discovered clusters as being managed", func() {
@@ -174,8 +170,6 @@ var _ = Describe("Discoveryconfig controller", func() {
 				}, timeout, interval).Should(Equal(1))
 			})
 		})
-	
-		
 
 		It("Should unmark discovered clusters when they are no longer managed", func() {
 			By("Creating ManagedClusters", func() {
@@ -280,90 +274,6 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 	})
 
-	Context("Multiple Provider Connections", func() {
-		AfterEach(func() {
-			err := k8sClient.Delete(ctx, customSecret("connection1", "connection1"))
-			if err != nil {
-				Expect(apierrors.IsNotFound(err)).To(BeTrue())
-			}
-			err = k8sClient.Delete(ctx, customSecret("connection2", "connection2"))
-			if err != nil {
-				Expect(apierrors.IsNotFound(err)).To(BeTrue())
-			}
-		})
-
-		It("Should create DiscoveredClusters from multiple Connections", func() {
-			By("Configuring testserver to return multiple responses", func() {
-				updateTestserverScenario("multipleConnections")
-			})
-
-			By("Creating a DiscoveryConfig with two Provider Connections", func() {
-				Expect(k8sClient.Create(ctx, customSecret("connection1", "connection1"))).Should(Succeed())
-				Expect(k8sClient.Create(ctx, customSecret("connection2", "connection2"))).Should(Succeed())
-				config := defaultDiscoveryConfig()
-				config.Spec.ProviderConnections = []string{"connection1", "connection2"}
-				Expect(k8sClient.Create(ctx, annotate(config))).Should(Succeed())
-			})
-
-			By("By checking 6 discovered clusters have been created (where two overlap)", func() {
-				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
-				}, timeout, interval).Should(Equal(6))
-			})
-
-			By("By checking that clusters under two provider connections display both", func() {
-				dc, err := getDiscoveredClusterByID("844b3bf1-8d70-469c-a113-f1cd5db45c63")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(dc.Spec.ProviderConnections).To(HaveLen(2))
-				dc, err = getDiscoveredClusterByID("dbcbbeeb-7a15-4c64-9975-6f6c331255c8")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(dc.Spec.ProviderConnections).To(HaveLen(2))
-			})
-		})
-
-		It("Should delete DiscoveredClusters when a Provider Connection is removed", func() {
-			By("Configuring testserver to return multiple responses", func() {
-				updateTestserverScenario("multipleConnections")
-			})
-
-			By("Creating a DiscoveryConfig with two Provider Connections", func() {
-				Expect(k8sClient.Create(ctx, customSecret("connection1", "connection1"))).Should(Succeed())
-				Expect(k8sClient.Create(ctx, customSecret("connection2", "connection2"))).Should(Succeed())
-				config := defaultDiscoveryConfig()
-				config.Spec.ProviderConnections = []string{"connection1", "connection2"}
-				Expect(k8sClient.Create(ctx, annotate(config))).Should(Succeed())
-			})
-
-			By("By checking 6 discovered clusters have been created (where two overlap)", func() {
-				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
-				}, timeout, interval).Should(Equal(6))
-			})
-
-			By("Removing a Provider Connection from the DiscoveryConfig", func() {
-				config := &discoveryv1.DiscoveryConfig{}
-				Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
-				config.Spec.ProviderConnections = config.Spec.ProviderConnections[:1]
-				Expect(k8sClient.Update(ctx, config)).Should(Succeed())
-			})
-
-			By("By checking only 4 discovered clusters remain", func() {
-				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
-				}, timeout, interval).Should(Equal(4))
-			})
-
-			By("By checking references to the old provider connection are removed from the discovered clusters", func() {
-				dc, err := getDiscoveredClusterByID("844b3bf1-8d70-469c-a113-f1cd5db45c63")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(dc.Spec.ProviderConnections).To(HaveLen(1))
-				dc, err = getDiscoveredClusterByID("dbcbbeeb-7a15-4c64-9975-6f6c331255c8")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(dc.Spec.ProviderConnections).To(HaveLen(1))
-			})
-		})
-	})
-
 	Context("Credentials become invalid", func() {
 		AfterEach(func() {
 			err := k8sClient.Delete(ctx, customSecret("badsecret", ""))
@@ -396,7 +306,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 				config := &discoveryv1.DiscoveryConfig{}
 				Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
-				config.Spec.ProviderConnections = []string{"badsecret"}
+				config.Spec.Credential = "badsecret"
 				Expect(k8sClient.Update(ctx, config)).Should(Succeed())
 			})
 
@@ -452,14 +362,7 @@ func annotate(dc *discoveryv1.DiscoveryConfig) *discoveryv1.DiscoveryConfig {
 	baseUrl := fmt.Sprintf("http://mock-ocm-server.%s.svc.cluster.local:3000", discoveryNamespace)
 	dc.SetAnnotations(map[string]string{"ocmBaseURL": baseUrl})
 	return dc
-} 
-
-// func byAddingTimestampAnnotation() {
-// 	dc := &discoveryv1.DiscoveryConfig{}
-// 	Expect(k8sClient.Get(ctx, discoveryConfig, dc)).To(Succeed())
-// 	dc.Annotations["triggerTimestamp"] = time.Now().String()
-// 	Expect(k8sClient.Update(ctx, dc)).To(Succeed())
-// }
+}
 
 func getTestserverDeployment() *appsv1.Deployment {
 	testserverDeployment := &appsv1.Deployment{}
@@ -621,7 +524,7 @@ func defaultDiscoveryConfig() *discoveryv1.DiscoveryConfig {
 			Namespace: discoveryNamespace,
 		},
 		Spec: discoveryv1.DiscoveryConfigSpec{
-			ProviderConnections: []string{SecretName},
+			Credential: SecretName,
 		},
 	}
 }
@@ -655,26 +558,3 @@ func newManagedCluster(name, clusterID string) *unstructured.Unstructured {
 		},
 	}
 }
-
-
-// func parseK8sYaml(file_loc string) []runtime.Object {
-// 	file, _ := ioutil.ReadFile(file_loc)
-//     fileAsString := string(file[:])
-//     sepYamlfiles := strings.Split(fileAsString, "---")
-//     retVal := make([]runtime.Object, 0, len(sepYamlfiles))
-//     for _, f := range sepYamlfiles {
-//         if f == "\n" || f == "" {
-//             // ignore empty cases
-//             continue
-//         }
-//         obj := &unstructured.Unstructured{}
-//         dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
-//         objc, _, _ := dec.Decode([]byte(f), nil, obj)
-       
-
-        
-//         retVal = append(retVal, objc)
-
-//     }
-//     return retVal
-// }
