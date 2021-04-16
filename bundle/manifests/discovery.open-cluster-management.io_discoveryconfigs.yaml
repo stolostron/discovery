@@ -50,6 +50,8 @@ spec:
                 items:
                   type: string
                 type: array
+            required:
+            - credential
             type: object
           status:
             description: DiscoveryConfigStatus defines the observed state of DiscoveryConfig

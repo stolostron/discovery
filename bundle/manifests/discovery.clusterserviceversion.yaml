@@ -11,12 +11,10 @@ metadata:
             "name": "discoveryconfig"
           },
           "spec": {
+            "credential": "ocm-api-token",
             "filters": {
               "lastActive": 7
-            },
-            "providerConnections": [
-              "ocm-api-token"
-            ]
+            }
           }
         }
       ]
@@ -75,6 +73,7 @@ spec:
           verbs:
           - create
           - delete
+          - deletecollection
           - get
           - list
           - patch

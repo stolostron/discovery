@@ -39,8 +39,7 @@ type DiscoveryConfigSpec struct {
 	ProviderConnections []string `json:"providerConnections,omitempty"`
 
 	// Credential is the secret containing credentials to connect to the OCM api on behalf of a user
-	// +optional
-	Credential string `json:"credential,omitempty"`
+	Credential string `json:"credential"`
 
 	// Sets restrictions on what kind of clusters to discover
 	// +optional
