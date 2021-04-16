@@ -11,19 +11,17 @@ metadata:
             "name": "discoveryconfig"
           },
           "spec": {
+            "credential": "ocm-api-token",
             "filters": {
               "lastActive": 7
-            },
-            "providerConnections": [
-              "ocm-api-token"
-            ]
+            }
           }
         }
       ]
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.3.0
+    operators.operatorframework.io/builder: operator-sdk-v1.3.2
     operators.operatorframework.io/internal-objects: '["discoveredclusters.discovery.open-cluster-management.io"]'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
     support: Red Hat
@@ -75,6 +73,7 @@ spec:
           verbs:
           - create
           - delete
+          - deletecollection
           - get
           - list
           - patch

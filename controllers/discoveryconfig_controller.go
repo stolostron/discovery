@@ -63,7 +63,7 @@ type CloudRedHatProviderConnection struct {
 	OCMApiToken string `yaml:"ocmAPIToken"`
 }
 
-// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/finalizers,verbs=get;update;patch
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs,verbs=get;list;watch;create;update;patch;delete
@@ -122,45 +122,42 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	allClusters := map[string]discoveryv1.DiscoveredCluster{}
 	log := logr.FromContext(ctx)
 
-	// Gather clusters from all provider connections
-	for _, secret := range config.Spec.ProviderConnections {
-		// Parse user token from providerconnection secret
-		ocmSecret := &corev1.Secret{}
-		if err := r.Get(context.TODO(), types.NamespacedName{Name: secret, Namespace: config.Namespace}, ocmSecret); err != nil {
-			if apierrors.IsNotFound(err) {
-				log.Info("Secret does not exist. Continue.")
-				continue
-			}
-			return err
+	// Parse user token from providerconnection secret
+	ocmSecret := &corev1.Secret{}
+	if err := r.Get(context.TODO(), types.NamespacedName{Name: config.Spec.Credential, Namespace: config.Namespace}, ocmSecret); err != nil {
+		if apierrors.IsNotFound(err) {
+			log.Info("Secret does not exist")
+			return r.deleteAllClusters(ctx, config)
 		}
-		userToken, err := parseUserToken(ocmSecret)
-		if err != nil {
-			log.Error(err, "Error parsing token from secret")
-			continue
-		}
+		return err
+	}
+	userToken, err := parseUserToken(ocmSecret)
+	if err != nil {
+		log.Error(err, "Error parsing token from secret")
+		return r.deleteAllClusters(ctx, config)
+	}
 
-		baseURL := getURLOverride(config)
-		filters := config.Spec.Filters
-		discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
-		if err != nil {
-			if ocm.IsUnrecoverable(err) {
-				log.Info("Error is unrecoverable. Continue and cleanup clusters.")
-				continue
-			}
-			return err
+	baseURL := getURLOverride(config)
+	filters := config.Spec.Filters
+	discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
+	if err != nil {
+		if ocm.IsUnrecoverable(err) {
+			log.Info("Error is unrecoverable. Cleaning up clusters.")
+			return r.deleteAllClusters(ctx, config)
 		}
+		return err
+	}
 
-		// Get reference to secret used for authentication
-		secretRef, err := ref.GetReference(r.Scheme, ocmSecret)
-		if err != nil {
-			return errors.Wrapf(err, "unable to make reference to secret %s", secretRef)
-		}
+	// Get reference to secret used for authentication
+	secretRef, err := ref.GetReference(r.Scheme, ocmSecret)
+	if err != nil {
+		return errors.Wrapf(err, "unable to make reference to secret %s", secretRef)
+	}
 
-		for _, dc := range discovered {
-			dc.SetNamespace(config.Namespace)
-			dc.Spec.ProviderConnections = append(dc.Spec.ProviderConnections, *secretRef)
-			merge(allClusters, dc)
-		}
+	for _, dc := range discovered {
+		dc.SetNamespace(config.Namespace)
+		dc.Spec.ProviderConnections = append(dc.Spec.ProviderConnections, *secretRef)
+		merge(allClusters, dc)
 	}
 
 	// Assign managed status
@@ -304,6 +301,15 @@ func (r *DiscoveryConfigReconciler) deleteCluster(ctx context.Context, dc discov
 		return errors.Wrapf(err, "Error deleting DiscoveredCluster %s", dc.Name)
 	}
 	log.Info("Deleted cluster", "Name", dc.Name)
+	return nil
+}
+
+func (r *DiscoveryConfigReconciler) deleteAllClusters(ctx context.Context, config *discoveryv1.DiscoveryConfig) error {
+	log := logr.FromContext(ctx)
+	if err := r.DeleteAllOf(ctx, &discoveryv1.DiscoveredCluster{}, client.InNamespace(config.Namespace)); err != nil {
+		return errors.Wrapf(err, "Error clearing namespace %s", config.Namespace)
+	}
+	log.Info("Deleted all clusters", "Namespace", config.Namespace)
 	return nil
 }
 
