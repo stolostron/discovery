@@ -218,9 +218,10 @@ func assignManagedStatus(discovered map[string]discoveryv1.DiscoveredCluster, ma
 		id := getClusterID(mc)
 		if id != "" {
 			// Update cluster as managed
-			dc := discovered[id]
-			setManagedStatus(&dc)
-			discovered[id] = dc
+			if dc, ok := discovered[id]; ok {
+				setManagedStatus(&dc)
+				discovered[id] = dc
+			}
 		}
 	}
 }

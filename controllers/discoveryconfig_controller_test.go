@@ -121,6 +121,16 @@ func Test_assignManagedStatus(t *testing.T) {
 				},
 			},
 		},
+		{
+			Object: map[string]interface{}{
+				"apiVersion": "cluster.open-cluster-management.io/v1",
+				"kind":       "ManagedCluster",
+				"metadata": map[string]interface{}{
+					"name":   "d",
+					"labels": map[string]interface{}{"clusterID": "d"},
+				},
+			},
+		},
 	}
 
 	assignManagedStatus(discovered, managed)
@@ -143,7 +153,12 @@ func Test_assignManagedStatus(t *testing.T) {
 		dc := discovered["c"]
 		managedLabel := dc.GetLabels()["isManagedCluster"]
 		if dc.Spec.IsManagedCluster || managedLabel == "true" {
-			t.Errorf("Expected cluster %s to be labeled as managed: %+v", dc.Name, dc)
+			t.Errorf("Expected cluster %s to not be labeled as managed: %+v", dc.Name, dc)
+		}
+	})
+	t.Run("Discovered list not added to", func(t *testing.T) {
+		if len(discovered) != 3 {
+			t.Errorf("The discoveredlist should not change in size. Wanted: %d. Got: %d.", 3, len(discovered))
 		}
 	})
 }
