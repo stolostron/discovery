@@ -146,6 +146,13 @@ var _ = Describe("Discoveryconfig controller", func() {
 	// })
 
 	Context("Tracking ManagedClusters", func() {
+		AfterEach(func() {
+			err := k8sClient.Delete(ctx, customSecret("badsecret", ""))
+			if err != nil {
+				Expect(apierrors.IsNotFound(err)).To(BeTrue())
+			}
+		})
+
 		It("Should mark matching discovered clusters as being managed", func() {
 			By("Creating unmanaged discovered clusters", func() {
 				updateTestserverScenario("tenClusters")
@@ -160,14 +167,39 @@ var _ = Describe("Discoveryconfig controller", func() {
 				Expect(countManagedDiscoveredClusters()).To(Equal(0))
 			})
 
-			By("Creating a ManagedCluster", func() {
+			By("Creating ManagedClusters", func() {
 				Expect(k8sClient.Create(ctx, newManagedCluster("testmc1", "844b3bf1-8d70-469c-a113-f1cd5db45c63"))).To(Succeed())
+				// Managed but not discovered
+				Expect(k8sClient.Create(ctx, newManagedCluster("testmc0", "abcdefgh-ijkl-mnop-qrst-uvwxyz123456"))).To(Succeed())
+			})
+
+			By("Forcing the DiscoveryConfig to be reconciled on", func() {
+				// This is to test that the reconcile doesn't encounter errors
+				// when a non-discovered managedcluster is present
+				byTriggeringReconcile()
 			})
 
 			By("Checking that a DiscoveredCluster is now labeled as managed", func() {
 				Eventually(func() (int, error) {
 					return countManagedDiscoveredClusters()
 				}, timeout, interval).Should(Equal(1))
+			})
+
+			By("Verify controller still cleans up discovered clusters", func() {
+				By("Changing secret to an invalid one", func() {
+					Expect(k8sClient.Create(ctx, customSecret("badsecret", ""))).Should(Succeed())
+
+					config := &discoveryv1.DiscoveryConfig{}
+					Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
+					config.Spec.Credential = "badsecret"
+					Expect(k8sClient.Update(ctx, config)).Should(Succeed())
+				})
+
+				By("Checking all discovered clusters are gone", func() {
+					Eventually(func() (int, error) {
+						return countDiscoveredClusters()
+					}, timeout, interval).Should(Equal(0))
+				})
 			})
 		})
 
@@ -545,8 +577,7 @@ func newManagedCluster(name, clusterID string) *unstructured.Unstructured {
 			"apiVersion": "cluster.open-cluster-management.io/v1",
 			"kind":       "ManagedCluster",
 			"metadata": map[string]interface{}{
-				"name":      name,
-				"namespace": discoveryNamespace,
+				"name": name,
 				"labels": map[string]string{
 					"clusterID": clusterID,
 				},
