@@ -36,6 +36,7 @@ var (
 	globalsInitialized = false
 	// discoveryNamespace = "discovery"
 	discoveryNamespace = ""
+	secondNamespace    = "secondary-test-ns"
 	k8sClient          client.Client
 
 	discoveryConfig = types.NamespacedName{}
@@ -119,7 +120,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("By checking 10 discovered clusters have been created", func() {
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(10))
 			})
 		})
@@ -139,7 +140,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 	// 		})
 	// 		By("By checking 999 discovered clusters have been created", func() {
 	// 			Eventually(func() (int, error) {
-	// 				return countDiscoveredClusters()
+	// 				return countDiscoveredClusters(discoveryNamespace)
 	// 			}, timeout, interval).Should(Equal(999))
 	// 		})
 	// 	})
@@ -147,7 +148,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 	Context("Tracking ManagedClusters", func() {
 		AfterEach(func() {
-			err := k8sClient.Delete(ctx, customSecret("badsecret", ""))
+			err := k8sClient.Delete(ctx, customSecret("badsecret", discoveryNamespace, ""))
 			if err != nil {
 				Expect(apierrors.IsNotFound(err)).To(BeTrue())
 			}
@@ -162,9 +163,9 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("Checking that no DiscoveredClusters are labeled as managed", func() {
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(10))
-				Expect(countManagedDiscoveredClusters()).To(Equal(0))
+				Expect(countManagedDiscoveredClusters(discoveryNamespace)).To(Equal(0))
 			})
 
 			By("Creating ManagedClusters", func() {
@@ -181,13 +182,13 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("Checking that a DiscoveredCluster is now labeled as managed", func() {
 				Eventually(func() (int, error) {
-					return countManagedDiscoveredClusters()
+					return countManagedDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(1))
 			})
 
 			By("Verify controller still cleans up discovered clusters", func() {
 				By("Changing secret to an invalid one", func() {
-					Expect(k8sClient.Create(ctx, customSecret("badsecret", ""))).Should(Succeed())
+					Expect(k8sClient.Create(ctx, customSecret("badsecret", discoveryNamespace, ""))).Should(Succeed())
 
 					config := &discoveryv1.DiscoveryConfig{}
 					Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
@@ -197,7 +198,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 				By("Checking all discovered clusters are gone", func() {
 					Eventually(func() (int, error) {
-						return countDiscoveredClusters()
+						return countDiscoveredClusters(discoveryNamespace)
 					}, timeout, interval).Should(Equal(0))
 				})
 			})
@@ -220,7 +221,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("Checking that all ManagedClusters are recognized in their matching DiscoveredClusters", func() {
 				Eventually(func() (int, error) {
-					return countManagedDiscoveredClusters()
+					return countManagedDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(5))
 			})
 
@@ -230,9 +231,9 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("Checking that no DiscoveredClusters are labeled as managed", func() {
 				Eventually(func() (int, error) {
-					return countManagedDiscoveredClusters()
+					return countManagedDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(0))
-				Expect(countDiscoveredClusters()).To(Equal(10))
+				Expect(countDiscoveredClusters(discoveryNamespace)).To(Equal(10))
 			})
 		})
 	})
@@ -244,7 +245,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
 				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(10))
 			})
 
@@ -258,7 +259,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("By checking that discovered clusters have changed", func() {
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(5))
 			})
 		})
@@ -271,7 +272,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
 				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(10))
 			})
 
@@ -281,7 +282,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("Checking all discovered clusters are gone", func() {
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(0))
 			})
 		})
@@ -300,7 +301,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("By checking only 8 discovered clusters have been created", func() {
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(8))
 			})
 		})
@@ -308,7 +309,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 	Context("Credentials become invalid", func() {
 		AfterEach(func() {
-			err := k8sClient.Delete(ctx, customSecret("badsecret", ""))
+			err := k8sClient.Delete(ctx, customSecret("badsecret", discoveryNamespace, ""))
 			if err != nil {
 				Expect(apierrors.IsNotFound(err)).To(BeTrue())
 			}
@@ -329,12 +330,12 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("By checking 10 discovered clusters have been created", func() {
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(10))
 			})
 
 			By("Change secret to an invalid one", func() {
-				Expect(k8sClient.Create(ctx, customSecret("badsecret", ""))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, customSecret("badsecret", discoveryNamespace, ""))).Should(Succeed())
 
 				config := &discoveryv1.DiscoveryConfig{}
 				Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
@@ -344,7 +345,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("Checking all discovered clusters are gone", func() {
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(0))
 			})
 		})
@@ -364,7 +365,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("By checking 10 discovered clusters have been created", func() {
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(10))
 			})
 
@@ -381,8 +382,160 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("Checking all discovered clusters are gone", func() {
 				Eventually(func() (int, error) {
-					return countDiscoveredClusters()
+					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(0))
+			})
+		})
+	})
+
+	Context("Multiple DiscoveryConfigs across namespaces", func() {
+		BeforeEach(func() {
+			Expect(k8sClient.Create(ctx, &corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{Name: secondNamespace},
+			})).To(Succeed())
+
+			// Wait for namespace to be established
+			createdNS := &corev1.Namespace{}
+			Eventually(func() bool {
+				err := k8sClient.Get(ctx, types.NamespacedName{Name: secondNamespace}, createdNS)
+				if err != nil {
+					return false
+				}
+				return true
+			}, timeout, interval).Should(BeTrue())
+		})
+
+		AfterEach(func() {
+			err := k8sClient.Delete(ctx, customSecret("badsecret", discoveryNamespace, ""))
+			if err != nil {
+				Expect(apierrors.IsNotFound(err)).To(BeTrue())
+			}
+
+			err = k8sClient.Delete(ctx, customSecret("connection1", discoveryNamespace, "connection1"))
+			if err != nil {
+				Expect(apierrors.IsNotFound(err)).To(BeTrue())
+			}
+
+			ns := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: secondNamespace}}
+			err = k8sClient.Delete(ctx, ns)
+			if err != nil {
+				Expect(apierrors.IsNotFound(err)).To(BeTrue())
+			}
+			Eventually(func() bool {
+				err := k8sClient.Get(ctx, types.NamespacedName{Name: secondNamespace}, &corev1.Namespace{})
+				if err == nil {
+					return false
+				}
+				return apierrors.IsNotFound(err)
+			}, timeout, interval).Should(BeTrue(), "There was an issue cleaning up the namespace.")
+		})
+
+		It("Should manage DiscoveredClusters across namespaces", func() {
+			By("Configuring testserver to return multiple responses", func() {
+				updateTestserverScenario("multipleConnections")
+			})
+
+			By("Creating DiscoveryConfigs in separate namespaces", func() {
+				Expect(k8sClient.Create(ctx, customSecret("connection1", discoveryNamespace, "connection1"))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, customSecret("connection2", secondNamespace, "connection2"))).Should(Succeed())
+
+				config1 := defaultDiscoveryConfig()
+				config1.Spec.Credential = "connection1"
+				Expect(k8sClient.Create(ctx, annotate(config1))).Should(Succeed())
+
+				config2 := defaultDiscoveryConfig()
+				config2.SetNamespace(secondNamespace)
+				config2.Spec.Credential = "connection2"
+				Expect(k8sClient.Create(ctx, annotate(config2))).Should(Succeed())
+			})
+
+			By("By checking discovered clusters have been created in both namespaces", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(discoveryNamespace)
+				}, timeout, interval).Should(Equal(4), "discoveredClusters not created in first namespace")
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(secondNamespace)
+				}, timeout, interval).Should(Equal(4), "discoveredClusters not created in second namespace")
+			})
+
+			By("By verifying a managedcluster change propogates across all namespaces", func() {
+				By("Change secret to an invalid one", func() {
+					Expect(k8sClient.Create(ctx, customSecret("badsecret", discoveryNamespace, ""))).Should(Succeed())
+
+					config := &discoveryv1.DiscoveryConfig{}
+					Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
+					config.Spec.Credential = "badsecret"
+					Expect(k8sClient.Update(ctx, config)).Should(Succeed())
+				})
+
+				By("Checking all discovered clusters are gone", func() {
+					Eventually(func() (int, error) {
+						return countDiscoveredClusters(discoveryNamespace)
+					}, timeout, interval).Should(Equal(0))
+				})
+
+				By("Checking discovered clusters in other namespace are still there", func() {
+					Expect(countDiscoveredClusters(secondNamespace)).To(Equal(4))
+				})
+			})
+		})
+
+		It("Should update DiscoveredClusters' managed status across namespaces", func() {
+			By("Configuring testserver to return multiple responses", func() {
+				updateTestserverScenario("multipleConnections")
+			})
+
+			By("Creating DiscoveryConfigs in separate namespaces", func() {
+				Expect(k8sClient.Create(ctx, customSecret("connection1", discoveryNamespace, "connection1"))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, customSecret("connection2", secondNamespace, "connection2"))).Should(Succeed())
+
+				config1 := defaultDiscoveryConfig()
+				config1.Spec.Credential = "connection1"
+				Expect(k8sClient.Create(ctx, annotate(config1))).Should(Succeed())
+
+				config2 := defaultDiscoveryConfig()
+				config2.SetNamespace(secondNamespace)
+				config2.Spec.Credential = "connection2"
+				Expect(k8sClient.Create(ctx, annotate(config2))).Should(Succeed())
+			})
+
+			By("By checking discovered clusters have been created in both namespaces", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(discoveryNamespace)
+				}, timeout, interval).Should(Equal(4), "discoveredClusters not created in first namespace")
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(secondNamespace)
+				}, timeout, interval).Should(Equal(4), "discoveredClusters not created in second namespace")
+			})
+
+			By("By verifying a change to a managedcluster applies to matching discoveredClusters in all namespaces", func() {
+				By("Creating ManagedClusters", func() {
+					Expect(k8sClient.Create(ctx, newManagedCluster("mc-connection-1", "d36f6dc3-84b0-4bc6-b126-9f30766f9fae"))).To(Succeed())
+					Expect(k8sClient.Create(ctx, newManagedCluster("mc-connection-2", "b6ec171b-d733-40ed-ba9c-78e58a9c9a8b"))).To(Succeed())
+					Expect(k8sClient.Create(ctx, newManagedCluster("mc-connection-both", "844b3bf1-8d70-469c-a113-f1cd5db45c63"))).To(Succeed())
+				})
+
+				By("Checking that all ManagedClusters are recognized in their matching DiscoveredClusters", func() {
+					Eventually(func() (int, error) {
+						return countManagedDiscoveredClusters(discoveryNamespace)
+					}, timeout, interval).Should(Equal(2), fmt.Sprintf("Missing managed labels in namespace %s", discoveryNamespace))
+					Eventually(func() (int, error) {
+						return countManagedDiscoveredClusters(secondNamespace)
+					}, timeout, interval).Should(Equal(2), fmt.Sprintf("Missing managed labels in namespace %s", secondNamespace))
+				})
+
+				By("Deleting all ManagedClusters", func() {
+					byDeletingAllManagedCluster()
+				})
+
+				By("Checking that no DiscoveredClusters are labeled as managed", func() {
+					Eventually(func() (int, error) {
+						return countManagedDiscoveredClusters(discoveryNamespace)
+					}, timeout, interval).Should(Equal(0))
+					Eventually(func() (int, error) {
+						return countManagedDiscoveredClusters(secondNamespace)
+					}, timeout, interval).Should(Equal(0))
+				})
 			})
 		})
 	})
@@ -457,10 +610,10 @@ func getDiscoveredClusterByID(id string) (*discoveryv1.DiscoveredCluster, error)
 	return nil, fmt.Errorf("Cluster not found")
 }
 
-func countManagedDiscoveredClusters() (int, error) {
+func countManagedDiscoveredClusters(namespace string) (int, error) {
 	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
 	err := k8sClient.List(ctx, discoveredClusters,
-		client.InNamespace(discoveryNamespace),
+		client.InNamespace(namespace),
 		client.MatchingLabels{
 			"isManagedCluster": "true",
 		})
@@ -470,9 +623,9 @@ func countManagedDiscoveredClusters() (int, error) {
 	return len(discoveredClusters.Items), err
 }
 
-func countDiscoveredClusters() (int, error) {
+func countDiscoveredClusters(namespace string) (int, error) {
 	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
-	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(discoveryNamespace))
+	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(namespace))
 	if err != nil {
 		return -1, err
 	}
@@ -537,11 +690,11 @@ func dummySecret() *corev1.Secret {
 	}
 }
 
-func customSecret(name, token string) *corev1.Secret {
+func customSecret(name, namespace, token string) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: discoveryNamespace,
+			Namespace: namespace,
 		},
 		StringData: map[string]string{
 			"metadata": fmt.Sprintf("ocmAPIToken: %s", token),
