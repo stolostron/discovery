@@ -26,6 +26,7 @@ import (
 // DiscoveredClusterSpec defines the desired state of DiscoveredCluster
 type DiscoveredClusterSpec struct {
 	Name              string       `json:"name,omitempty" yaml:"name,omitempty"`
+	DisplayName       string       `json:"display_name,omitempty" yaml:"display_name,omitempty"`
 	Console           string       `json:"console,omitempty" yaml:"console,omitempty"`
 	CreationTimestamp *metav1.Time `json:"creation_timestamp,omitempty" yaml:"creation_timestamp,omitempty"`
 	ActivityTimestamp *metav1.Time `json:"activity_timestamp,omitempty" yaml:"activity_timestamp,omitempty"`

@@ -115,3 +115,64 @@ func TestDiscoverClusters(t *testing.T) {
 		})
 	}
 }
+
+func Test_computeDisplayName(t *testing.T) {
+	tests := []struct {
+		name string
+		sub  subscription.Subscription
+		want string
+	}{
+		{
+			name: "Custom displayname set",
+			sub: subscription.Subscription{
+				ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
+				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+				DisplayName:       "my-custom-name",
+			},
+			want: "my-custom-name",
+		},
+		{
+			name: "No custom displayname - use consoleURL",
+			sub: subscription.Subscription{
+				ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
+				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+				DisplayName:       "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+			},
+			want: "installer-pool-j88kj.dev01.red-chesterfield.com",
+		},
+		{
+			name: "Displayname missing - use consoleURL",
+			sub: subscription.Subscription{
+				ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
+				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+				DisplayName:       "",
+			},
+			want: "installer-pool-j88kj.dev01.red-chesterfield.com",
+		},
+		{
+			name: "Displayname and consoleURL missing - use GUID",
+			sub: subscription.Subscription{
+				ConsoleURL:        "",
+				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+				DisplayName:       "",
+			},
+			want: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+		},
+		{
+			name: "ConsoleURL malformed - use GUID",
+			sub: subscription.Subscription{
+				ConsoleURL:        "www.installer-pool-j88kj.dev01.red-chesterfield.com",
+				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+				DisplayName:       "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+			},
+			want: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := computeDisplayName(tt.sub); got != tt.want {
+				t.Errorf("computeDisplayName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

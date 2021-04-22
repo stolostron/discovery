@@ -358,6 +358,9 @@ func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
 	if c1i.Name != c2i.Name {
 		return false
 	}
+	if c1i.DisplayName != c2i.DisplayName {
+		return false
+	}
 	if c1i.OpenshiftVersion != c2i.OpenshiftVersion {
 		return false
 	}
