@@ -44,6 +44,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+const (
+	defaultDiscoveryConfigName = "discoveryconfig"
+)
+
 var (
 	// baseURLAnnotation is the annotation set in a DiscoveryConfig that overrides the URL base used to find clusters
 	baseURLAnnotation = "ocmBaseURL"
@@ -74,6 +78,12 @@ type CloudRedHatProviderConnection struct {
 func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logr.FromContext(ctx)
 	log.Info("Reconciling DiscoveryConfig")
+
+	if req.Name != defaultDiscoveryConfigName {
+		err := fmt.Errorf("DiscoveryConfig resource name must be '%s'", defaultDiscoveryConfigName)
+		log.Error(err, "Invalid DiscoveryConfig resource name")
+		return ctrl.Result{}, nil
+	}
 
 	config := &discoveryv1.DiscoveryConfig{}
 	err := r.Get(ctx, req.NamespacedName, config)

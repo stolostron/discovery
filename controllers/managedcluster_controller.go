@@ -49,6 +49,9 @@ type ManagedClusterReconciler struct {
 // +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters,verbs=get;list;watch
 
 func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := logr.FromContext(ctx)
+	log.Info("Reconciling Managed Clusters")
+
 	managedClusters := &unstructured.UnstructuredList{}
 	managedClusters.SetGroupVersionKind(managedClusterGVK)
 	if err := r.List(ctx, managedClusters); err != nil {
@@ -119,40 +122,36 @@ func StartManagedClusterController(c controller.Controller, mgr ctrl.Manager, lo
 
 // updateManagedLabels adds managed labels to discovered clusters that need them and removes the labels if the discoveredclusters
 // have the label but should not, based on the list of managedclusters.
-func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, managed *unstructured.UnstructuredList, discovered *discoveryv1.DiscoveredClusterList) error {
-	// Update for recently managed clusters
-	for _, m := range managed.Items {
-		id := getClusterID(m)
-		dc := matchingDiscoveredCluster(discovered, id)
-		if dc == nil {
-			// No matching discovered cluster
-			continue
-		}
+func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, managedClusters *unstructured.UnstructuredList, discoveredClusters *discoveryv1.DiscoveredClusterList) error {
+	log := logr.FromContext(ctx)
 
-		if updateRequired := setManagedStatus(dc); updateRequired {
-			// Update with managed labels
-			if err := r.Update(ctx, dc); err != nil {
-				return errors.Wrapf(err, "error updating discovered cluster `%s`", id)
-			}
+	isManaged := map[string]bool{}
+	for _, m := range managedClusters.Items {
+		if id := getClusterID(m); id != "" {
+			isManaged[id] = true
 		}
 	}
 
-	// Update for clusters no longer managed
-	for _, dc := range discovered.Items {
+	for _, dc := range discoveredClusters.Items {
 		dc := dc
-		if !dc.Spec.IsManagedCluster {
-			continue
-		}
-		if isManagedCluster(dc, managed) {
-			continue
-		}
+		dcID := getDiscoveredID(dc)
 
-		// Discovered cluster is labeled as managed, but does not have a matching managed cluster
-		unsetManagedStatus(&dc)
-
-		// Update with managed labels removed
-		if err := r.Update(ctx, &dc); err != nil {
-			return errors.Wrapf(err, "error updating discovered cluster `%s`", dc.Name)
+		if isManaged[dcID] {
+			if updateRequired := setManagedStatus(&dc); updateRequired {
+				// Update with managed labels
+				if err := r.Update(ctx, &dc); err != nil {
+					return errors.Wrapf(err, "error setting managed status `%s`", dc.Name)
+				}
+				log.Info("Updated cluster, adding managed status", "discoveredcluster", dc.Name, "discoveredcluster namespace", dc.Namespace)
+			}
+		} else {
+			if updateRequired := unsetManagedStatus(&dc); updateRequired {
+				// Update with managed labels removed
+				if err := r.Update(ctx, &dc); err != nil {
+					return errors.Wrapf(err, "error unsetting managed status `%s`", dc.Name)
+				}
+				log.Info("Updated cluster, removing managed status", "discoveredcluster", dc.Name, "discoveredcluster namespace", dc.Namespace)
+			}
 		}
 	}
 
@@ -167,14 +166,9 @@ func getClusterID(managedCluster unstructured.Unstructured) string {
 	return ""
 }
 
-// matchingDiscoveredCluster returns the discoveredCluster with the provided id or nil if not found
-func matchingDiscoveredCluster(discoveredList *discoveryv1.DiscoveredClusterList, id string) *discoveryv1.DiscoveredCluster {
-	for i := range discoveredList.Items {
-		if discoveredList.Items[i].Spec.Name == id {
-			return &discoveredList.Items[i]
-		}
-	}
-	return nil
+// getDiscoveredID returns the clusterID from a discoveredCluster
+func getDiscoveredID(dc discoveryv1.DiscoveredCluster) string {
+	return dc.Spec.Name
 }
 
 // setManagedStatus returns true if labels were added and false if the labels already exist
@@ -211,15 +205,4 @@ func unsetManagedStatus(dc *discoveryv1.DiscoveredCluster) bool {
 		updated = true
 	}
 	return updated
-}
-
-func isManagedCluster(dc discoveryv1.DiscoveredCluster, managedClusters *unstructured.UnstructuredList) bool {
-	discoveredName := dc.Spec.Name
-	for _, mc := range managedClusters.Items {
-		id := getClusterID(mc)
-		if id != "" && id == discoveredName {
-			return true
-		}
-	}
-	return false
 }

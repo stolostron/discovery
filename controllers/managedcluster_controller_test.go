@@ -3,7 +3,6 @@
 package controllers
 
 import (
-	"reflect"
 	"testing"
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
@@ -51,57 +50,6 @@ func Test_getClusterID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := getClusterID(tt.managedCluster); got != tt.want {
 				t.Errorf("getClusterID() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_matchingDiscoveredCluster(t *testing.T) {
-	a := discoveryv1.DiscoveredCluster{
-		Spec: discoveryv1.DiscoveredClusterSpec{
-			Name: "dc1",
-		},
-	}
-	b := discoveryv1.DiscoveredCluster{
-		Spec: discoveryv1.DiscoveredClusterSpec{
-			Name: "dc2",
-		},
-	}
-
-	type args struct {
-		discoveredList *discoveryv1.DiscoveredClusterList
-		id             string
-	}
-	tests := []struct {
-		name string
-		args args
-		want *discoveryv1.DiscoveredCluster
-	}{
-		{
-			name: "Matching cluster",
-			args: args{
-				discoveredList: &discoveryv1.DiscoveredClusterList{
-					Items: []discoveryv1.DiscoveredCluster{a, b},
-				},
-				id: "dc1",
-			},
-			want: &a,
-		},
-		{
-			name: "No matching cluster",
-			args: args{
-				discoveredList: &discoveryv1.DiscoveredClusterList{
-					Items: []discoveryv1.DiscoveredCluster{a, b},
-				},
-				id: "dc0",
-			},
-			want: nil,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := matchingDiscoveredCluster(tt.args.discoveredList, tt.args.id); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("matchingDiscoveredCluster() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -192,77 +140,6 @@ func Test_unsetManagedStatus(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := unsetManagedStatus(tt.dc); got != tt.want {
 				t.Errorf("unsetManagedStatus() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_isManagedCluster(t *testing.T) {
-	managedClusters := unstructured.UnstructuredList{
-		Items: []unstructured.Unstructured{
-			{
-				Object: map[string]interface{}{
-					"apiVersion": "cluster.open-cluster-management.io/v1",
-					"kind":       "ManagedCluster",
-					"metadata": map[string]interface{}{
-						"name":      "managedcluster1",
-						"namespace": "test",
-						"labels":    map[string]interface{}{"clusterID": "cluster-id-1"},
-					},
-				},
-			},
-			{
-				Object: map[string]interface{}{
-					"apiVersion": "cluster.open-cluster-management.io/v1",
-					"kind":       "ManagedCluster",
-					"metadata": map[string]interface{}{
-						"name":      "managedcluster2",
-						"namespace": "test",
-						"labels":    map[string]interface{}{"clusterID": "cluster-id-2"},
-					},
-				},
-			},
-		},
-	}
-
-	type args struct {
-		dc              discoveryv1.DiscoveredCluster
-		managedClusters *unstructured.UnstructuredList
-	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{
-			name: "Cluster is managed",
-			args: args{
-				dc: discoveryv1.DiscoveredCluster{
-					Spec: discoveryv1.DiscoveredClusterSpec{
-						Name: "cluster-id-1",
-					},
-				},
-				managedClusters: &managedClusters,
-			},
-			want: true,
-		},
-		{
-			name: "Cluster is not managed",
-			args: args{
-				dc: discoveryv1.DiscoveredCluster{
-					Spec: discoveryv1.DiscoveredClusterSpec{
-						Name: "cluster-id-0",
-					},
-				},
-				managedClusters: &managedClusters,
-			},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := isManagedCluster(tt.args.dc, tt.args.managedClusters); got != tt.want {
-				t.Errorf("isManagedCluster() = %v, want %v", got, tt.want)
 			}
 		})
 	}
