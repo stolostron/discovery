@@ -190,11 +190,11 @@ logs:
 
 # Annotate discoveryconfig to target mock server
 annotate:
-	kubectl annotate discoveryconfig discoveryconfig ocmBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 --overwrite
+	kubectl annotate discoveryconfig discovery ocmBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 --overwrite
 
 # Remove mock server annotation
 unannotate:
-	kubectl annotate discoveryconfig discoveryconfig ocmBaseURL-
+	kubectl annotate discoveryconfig discovery ocmBaseURL-
 
 set-copyright:
 	@bash ./cicd-scripts/set-copyright.sh

@@ -45,7 +45,7 @@ import (
 )
 
 const (
-	defaultDiscoveryConfigName = "discoveryconfig"
+	defaultDiscoveryConfigName = "discovery"
 )
 
 var (

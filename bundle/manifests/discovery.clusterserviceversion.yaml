@@ -8,7 +8,7 @@ metadata:
           "apiVersion": "discovery.open-cluster-management.io/v1",
           "kind": "DiscoveryConfig",
           "metadata": {
-            "name": "discoveryconfig"
+            "name": "discovery"
           },
           "spec": {
             "credential": "ocm-api-token",

@@ -69,7 +69,7 @@ This will create a `DiscoveryConfig` like the example below:
 apiVersion: discovery.open-cluster-management.io/v1
 kind: DiscoveryConfig
 metadata:
-  name: discoveryconfig
+  name: discovery
 spec:
   providerConnections:
     - ocm-api-token
