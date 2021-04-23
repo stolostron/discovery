@@ -23,7 +23,7 @@ import (
 
 // Define utility constants for object names and testing timeouts/durations and intervals.
 const (
-	DiscoveryConfigName = "discoveryconfig"
+	DiscoveryConfigName = "discovery"
 	SecretName          = "test-connection-secret"
 	TestserverName      = "mock-ocm-server"
 

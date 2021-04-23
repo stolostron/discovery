@@ -27,7 +27,7 @@ server/docker-run:
 
 ## Annotate DiscoveryConfig with Mock OCM Server URL
 server/annotate:
-	oc annotate discoveryconfig discoveryconfig ocmBaseURL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000 --overwrite
+	oc annotate discoveryconfig discovery ocmBaseURL=http://mock-ocm-server.open-cluster-management.svc.cluster.local:3000 --overwrite
 
 DUMMY_ENCRYPTION = $(shell echo "ocmAPIToken: dummytoken" | base64)
 server/secret:
