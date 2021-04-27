@@ -63,7 +63,7 @@ type DiscoveryConfigReconciler struct {
 }
 
 // CloudRedHatProviderConnection ...
-type CloudRedHatProviderConnection struct {
+type CloudRedHatCredential struct {
 	OCMApiToken string `yaml:"ocmAPIToken"`
 }
 
@@ -167,6 +167,7 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	for _, dc := range discovered {
 		dc.SetNamespace(config.Namespace)
 		dc.Spec.ProviderConnections = append(dc.Spec.ProviderConnections, *secretRef)
+		dc.Spec.Credential = *secretRef
 		merge(allClusters, dc)
 	}
 
@@ -207,19 +208,19 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	return nil
 }
 
-// getUserToken takes a secret cotaining a Provider Connection and returns the stored OCM api token.
+// getUserToken takes a secret cotaining credentials and returns the stored OCM api token.
 func parseUserToken(secret *corev1.Secret) (string, error) {
 	if _, ok := secret.Data["metadata"]; !ok {
 		// return "", fmt.Errorf("Secret '%s' does not contain 'metadata' field", secret.Name)
 		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
 	}
 
-	providerConnection := &CloudRedHatProviderConnection{}
-	if err := yaml.Unmarshal(secret.Data["metadata"], providerConnection); err != nil {
+	cred := &CloudRedHatCredential{}
+	if err := yaml.Unmarshal(secret.Data["metadata"], cred); err != nil {
 		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
 	}
 
-	return providerConnection.OCMApiToken, nil
+	return cred.OCMApiToken, nil
 }
 
 // assignManagedStatus marks clusters in the discovered map as managed if they are in the managed list
@@ -332,7 +333,7 @@ func getURLOverride(config *discoveryv1.DiscoveryConfig) string {
 }
 
 // merge adds the cluster to the cluster map. If the cluster name is already in the map then it
-// appends the ProviderConnections to the cluster in the map
+// appends the credentials to the cluster in the map
 func merge(clusters map[string]discoveryv1.DiscoveredCluster, dc discoveryv1.DiscoveredCluster) {
 	id := dc.Spec.Name
 	current, ok := clusters[id]
@@ -361,6 +362,9 @@ func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
 		return false
 	}
 	if c1i.IsManagedCluster != c2i.IsManagedCluster {
+		return false
+	}
+	if c1i.Credential != c2i.Credential {
 		return false
 	}
 	if len(c1i.ProviderConnections) != len(c2i.ProviderConnections) {

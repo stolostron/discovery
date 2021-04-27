@@ -35,6 +35,7 @@ type DiscoveredClusterSpec struct {
 	IsManagedCluster  bool         `json:"isManagedCluster,omitempty" yaml:"isManagedCluster,omitempty"`
 
 	ProviderConnections []corev1.ObjectReference `json:"providerConnections"`
+	Credential          corev1.ObjectReference   `json:"credential,omitempty" yaml:"credential,omitempty"`
 }
 
 // DiscoveredClusterStatus defines the observed state of DiscoveredCluster
