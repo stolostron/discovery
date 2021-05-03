@@ -167,6 +167,15 @@ func Test_computeDisplayName(t *testing.T) {
 			},
 			want: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 		},
+		{
+			name: "Port in consoleURL - remove port",
+			sub: subscription.Subscription{
+				ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com:6443",
+				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+				DisplayName:       "",
+			},
+			want: "installer-pool-j88kj.dev01.red-chesterfield.com",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

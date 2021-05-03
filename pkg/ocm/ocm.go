@@ -95,7 +95,14 @@ func computeDisplayName(sub subscription.Subscription) string {
 	}
 	// use consoleURL for displayName
 	if strings.HasPrefix(sub.ConsoleURL, "https://console-openshift-console.apps.") {
-		return strings.TrimPrefix(sub.ConsoleURL, "https://console-openshift-console.apps.")
+		// trim common prefix
+		hostport := strings.TrimPrefix(sub.ConsoleURL, "https://console-openshift-console.apps.")
+		// trim port if present
+		i := strings.LastIndex(hostport, ":")
+		if i > -1 {
+			return hostport[:i]
+		}
+		return hostport
 	}
 	// Use GUID as backup
 	return sub.ExternalClusterID
