@@ -2,6 +2,7 @@ package ocm
 
 import (
 	"errors"
+	"strings"
 
 	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
 	"github.com/open-cluster-management/discovery/pkg/ocm/auth"
@@ -64,6 +65,7 @@ func formatCluster(sub subscription.Subscription) (discoveryv1.DiscoveredCluster
 		},
 		Spec: discoveryv1.DiscoveredClusterSpec{
 			Name:              sub.ExternalClusterID,
+			DisplayName:       computeDisplayName(sub),
 			Console:           sub.ConsoleURL,
 			CreationTimestamp: sub.CreatedAt,
 			ActivityTimestamp: sub.UpdatedAt,
@@ -82,4 +84,26 @@ func IsUnrecoverable(err error) bool {
 		return true
 	}
 	return false
+}
+
+// computeDisplayName tries to provide a more user-friendly name if set
+// to a cluster ID
+func computeDisplayName(sub subscription.Subscription) string {
+	// displayName is custom
+	if sub.DisplayName != sub.ExternalClusterID && sub.DisplayName != "" {
+		return sub.DisplayName
+	}
+	// use consoleURL for displayName
+	if strings.HasPrefix(sub.ConsoleURL, "https://console-openshift-console.apps.") {
+		// trim common prefix
+		hostport := strings.TrimPrefix(sub.ConsoleURL, "https://console-openshift-console.apps.")
+		// trim port if present
+		i := strings.LastIndex(hostport, ":")
+		if i > -1 {
+			return hostport[:i]
+		}
+		return hostport
+	}
+	// Use GUID as backup
+	return sub.ExternalClusterID
 }
