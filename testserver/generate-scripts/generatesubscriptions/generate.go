@@ -110,7 +110,7 @@ var loweralphanum = []rune("abcdefghijklmnopqrstuvwxyz123456789")
 func randSeq(n int) string {
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = loweralphanum[rand.Intn(len(loweralphanum))]
+		b[i] = loweralphanum[rand.Intn(len(loweralphanum))] // #nosec G404 (cryptographic strength irrelevant)
 	}
 	return string(b)
 }
@@ -173,12 +173,12 @@ func main() {
 		now := time.Now()
 		floor := now.AddDate(0, 0, -1**num)
 		maxDelta := now.Sub(floor)
-		randomCreatedDelta := rand.Int63n(int64(maxDelta.Nanoseconds()))
+		randomCreatedDelta := rand.Int63n(int64(maxDelta.Nanoseconds())) // #nosec G404 (cryptographic strength irrelevant)
 		createdDate := floor.Add(time.Nanosecond * time.Duration(randomCreatedDelta))
 		updateDelta := now.Sub(createdDate)
-		randomUpdatedDelta := rand.Int63n(int64(updateDelta.Nanoseconds()))
+		randomUpdatedDelta := rand.Int63n(int64(updateDelta.Nanoseconds())) // #nosec G404 (cryptographic strength irrelevant)
 		updatedDate := createdDate.Add(time.Nanosecond * time.Duration(randomUpdatedDelta))
-		randomTelemDelta := rand.Int63n(int64(updateDelta.Nanoseconds()))
+		randomTelemDelta := rand.Int63n(int64(updateDelta.Nanoseconds())) // #nosec G404 (cryptographic strength irrelevant)
 		telemDate := createdDate.Add(time.Nanosecond * time.Duration(randomTelemDelta))
 		createdDateStr := createdDate.UTC().Format("2006-01-02T15:04:05.000000Z0700")
 		updatedDateStr := updatedDate.UTC().Format("2006-01-02T15:04:05.000000Z0700")
@@ -188,5 +188,5 @@ func main() {
 	}
 	total := SubscriptionList{"SubscriptionList", 1, *numFlag, *numFlag, test}
 	b, _ := json.MarshalIndent(total, "", "    ")
-	_ = ioutil.WriteFile(*wordPtr, b, 0777)
+	_ = ioutil.WriteFile(*wordPtr, b, 0600)
 }
