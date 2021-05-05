@@ -228,7 +228,7 @@ func (in *Filter) DeepCopyInto(out *Filter) {
 	*out = *in
 	if in.OpenShiftVersions != nil {
 		in, out := &in.OpenShiftVersions, &out.OpenShiftVersions
-		*out = make([]string, len(*in))
+		*out = make([]Semver, len(*in))
 		copy(*out, *in)
 	}
 }

@@ -27,10 +27,15 @@ type Filter struct {
 	// LastActive is the last active in days of clusters to discover, determined by activity timestamp
 	LastActive int `json:"lastActive,omitempty"`
 
-	// OpenShiftVersions is the list of release versions of OpenShift. This is currently just an API addition and has no implemented functionality yet
+	// OpenShiftVersions is the list of release versions of OpenShift of the form "<Major>.<Minor>"
 	// +optional
-	OpenShiftVersions []string `json:"openShiftVersions,omitempty"`
+	OpenShiftVersions []Semver `json:"openShiftVersions,omitempty"`
 }
+
+// Semver represents a partial semver string with the major and minor version
+// in the form "<Major>.<Minor>". For example: "4.5"
+// +kubebuilder:validation:Pattern="^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)$"
+type Semver string
 
 // DiscoveryConfigSpec defines the desired state of DiscoveryConfig
 type DiscoveryConfigSpec struct {

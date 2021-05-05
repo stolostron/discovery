@@ -31,7 +31,7 @@ func TestGetSubscriptionsBadFormat(t *testing.T) {
 
 	subscriptionClient := NewClient(SubscriptionRequest{
 		Token:  "access_token",
-		Filter: discoveryv1.Filter{},
+		Filter: discoveryv1.Filter{LastActive: 1000000000},
 	})
 
 	response, err := subscriptionClient.GetSubscriptions()
@@ -61,7 +61,7 @@ func TestGetSubscriptionsNoError(t *testing.T) {
 
 	subscriptionClient := NewClient(SubscriptionRequest{
 		Token:  "access_token",
-		Filter: discoveryv1.Filter{},
+		Filter: discoveryv1.Filter{LastActive: 1000000000},
 	})
 
 	response, err := subscriptionClient.GetSubscriptions()
