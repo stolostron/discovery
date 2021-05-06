@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	"github.com/open-cluster-management/discovery/pkg/ocm/auth"
 	"github.com/open-cluster-management/discovery/pkg/ocm/subscription"
 )
@@ -53,7 +53,7 @@ func TestDiscoverClusters(t *testing.T) {
 	type args struct {
 		token   string
 		baseURL string
-		filters discoveryv1.Filter
+		filters discovery.Filter
 	}
 	tests := []struct {
 		name             string
@@ -74,7 +74,7 @@ func TestDiscoverClusters(t *testing.T) {
 			args: args{
 				token:   "test",
 				baseURL: "test",
-				filters: discoveryv1.Filter{},
+				filters: discovery.Filter{},
 			},
 			want:    1,
 			wantErr: false,
@@ -90,7 +90,7 @@ func TestDiscoverClusters(t *testing.T) {
 			args: args{
 				token:   "test",
 				baseURL: "test",
-				filters: discoveryv1.Filter{},
+				filters: discovery.Filter{},
 			},
 			want:    2,
 			wantErr: false,

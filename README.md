@@ -66,7 +66,7 @@ make samples
 This will create a `DiscoveryConfig` like the example below:
 
 ```yaml
-apiVersion: discovery.open-cluster-management.io/v1
+apiVersion: discovery.open-cluster-management.io/v1alpha1
 kind: DiscoveryConfig
 metadata:
   name: discovery

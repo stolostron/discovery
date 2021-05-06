@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -31,7 +31,7 @@ func TestGetSubscriptionsBadFormat(t *testing.T) {
 
 	subscriptionClient := NewClient(SubscriptionRequest{
 		Token:  "access_token",
-		Filter: discoveryv1.Filter{LastActive: 1000000000},
+		Filter: discovery.Filter{LastActive: 1000000000},
 	})
 
 	response, err := subscriptionClient.GetSubscriptions()
@@ -61,7 +61,7 @@ func TestGetSubscriptionsNoError(t *testing.T) {
 
 	subscriptionClient := NewClient(SubscriptionRequest{
 		Token:  "access_token",
-		Filter: discoveryv1.Filter{LastActive: 1000000000},
+		Filter: discovery.Filter{LastActive: 1000000000},
 	})
 
 	response, err := subscriptionClient.GetSubscriptions()

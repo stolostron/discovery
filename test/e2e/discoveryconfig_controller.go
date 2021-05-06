@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -96,7 +96,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 		// Once this succeeds, clean up has happened for all owned resources.
 		Eventually(func() bool {
-			err := k8sClient.Get(ctx, discoveryConfig, &discoveryv1.DiscoveryConfig{})
+			err := k8sClient.Get(ctx, discoveryConfig, &discovery.DiscoveryConfig{})
 			if err == nil {
 				return false
 			}
@@ -190,7 +190,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				By("Changing secret to an invalid one", func() {
 					Expect(k8sClient.Create(ctx, customSecret("badsecret", discoveryNamespace, ""))).Should(Succeed())
 
-					config := &discoveryv1.DiscoveryConfig{}
+					config := &discovery.DiscoveryConfig{}
 					Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
 					config.Spec.Credential = "badsecret"
 					Expect(k8sClient.Update(ctx, config)).Should(Succeed())
@@ -337,7 +337,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("Change secret to an invalid one", func() {
 				Expect(k8sClient.Create(ctx, customSecret("badsecret", discoveryNamespace, ""))).Should(Succeed())
 
-				config := &discoveryv1.DiscoveryConfig{}
+				config := &discovery.DiscoveryConfig{}
 				Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
 				config.Spec.Credential = "badsecret"
 				Expect(k8sClient.Update(ctx, config)).Should(Succeed())
@@ -462,7 +462,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				By("Change secret to an invalid one", func() {
 					Expect(k8sClient.Create(ctx, customSecret("badsecret", discoveryNamespace, ""))).Should(Succeed())
 
-					config := &discoveryv1.DiscoveryConfig{}
+					config := &discovery.DiscoveryConfig{}
 					Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
 					config.Spec.Credential = "badsecret"
 					Expect(k8sClient.Update(ctx, config)).Should(Succeed())
@@ -543,7 +543,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 })
 
 // annotate adds an annotation to modify the baseUrl used with the discoveryconfig
-func annotate(dc *discoveryv1.DiscoveryConfig) *discoveryv1.DiscoveryConfig {
+func annotate(dc *discovery.DiscoveryConfig) *discovery.DiscoveryConfig {
 	baseUrl := fmt.Sprintf("http://mock-ocm-server.%s.svc.cluster.local:3000", discoveryNamespace)
 	dc.SetAnnotations(map[string]string{"ocmBaseURL": baseUrl})
 	return dc
@@ -587,16 +587,16 @@ func updateTestserverScenario(scenario string) {
 	}, time.Minute, interval).Should(BeTrue(), "Testserver should reach a running state with its entrypoint argument set to "+arg)
 
 	// Give time for testserver to begin serving new output
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 15)
 }
 
-func listDiscoveredClusters() (*discoveryv1.DiscoveredClusterList, error) {
-	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
+func listDiscoveredClusters() (*discovery.DiscoveredClusterList, error) {
+	discoveredClusters := &discovery.DiscoveredClusterList{}
 	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(discoveryNamespace))
 	return discoveredClusters, err
 }
 
-func getDiscoveredClusterByID(id string) (*discoveryv1.DiscoveredCluster, error) {
+func getDiscoveredClusterByID(id string) (*discovery.DiscoveredCluster, error) {
 	discoveredClusters, err := listDiscoveredClusters()
 	if err != nil {
 		return nil, err
@@ -611,7 +611,7 @@ func getDiscoveredClusterByID(id string) (*discoveryv1.DiscoveredCluster, error)
 }
 
 func countManagedDiscoveredClusters(namespace string) (int, error) {
-	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
+	discoveredClusters := &discovery.DiscoveredClusterList{}
 	err := k8sClient.List(ctx, discoveredClusters,
 		client.InNamespace(namespace),
 		client.MatchingLabels{
@@ -624,7 +624,7 @@ func countManagedDiscoveredClusters(namespace string) (int, error) {
 }
 
 func countDiscoveredClusters(namespace string) (int, error) {
-	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
+	discoveredClusters := &discovery.DiscoveredClusterList{}
 	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(namespace))
 	if err != nil {
 		return -1, err
@@ -667,7 +667,7 @@ func byDeletingAllManagedCluster() {
 }
 
 func byTriggeringReconcile() {
-	config := &discoveryv1.DiscoveryConfig{}
+	config := &discovery.DiscoveryConfig{}
 	Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
 	a := config.GetAnnotations()
 	if a == nil {
@@ -702,15 +702,15 @@ func customSecret(name, namespace, token string) *corev1.Secret {
 	}
 }
 
-func defaultDiscoveryConfig() *discoveryv1.DiscoveryConfig {
-	return &discoveryv1.DiscoveryConfig{
+func defaultDiscoveryConfig() *discovery.DiscoveryConfig {
+	return &discovery.DiscoveryConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      DiscoveryConfigName,
 			Namespace: discoveryNamespace,
 		},
-		Spec: discoveryv1.DiscoveryConfigSpec{
+		Spec: discovery.DiscoveryConfigSpec{
 			Credential: SecretName,
-			Filters:    discoveryv1.Filter{LastActive: 1000000},
+			Filters:    discovery.Filter{LastActive: 1000000},
 		},
 	}
 }

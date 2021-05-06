@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -12,13 +12,13 @@ func TestFilter(t *testing.T) {
 	day := metav1.NewTime(time.Date(2020, 5, 29, 6, 0, 0, 0, time.UTC))
 	tests := []struct {
 		name string
-		f    discoveryv1.Filter
+		f    discovery.Filter
 		subs []Subscription
 		want []Subscription
 	}{
 		{
 			name: "hi",
-			f:    discoveryv1.Filter{LastActive: 1000000000, OpenShiftVersions: []discoveryv1.Semver{"4.8", "4.9"}},
+			f:    discovery.Filter{LastActive: 1000000000, OpenShiftVersions: []discovery.Semver{"4.8", "4.9"}},
 			subs: []Subscription{
 				{
 					DisplayName:       "valid-subscription",
@@ -109,37 +109,37 @@ func Test_openshiftVersionFilter(t *testing.T) {
 	tests := []struct {
 		name     string
 		sub      Subscription
-		versions []discoveryv1.Semver
+		versions []discovery.Semver
 		want     bool
 	}{
 		{
 			name:     "Matching version",
 			sub:      Subscription{Metrics: []Metrics{{OpenShiftVersion: "4.6.1"}}},
-			versions: []discoveryv1.Semver{"4.5", "4.6"},
+			versions: []discovery.Semver{"4.5", "4.6"},
 			want:     true,
 		},
 		{
 			name:     "Old version",
 			sub:      Subscription{Metrics: []Metrics{{OpenShiftVersion: "4.6.1"}}},
-			versions: []discoveryv1.Semver{"4.8", "4.9"},
+			versions: []discovery.Semver{"4.8", "4.9"},
 			want:     false,
 		},
 		{
 			name:     "Missing version",
 			sub:      Subscription{Metrics: []Metrics{{OpenShiftVersion: ""}}},
-			versions: []discoveryv1.Semver{"4.8", "4.9"},
+			versions: []discovery.Semver{"4.8", "4.9"},
 			want:     false,
 		},
 		{
 			name:     "Missing metrics",
 			sub:      Subscription{},
-			versions: []discoveryv1.Semver{"4.8", "4.9"},
+			versions: []discovery.Semver{"4.8", "4.9"},
 			want:     false,
 		},
 		{
 			name:     "No version filter",
 			sub:      Subscription{Metrics: []Metrics{{OpenShiftVersion: ""}}},
-			versions: []discoveryv1.Semver{},
+			versions: []discovery.Semver{},
 			want:     true,
 		},
 	}

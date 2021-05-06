@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 )
 
 // filterFunc returns true if the Subscription passes the filter
@@ -12,7 +12,7 @@ type filterFunc func(sub Subscription) bool
 
 // Filter creates filter functions based on the provided filter spec and returns
 // only the list of subscriptions that pass all filters
-func Filter(subs []Subscription, f discoveryv1.Filter) []Subscription {
+func Filter(subs []Subscription, f discovery.Filter) []Subscription {
 	vsf := make([]Subscription, 0)
 	filters := createFilters(f)
 	for _, s := range subs {
@@ -34,7 +34,7 @@ func all(s Subscription, fs []filterFunc) bool {
 }
 
 // createFilters returns a list of filter functions generated from the Filter spec
-func createFilters(f discoveryv1.Filter) []filterFunc {
+func createFilters(f discovery.Filter) []filterFunc {
 	return []filterFunc{
 		archiveFilter(),
 		openshiftVersionFilter(f.OpenShiftVersions),
@@ -51,7 +51,7 @@ func archiveFilter() filterFunc {
 
 // openshiftVersionFilter filters out clusters with versions not in the
 // list of Major/Minor semver versions
-func openshiftVersionFilter(versions []discoveryv1.Semver) filterFunc {
+func openshiftVersionFilter(versions []discovery.Semver) filterFunc {
 	if len(versions) == 0 {
 		// noop filter
 		return func(sub Subscription) bool { return true }
