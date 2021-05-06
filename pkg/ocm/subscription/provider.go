@@ -112,15 +112,6 @@ func parseResponse(response *http.Response) (*SubscriptionResponse, *Subscriptio
 // applyPreFilters adds fields to the http query to limit the number of items returned
 func applyPreFilters(query *url.Values, filters discoveryv1.Filter) {
 	if filters.LastActive != 0 {
-		query.Add("search", fmt.Sprintf("updated_at >= '%s'", lastActiveDate(time.Now(), filters.LastActive)))
+		query.Add("search", fmt.Sprintf("updated_at >= '%s'", lastActiveDate(time.Now(), filters.LastActive).Format("2006-01-02")))
 	}
-}
-
-// return the date that is `daysAgo` days before `currentDate` in 'YYYY-MM-DD' format
-func lastActiveDate(currentDate time.Time, daysAgo int) string {
-	if daysAgo < 0 {
-		daysAgo = 0
-	}
-	cutoffDay := currentDate.AddDate(0, 0, -daysAgo)
-	return cutoffDay.Format("2006-01-02")
 }

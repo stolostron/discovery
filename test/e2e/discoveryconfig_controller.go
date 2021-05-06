@@ -710,6 +710,7 @@ func defaultDiscoveryConfig() *discoveryv1.DiscoveryConfig {
 		},
 		Spec: discoveryv1.DiscoveryConfigSpec{
 			Credential: SecretName,
+			Filters:    discoveryv1.Filter{LastActive: 1000000},
 		},
 	}
 }
