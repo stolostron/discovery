@@ -1,14 +1,27 @@
 domain: open-cluster-management.io
-layout: go.kubebuilder.io/v2
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
 projectName: discovery
 repo: github.com/open-cluster-management/discovery
 resources:
-- group: discovery
-  kind: DiscoveredCluster
-  version: v1
-- group: discovery
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: open-cluster-management.io
+  group: discovery
   kind: DiscoveryConfig
-  version: v1
-version: 3-alpha
-plugins:
-  go.sdk.operatorframework.io/v2-alpha: {}
+  path: github.com/open-cluster-management/discovery/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: open-cluster-management.io
+  group: discovery
+  kind: DiscoveredCluster
+  path: github.com/open-cluster-management/discovery/api/v1alpha1
+  version: v1alpha1
+version: "3"

@@ -1,15 +1,5 @@
 # Copyright Contributors to the Open Cluster Management project
 
-USE_VENDORIZED_BUILD_HARNESS ?=
-
-ifndef USE_VENDORIZED_BUILD_HARNESS
-	ifeq ($(CI),true)
-	-include $(shell curl -H 'Accept: application/vnd.github.v4.raw' -L https://api.github.com/repos/open-cluster-management/build-harness-extensions/contents/templates/Makefile.build-harness-bootstrap -o .build-harness-bootstrap; echo .build-harness-bootstrap)
-	endif
-else
--include vbh/.build-harness-vendorized
-endif
-
 # Allow operator-sdk version/binary to be used to be specified externally via
 # an environment variable.
 #
@@ -20,8 +10,7 @@ OPERATOR_SDK ?= osdk
 
 # Current Operator version
 VERSION ?= 0.0.1
-# Default bundle image tag
-BUNDLE_IMG ?= controller-bundle:$(VERSION)
+
 # Options for 'bundle-build'
 ifneq ($(origin CHANNELS), undefined)
 BUNDLE_CHANNELS := --channels=$(CHANNELS)
@@ -30,6 +19,17 @@ ifneq ($(origin DEFAULT_CHANNEL), undefined)
 BUNDLE_DEFAULT_CHANNEL := --default-channel=$(DEFAULT_CHANNEL)
 endif
 BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
+
+# IMAGE_TAG_BASE defines the docker.io namespace and part of the image name for remote images.
+# This variable is used to construct full image tags for bundle and catalog images.
+#
+# For example, running 'make bundle-build bundle-push catalog-build catalog-push' will build and push both
+# open-cluster-management.io/discovery-bundle:$VERSION and open-cluster-management.io/discovery-catalog:$VERSION.
+IMAGE_TAG_BASE ?= open-cluster-management/discovery
+
+# BUNDLE_IMG defines the image:tag used for the bundle.
+# You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
+BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 
 # Image URL to use all building/pushing image targets
 REGISTRY ?= quay.io/rhibmcollab
@@ -48,44 +48,99 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+# Setting SHELL to bash allows bash commands to be executed by recipes.
+# This is a requirement for 'setup-envtest.sh' in the test target.
+# Options are set to exit when a recipe line exits non-zero or a piped command fails.
+SHELL = /usr/bin/env bash -o pipefail
+.SHELLFLAGS = -ec
+
 -include testserver/Makefile
 
-all: manager
+all: build
 
-# Run tests
-test: generate fmt vet manifests
+##@ General
+
+# The help target prints out all targets with their descriptions organized
+# beneath their categories. The categories are represented by '##@' and the
+# target descriptions by '##'. The awk commands is responsible for reading the
+# entire set of makefiles included in this invocation, looking for lines of the
+# file as xyz: ## something, and then pretty-format the target and help. Then,
+# if there's a line with ##@ something, that gets pretty-printed as a category.
+# More info on the usage of ANSI control characters for terminal formatting:
+# https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
+# More info on the awk command:
+# http://linuxcommand.org/lc3_adv_awk.php
+
+help: ## Display this help.
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+
+##@ Development
+
+manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=discovery-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+
+generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+fmt: ## Run go fmt against code.
+	go fmt ./...
+
+vet: ## Run go vet against code.
+	go vet `go list ./... | grep -v test`
+
+test: manifests generate fmt vet ## Run tests.
 	go test `go list ./... | grep -v e2e` -coverprofile cover.out
 
-# Run fast tests that don't require extra binary
-unit-tests:
-	go test ./... -short -v
-
-# Run tests
-integration-tests: install deploy server/deploy
+integration-tests: install deploy server/deploy ## Run integration tests
 	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
 	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n $(NAMESPACE)
 	kubectl wait --for=condition=available --timeout=60s deployment/mock-ocm-server -n $(NAMESPACE)
 	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)
 
-# Build manager binary
-manager: generate fmt vet
+ENCRYPTED = $(shell echo "ocmAPIToken: ${OCM_API_TOKEN}" | base64)
+secret: ## Generate secret for OCM access
+	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(ENCRYPTED)/g" | kubectl apply -f - || true
+
+samples: ## Create custom resources
+	$(KUSTOMIZE) build config/samples | kubectl apply -f -
+
+logs: ## Print operator logs
+	@kubectl logs -f $(shell kubectl get pod -l app=discovery-operator -o jsonpath="{.items[0].metadata.name}")
+
+annotate: ## Annotate discoveryconfig to target mock server
+	kubectl annotate discoveryconfig discovery ocmBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 --overwrite
+
+unannotate: ## Remove mock server annotation
+	kubectl annotate discoveryconfig discovery ocmBaseURL-
+
+set-copyright:
+	@bash ./cicd-scripts/set-copyright.sh
+
+verify: test integration-tests manifests
+
+##@ Build
+
+build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
-# Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate fmt vet manifests
+run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go
 
-# Install CRDs into a cluster 
-install: manifests kustomize
+docker-build: ## Build docker image with the manager.
+	docker build -t "${URL}" .
+
+docker-push: ## Push docker image with the manager.
+	docker push "${URL}"
+
+##@ Deployment
+
+install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
 
-# Uninstall CRDs from a cluster
-uninstall: manifests kustomize
+uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: manifests kustomize
-	@echo "Deploying with image ${URL}"
+deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	cd config/manager && $(KUSTOMIZE) edit set image controller="${URL}"
 	cd config/default && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
@@ -93,33 +148,10 @@ deploy: manifests kustomize
 	cd config/manager && $(KUSTOMIZE) edit set image controller="discovery-operator:latest"
 	cd config/default && $(KUSTOMIZE) edit set namespace open-cluster-management
 
-# Generate manifests e.g. CRD, RBAC etc.
-manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=discovery-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build config/default | kubectl delete -f -
 
-# Run go fmt against code
-fmt:
-	go fmt ./...
-
-# Run go vet against code
-vet:
-	go vet `go list ./... | grep -v test`
-
-# Generate code
-generate: controller-gen
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
-
-# Build the docker image
-docker-build:
-	docker build . -t "${URL}"
-
-# Push the docker image
-docker-push:
-	docker push "${URL}"
-
-# find or download controller-gen
-# download controller-gen if necessary
-controller-gen:
+controller-gen: ## Download controller-gen locally if necessary.
 ifeq (, $(shell which controller-gen))
 	@{ \
 	set -e ;\
@@ -134,14 +166,14 @@ else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
-kustomize:
+kustomize: ## Download kustomize locally if necessary.
 ifeq (, $(shell which kustomize))
 	@{ \
 	set -e ;\
 	KUSTOMIZE_GEN_TMP_DIR=$$(mktemp -d) ;\
 	cd $$KUSTOMIZE_GEN_TMP_DIR ;\
 	go mod init tmp ;\
-	go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4 ;\
+	go get sigs.k8s.io/kustomize/kustomize/v3@v3.8.7 ;\
 	rm -rf $$KUSTOMIZE_GEN_TMP_DIR ;\
 	}
 KUSTOMIZE=$(GOBIN)/kustomize
@@ -149,57 +181,62 @@ else
 KUSTOMIZE=$(shell which kustomize)
 endif
 
-# Generate bundle manifests and metadata, then validate generated files.
-#
-# Note: Generated bundle material must  be committed to be picked up and included
-# as part of the ACM composite bundle. The merge tooling assumes this stuff is
-# found in operator-sdk (V1's) default output directory (bundle).
-
 .PHONY: bundle
-bundle: manifests kustomize
+bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.
 	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	$(OPERATOR_SDK) bundle validate ./bundle
 	cd config/manager && $(KUSTOMIZE) edit set image controller="discovery-operator:latest"
 
-# Build the bundle image.
 .PHONY: bundle-build
-bundle-build:
+bundle-build: ## Build the bundle image.
 	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
 
-# Generate secrets for image pull and OCM access
-.PHONY: secrets
-ENCRYPTED = $(shell echo "ocmAPIToken: ${OCM_API_TOKEN}" | base64)
-secrets:
-	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(ENCRYPTED)/g" | kubectl apply -f - || true
-	@kubectl create secret docker-registry discovery-operator-pull-secret --docker-server=quay.io --docker-username=$(DOCKER_USER) --docker-password=$(DOCKER_PASS) || true
+.PHONY: bundle-push
+bundle-push: ## Push the bundle image.
+	$(MAKE) docker-push IMG=$(BUNDLE_IMG)
 
-# Generate secret for OCM access
-.PHONY: secret
-secret:
-	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(ENCRYPTED)/g" | kubectl apply -f - || true
+.PHONY: opm
+OPM = ./bin/opm
+opm: ## Download opm locally if necessary.
+ifeq (,$(wildcard $(OPM)))
+ifeq (,$(shell which opm 2>/dev/null))
+	@{ \
+	set -e ;\
+	mkdir -p $(dir $(OPM)) ;\
+	OS=$(shell go env GOOS) && ARCH=$(shell go env GOARCH) && \
+	curl -sSLo $(OPM) https://github.com/operator-framework/operator-registry/releases/download/v1.15.1/$${OS}-$${ARCH}-opm ;\
+	chmod +x $(OPM) ;\
+	}
+else
+OPM = $(shell which opm)
+endif
+endif
 
-# Create custom resources
-.PHONY: samples
-samples:
-	$(KUSTOMIZE) build config/samples | kubectl apply -f -
+# A comma-separated list of bundle images (e.g. make catalog-build BUNDLE_IMGS=example.com/operator-bundle:v0.1.0,example.com/operator-bundle:v0.2.0).
+# These images MUST exist in a registry and be pull-able.
+BUNDLE_IMGS ?= $(BUNDLE_IMG)
 
-logs:
-	@kubectl logs -f $(shell kubectl get pod -l app=discovery-operator -o jsonpath="{.items[0].metadata.name}")
+# The image tag given to the resulting catalog image (e.g. make catalog-build CATALOG_IMG=example.com/operator-catalog:v0.2.0).
+CATALOG_IMG ?= $(IMAGE_TAG_BASE)-catalog:v$(VERSION)
 
-# Annotate discoveryconfig to target mock server
-annotate:
-	kubectl annotate discoveryconfig discovery ocmBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 --overwrite
+# Set CATALOG_BASE_IMG to an existing catalog image tag to add $BUNDLE_IMGS to that image.
+ifneq ($(origin CATALOG_BASE_IMG), undefined)
+FROM_INDEX_OPT := --from-index $(CATALOG_BASE_IMG)
+endif
 
-# Remove mock server annotation
-unannotate:
-	kubectl annotate discoveryconfig discovery ocmBaseURL-
+# Build a catalog image by adding bundle images to an empty catalog using the operator package manager tool, 'opm'.
+# This recipe invokes 'opm' in 'semver' bundle add mode. For more information on add modes, see:
+# https://github.com/operator-framework/community-operators/blob/7f1438c/docs/packaging-operator.md#updating-your-existing-operator
+.PHONY: catalog-build
+catalog-build: opm ## Build a catalog image.
+	$(OPM) index add --container-tool docker --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT)
 
-set-copyright:
-	@bash ./cicd-scripts/set-copyright.sh
-
-verify: test integration-tests manifests
+# Push the catalog image.
+.PHONY: catalog-push
+catalog-push: ## Push a catalog image.
+	$(MAKE) docker-push IMG=$(CATALOG_IMG)
 
 ############################################################
 # e2e test section

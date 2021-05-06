@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/go-yaml/yaml"
+	"sigs.k8s.io/yaml"
 )
 
 type Plan struct {
