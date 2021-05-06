@@ -25,18 +25,17 @@ import (
 
 // DiscoveredClusterSpec defines the desired state of DiscoveredCluster
 type DiscoveredClusterSpec struct {
-	Name              string       `json:"name,omitempty" yaml:"name,omitempty"`
-	DisplayName       string       `json:"display_name,omitempty" yaml:"display_name,omitempty"`
+	Name              string       `json:"name" yaml:"name"`
+	DisplayName       string       `json:"displayName" yaml:"displayName"`
 	Console           string       `json:"console,omitempty" yaml:"console,omitempty"`
-	CreationTimestamp *metav1.Time `json:"creation_timestamp,omitempty" yaml:"creation_timestamp,omitempty"`
-	ActivityTimestamp *metav1.Time `json:"activity_timestamp,omitempty" yaml:"activity_timestamp,omitempty"`
+	CreationTimestamp *metav1.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
+	ActivityTimestamp *metav1.Time `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
 	OpenshiftVersion  string       `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
 	CloudProvider     string       `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
 	Status            string       `json:"status,omitempty" yaml:"status,omitempty"`
-	IsManagedCluster  bool         `json:"isManagedCluster,omitempty" yaml:"isManagedCluster,omitempty"`
+	IsManagedCluster  bool         `json:"isManagedCluster" yaml:"isManagedCluster"`
 
-	ProviderConnections []corev1.ObjectReference `json:"providerConnections"`
-	Credential          corev1.ObjectReference   `json:"credential,omitempty" yaml:"credential,omitempty"`
+	Credential corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
 }
 
 // DiscoveredClusterStatus defines the observed state of DiscoveredCluster

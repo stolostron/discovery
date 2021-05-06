@@ -25,6 +25,7 @@ import (
 // Filter ...
 type Filter struct {
 	// LastActive is the last active in days of clusters to discover, determined by activity timestamp
+	// +optional
 	LastActive int `json:"lastActive,omitempty"`
 
 	// OpenShiftVersions is the list of release versions of OpenShift of the form "<Major>.<Minor>"
@@ -39,11 +40,8 @@ type Semver string
 
 // DiscoveryConfigSpec defines the desired state of DiscoveryConfig
 type DiscoveryConfigSpec struct {
-	// ProviderConnections are the list of secrets containing credentials to connect to the OCM api on behalf of a user
-	// +optional
-	ProviderConnections []string `json:"providerConnections,omitempty"`
-
 	// Credential is the secret containing credentials to connect to the OCM api on behalf of a user
+	// +required
 	Credential string `json:"credential"`
 
 	// Sets restrictions on what kind of clusters to discover

@@ -62,7 +62,7 @@ type DiscoveryConfigReconciler struct {
 	Trigger chan event.GenericEvent
 }
 
-// CloudRedHatProviderConnection ...
+// CloudRedHatCredential ...
 type CloudRedHatCredential struct {
 	OCMApiToken string `yaml:"ocmAPIToken"`
 }
@@ -132,7 +132,7 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	allClusters := map[string]discovery.DiscoveredCluster{}
 	log := logr.FromContext(ctx)
 
-	// Parse user token from providerconnection secret
+	// Parse user token from secret
 	ocmSecret := &corev1.Secret{}
 	if err := r.Get(context.TODO(), types.NamespacedName{Name: config.Spec.Credential, Namespace: config.Namespace}, ocmSecret); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -166,9 +166,8 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 
 	for _, dc := range discovered {
 		dc.SetNamespace(config.Namespace)
-		dc.Spec.ProviderConnections = append(dc.Spec.ProviderConnections, *secretRef)
 		dc.Spec.Credential = *secretRef
-		merge(allClusters, dc)
+		allClusters[dc.Spec.Name] = dc
 	}
 
 	// Assign managed status
@@ -332,21 +331,6 @@ func getURLOverride(config *discovery.DiscoveryConfig) string {
 	return ""
 }
 
-// merge adds the cluster to the cluster map. If the cluster name is already in the map then it
-// appends the credentials to the cluster in the map
-func merge(clusters map[string]discovery.DiscoveredCluster, dc discovery.DiscoveredCluster) {
-	id := dc.Spec.Name
-	current, ok := clusters[id]
-	if !ok {
-		clusters[id] = dc
-		return
-	}
-
-	secretRef := dc.Spec.ProviderConnections
-	current.Spec.ProviderConnections = append(current.Spec.ProviderConnections, secretRef...)
-	clusters[id] = current
-}
-
 func same(c1, c2 discovery.DiscoveredCluster) bool {
 	c1i, c2i := c1.Spec, c2.Spec
 	if c1i.CloudProvider != c2i.CloudProvider {
@@ -369,14 +353,6 @@ func same(c1, c2 discovery.DiscoveredCluster) bool {
 	}
 	if c1i.Credential != c2i.Credential {
 		return false
-	}
-	if len(c1i.ProviderConnections) != len(c2i.ProviderConnections) {
-		return false
-	}
-	for i := 0; i < len(c1i.ProviderConnections); i++ {
-		if c1i.ProviderConnections[i] != c2i.ProviderConnections[i] {
-			return false
-		}
 	}
 	return true
 }

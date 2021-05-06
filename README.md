@@ -71,8 +71,7 @@ kind: DiscoveryConfig
 metadata:
   name: discovery
 spec:
-  providerConnections:
-    - ocm-api-token
+  credential: ocm-api-token
   filters:
     lastActive: 7
 ```

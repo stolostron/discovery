@@ -58,12 +58,6 @@ spec:
                       type: string
                     type: array
                 type: object
-              providerConnections:
-                description: ProviderConnections are the list of secrets containing
-                  credentials to connect to the OCM api on behalf of a user
-                items:
-                  type: string
-                type: array
             required:
             - credential
             type: object

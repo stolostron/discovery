@@ -163,68 +163,6 @@ func Test_assignManagedStatus(t *testing.T) {
 	})
 }
 
-func Test_merge(t *testing.T) {
-	type args struct {
-		clusters map[string]discovery.DiscoveredCluster
-		dc       discovery.DiscoveredCluster
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "Combine provider connections",
-			args: args{
-				clusters: map[string]discovery.DiscoveredCluster{
-					"a": {
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "a",
-							Namespace: "test",
-							Labels:    map[string]string{"isManagedCluster": "false"},
-						},
-						Spec: discovery.DiscoveredClusterSpec{
-							Name: "a",
-							ProviderConnections: []corev1.ObjectReference{
-								{
-									APIVersion: "v1",
-									Kind:       "Secret",
-									Name:       "testsecret1",
-									Namespace:  "test",
-								},
-							},
-						},
-					},
-				},
-				dc: discovery.DiscoveredCluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "a",
-						Namespace: "test",
-					},
-					Spec: discovery.DiscoveredClusterSpec{
-						Name: "a",
-						ProviderConnections: []corev1.ObjectReference{
-							{
-								APIVersion: "v1",
-								Kind:       "Secret",
-								Name:       "testsecret2",
-								Namespace:  "test",
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			merge(tt.args.clusters, tt.args.dc)
-			if len(tt.args.clusters["a"].Spec.ProviderConnections) != 2 {
-				t.Errorf("Expected merged providerConnections: %+v", tt.args.clusters["a"])
-			}
-		})
-	}
-}
-
 func Test_same(t *testing.T) {
 	cluster1 := discovery.DiscoveredCluster{
 		ObjectMeta: metav1.ObjectMeta{
