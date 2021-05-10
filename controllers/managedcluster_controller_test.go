@@ -5,7 +5,7 @@ package controllers
 import (
 	"testing"
 
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -58,18 +58,18 @@ func Test_getClusterID(t *testing.T) {
 func Test_setManagedStatus(t *testing.T) {
 	tests := []struct {
 		name string
-		dc   *discoveryv1.DiscoveredCluster
+		dc   *discovery.DiscoveredCluster
 		want bool
 	}{
 		{
 			name: "Managed labels set",
-			dc: &discoveryv1.DiscoveredCluster{
+			dc: &discovery.DiscoveredCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "a",
 					Namespace: "b",
 					Labels:    map[string]string{"isManagedCluster": "true"},
 				},
-				Spec: discoveryv1.DiscoveredClusterSpec{
+				Spec: discovery.DiscoveredClusterSpec{
 					IsManagedCluster: true,
 				},
 			},
@@ -77,13 +77,13 @@ func Test_setManagedStatus(t *testing.T) {
 		},
 		{
 			name: "Managed label missing",
-			dc: &discoveryv1.DiscoveredCluster{
+			dc: &discovery.DiscoveredCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "a",
 					Namespace: "b",
 					Labels:    map[string]string{"isManagedCluster": "false"},
 				},
-				Spec: discoveryv1.DiscoveredClusterSpec{
+				Spec: discovery.DiscoveredClusterSpec{
 					IsManagedCluster: false,
 				},
 			},
@@ -101,22 +101,22 @@ func Test_setManagedStatus(t *testing.T) {
 
 func Test_unsetManagedStatus(t *testing.T) {
 	type args struct {
-		dc *discoveryv1.DiscoveredCluster
+		dc *discovery.DiscoveredCluster
 	}
 	tests := []struct {
 		name string
-		dc   *discoveryv1.DiscoveredCluster
+		dc   *discovery.DiscoveredCluster
 		want bool
 	}{
 		{
 			name: "Managed labels set",
-			dc: &discoveryv1.DiscoveredCluster{
+			dc: &discovery.DiscoveredCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "a",
 					Namespace: "b",
 					Labels:    map[string]string{"isManagedCluster": "true"},
 				},
-				Spec: discoveryv1.DiscoveredClusterSpec{
+				Spec: discovery.DiscoveredClusterSpec{
 					IsManagedCluster: true,
 				},
 			},
@@ -124,13 +124,13 @@ func Test_unsetManagedStatus(t *testing.T) {
 		},
 		{
 			name: "Managed label missing",
-			dc: &discoveryv1.DiscoveredCluster{
+			dc: &discovery.DiscoveredCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "a",
 					Namespace: "b",
 					Labels:    map[string]string{"isManagedCluster": "false"},
 				},
-				Spec: discoveryv1.DiscoveredClusterSpec{
+				Spec: discovery.DiscoveredClusterSpec{
 					IsManagedCluster: false,
 				},
 			},

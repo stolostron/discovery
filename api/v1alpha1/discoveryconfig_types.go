@@ -1,7 +1,7 @@
 // Copyright Contributors to the Open Cluster Management project
 
 /*
-
+Copyright 2021.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1
+package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,6 +25,7 @@ import (
 // Filter ...
 type Filter struct {
 	// LastActive is the last active in days of clusters to discover, determined by activity timestamp
+	// +optional
 	LastActive int `json:"lastActive,omitempty"`
 
 	// OpenShiftVersions is the list of release versions of OpenShift of the form "<Major>.<Minor>"
@@ -39,11 +40,8 @@ type Semver string
 
 // DiscoveryConfigSpec defines the desired state of DiscoveryConfig
 type DiscoveryConfigSpec struct {
-	// ProviderConnections are the list of secrets containing credentials to connect to the OCM api on behalf of a user
-	// +optional
-	ProviderConnections []string `json:"providerConnections,omitempty"`
-
 	// Credential is the secret containing credentials to connect to the OCM api on behalf of a user
+	// +required
 	Credential string `json:"credential"`
 
 	// Sets restrictions on what kind of clusters to discover

@@ -1,7 +1,7 @@
 package subscription
 
 import (
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -57,7 +57,7 @@ type SubscriptionRequest struct {
 	Token   string
 	Page    int
 	Size    int
-	Filter  discoveryv1.Filter
+	Filter  discovery.Filter
 }
 
 // SubscriptionError represents the error format response by OCM on a subscription request.

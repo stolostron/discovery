@@ -12,7 +12,7 @@ Operator for managing discovered clusters from OpenShift Cluster Manager
 
 - Go v1.16+
 - kubectl 1.19+
-- Operator-sdk v1.3.0
+- Operator-sdk v1.7.1
 - Docker
 - Connection to an existing Kubernetes cluster
 
@@ -66,13 +66,12 @@ make samples
 This will create a `DiscoveryConfig` like the example below:
 
 ```yaml
-apiVersion: discovery.open-cluster-management.io/v1
+apiVersion: discovery.open-cluster-management.io/v1alpha1
 kind: DiscoveryConfig
 metadata:
   name: discovery
 spec:
-  providerConnections:
-    - ocm-api-token
+  credential: ocm-api-token
   filters:
     lastActive: 7
 ```

@@ -37,7 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"sigs.k8s.io/yaml"
 
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	"github.com/open-cluster-management/discovery/pkg/ocm"
 	"github.com/open-cluster-management/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
@@ -62,7 +62,7 @@ type DiscoveryConfigReconciler struct {
 	Trigger chan event.GenericEvent
 }
 
-// CloudRedHatProviderConnection ...
+// CloudRedHatCredential ...
 type CloudRedHatCredential struct {
 	OCMApiToken string `yaml:"ocmAPIToken"`
 }
@@ -85,7 +85,7 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, nil
 	}
 
-	config := &discoveryv1.DiscoveryConfig{}
+	config := &discovery.DiscoveryConfig{}
 	err := r.Get(ctx, req.NamespacedName, config)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
@@ -106,7 +106,7 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 // SetupWithManager ...
 func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	c, err := ctrl.NewControllerManagedBy(mgr).
-		For(&discoveryv1.DiscoveryConfig{}).
+		For(&discovery.DiscoveryConfig{}).
 		WithEventFilter(predicate.Funcs{
 			// Skip delete events
 			DeleteFunc: func(e event.DeleteEvent) bool {
@@ -128,11 +128,11 @@ func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return nil
 }
 
-func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context, config *discoveryv1.DiscoveryConfig) error {
-	allClusters := map[string]discoveryv1.DiscoveredCluster{}
+func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context, config *discovery.DiscoveryConfig) error {
+	allClusters := map[string]discovery.DiscoveredCluster{}
 	log := logr.FromContext(ctx)
 
-	// Parse user token from providerconnection secret
+	// Parse user token from secret
 	ocmSecret := &corev1.Secret{}
 	if err := r.Get(context.TODO(), types.NamespacedName{Name: config.Spec.Credential, Namespace: config.Namespace}, ocmSecret); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -166,9 +166,8 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 
 	for _, dc := range discovered {
 		dc.SetNamespace(config.Namespace)
-		dc.Spec.ProviderConnections = append(dc.Spec.ProviderConnections, *secretRef)
 		dc.Spec.Credential = *secretRef
-		merge(allClusters, dc)
+		allClusters[dc.Spec.Name] = dc
 	}
 
 	// Assign managed status
@@ -224,7 +223,7 @@ func parseUserToken(secret *corev1.Secret) (string, error) {
 }
 
 // assignManagedStatus marks clusters in the discovered map as managed if they are in the managed list
-func assignManagedStatus(discovered map[string]discoveryv1.DiscoveredCluster, managed []unstructured.Unstructured) {
+func assignManagedStatus(discovered map[string]discovery.DiscoveredCluster, managed []unstructured.Unstructured) {
 	for _, mc := range managed {
 		id := getClusterID(mc)
 		if id != "" {
@@ -253,13 +252,13 @@ func (r *DiscoveryConfigReconciler) getManagedClusters() ([]unstructured.Unstruc
 	return managedList.Items, nil
 }
 
-func (r *DiscoveryConfigReconciler) getExistingClusterMap(ctx context.Context, config *discoveryv1.DiscoveryConfig) (map[string]discoveryv1.DiscoveredCluster, error) {
+func (r *DiscoveryConfigReconciler) getExistingClusterMap(ctx context.Context, config *discovery.DiscoveryConfig) (map[string]discovery.DiscoveredCluster, error) {
 	// List all existing discovered clusters
-	var discoveredList discoveryv1.DiscoveredClusterList
+	var discoveredList discovery.DiscoveredClusterList
 	if err := r.List(ctx, &discoveredList, client.InNamespace(config.Namespace)); err != nil {
 		return nil, errors.Wrapf(err, "error listing list discovered clusters")
 	}
-	existingDCs := make(map[string]discoveryv1.DiscoveredCluster, len(discoveredList.Items))
+	existingDCs := make(map[string]discovery.DiscoveredCluster, len(discoveredList.Items))
 	for _, dc := range discoveredList.Items {
 		existingDCs[dc.Spec.Name] = dc
 	}
@@ -268,7 +267,7 @@ func (r *DiscoveryConfigReconciler) getExistingClusterMap(ctx context.Context, c
 
 // applyCluster creates the DiscoveredCluster resources or updates it if necessary. If the cluster already
 // exists and doesn't need updating then nothing changes.
-func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *discoveryv1.DiscoveryConfig, dc discoveryv1.DiscoveredCluster, existing map[string]discoveryv1.DiscoveredCluster) error {
+func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *discovery.DiscoveryConfig, dc discovery.DiscoveredCluster, existing map[string]discovery.DiscoveredCluster) error {
 	current, exists := existing[dc.Spec.Name]
 	if !exists {
 		// Newly discovered cluster
@@ -284,7 +283,7 @@ func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *di
 	return r.updateCluster(ctx, config, dc, current)
 }
 
-func (r *DiscoveryConfigReconciler) createCluster(ctx context.Context, config *discoveryv1.DiscoveryConfig, dc discoveryv1.DiscoveredCluster) error {
+func (r *DiscoveryConfigReconciler) createCluster(ctx context.Context, config *discovery.DiscoveryConfig, dc discovery.DiscoveredCluster) error {
 	log := logr.FromContext(ctx)
 	if err := ctrl.SetControllerReference(config, &dc, r.Scheme); err != nil {
 		return errors.Wrapf(err, "Error setting controller reference on DiscoveredCluster %s", dc.Name)
@@ -296,7 +295,7 @@ func (r *DiscoveryConfigReconciler) createCluster(ctx context.Context, config *d
 	return nil
 }
 
-func (r *DiscoveryConfigReconciler) updateCluster(ctx context.Context, config *discoveryv1.DiscoveryConfig, new, old discoveryv1.DiscoveredCluster) error {
+func (r *DiscoveryConfigReconciler) updateCluster(ctx context.Context, config *discovery.DiscoveryConfig, new, old discovery.DiscoveredCluster) error {
 	log := logr.FromContext(ctx)
 	updated := old
 	updated.Spec = new.Spec
@@ -307,7 +306,7 @@ func (r *DiscoveryConfigReconciler) updateCluster(ctx context.Context, config *d
 	return nil
 }
 
-func (r *DiscoveryConfigReconciler) deleteCluster(ctx context.Context, dc discoveryv1.DiscoveredCluster) error {
+func (r *DiscoveryConfigReconciler) deleteCluster(ctx context.Context, dc discovery.DiscoveredCluster) error {
 	log := logr.FromContext(ctx)
 	if err := r.Delete(ctx, &dc); err != nil {
 		return errors.Wrapf(err, "Error deleting DiscoveredCluster %s", dc.Name)
@@ -316,38 +315,23 @@ func (r *DiscoveryConfigReconciler) deleteCluster(ctx context.Context, dc discov
 	return nil
 }
 
-func (r *DiscoveryConfigReconciler) deleteAllClusters(ctx context.Context, config *discoveryv1.DiscoveryConfig) error {
+func (r *DiscoveryConfigReconciler) deleteAllClusters(ctx context.Context, config *discovery.DiscoveryConfig) error {
 	log := logr.FromContext(ctx)
-	if err := r.DeleteAllOf(ctx, &discoveryv1.DiscoveredCluster{}, client.InNamespace(config.Namespace)); err != nil {
+	if err := r.DeleteAllOf(ctx, &discovery.DiscoveredCluster{}, client.InNamespace(config.Namespace)); err != nil {
 		return errors.Wrapf(err, "Error clearing namespace %s", config.Namespace)
 	}
 	log.Info("Deleted all clusters", "Namespace", config.Namespace)
 	return nil
 }
 
-func getURLOverride(config *discoveryv1.DiscoveryConfig) string {
+func getURLOverride(config *discovery.DiscoveryConfig) string {
 	if annotations := config.GetAnnotations(); annotations != nil {
 		return annotations[baseURLAnnotation]
 	}
 	return ""
 }
 
-// merge adds the cluster to the cluster map. If the cluster name is already in the map then it
-// appends the credentials to the cluster in the map
-func merge(clusters map[string]discoveryv1.DiscoveredCluster, dc discoveryv1.DiscoveredCluster) {
-	id := dc.Spec.Name
-	current, ok := clusters[id]
-	if !ok {
-		clusters[id] = dc
-		return
-	}
-
-	secretRef := dc.Spec.ProviderConnections
-	current.Spec.ProviderConnections = append(current.Spec.ProviderConnections, secretRef...)
-	clusters[id] = current
-}
-
-func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
+func same(c1, c2 discovery.DiscoveredCluster) bool {
 	c1i, c2i := c1.Spec, c2.Spec
 	if c1i.CloudProvider != c2i.CloudProvider {
 		return false
@@ -369,14 +353,6 @@ func same(c1, c2 discoveryv1.DiscoveredCluster) bool {
 	}
 	if c1i.Credential != c2i.Credential {
 		return false
-	}
-	if len(c1i.ProviderConnections) != len(c2i.ProviderConnections) {
-		return false
-	}
-	for i := 0; i < len(c1i.ProviderConnections); i++ {
-		if c1i.ProviderConnections[i] != c2i.ProviderConnections[i] {
-			return false
-		}
 	}
 	return true
 }

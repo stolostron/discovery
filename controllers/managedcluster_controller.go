@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -58,7 +58,7 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, errors.Wrapf(err, "error listing managed clusters")
 	}
 
-	discoveredClusters := &discoveryv1.DiscoveredClusterList{}
+	discoveredClusters := &discovery.DiscoveredClusterList{}
 	if err := r.List(ctx, discoveredClusters); err != nil {
 		return ctrl.Result{}, errors.Wrapf(err, "error listing discovered clusters")
 	}
@@ -122,7 +122,7 @@ func StartManagedClusterController(c controller.Controller, mgr ctrl.Manager, lo
 
 // updateManagedLabels adds managed labels to discovered clusters that need them and removes the labels if the discoveredclusters
 // have the label but should not, based on the list of managedclusters.
-func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, managedClusters *unstructured.UnstructuredList, discoveredClusters *discoveryv1.DiscoveredClusterList) error {
+func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, managedClusters *unstructured.UnstructuredList, discoveredClusters *discovery.DiscoveredClusterList) error {
 	log := logr.FromContext(ctx)
 
 	isManaged := map[string]bool{}
@@ -167,12 +167,12 @@ func getClusterID(managedCluster unstructured.Unstructured) string {
 }
 
 // getDiscoveredID returns the clusterID from a discoveredCluster
-func getDiscoveredID(dc discoveryv1.DiscoveredCluster) string {
+func getDiscoveredID(dc discovery.DiscoveredCluster) string {
 	return dc.Spec.Name
 }
 
 // setManagedStatus returns true if labels were added and false if the labels already exist
-func setManagedStatus(dc *discoveryv1.DiscoveredCluster) bool {
+func setManagedStatus(dc *discovery.DiscoveredCluster) bool {
 	updated := false
 
 	if dc.Labels == nil || dc.Labels["isManagedCluster"] != "true" {
@@ -194,7 +194,7 @@ func setManagedStatus(dc *discoveryv1.DiscoveredCluster) bool {
 }
 
 // unsetManagedStatus returns true if labels were removed and false if the labels aren't present
-func unsetManagedStatus(dc *discoveryv1.DiscoveredCluster) bool {
+func unsetManagedStatus(dc *discovery.DiscoveredCluster) bool {
 	updated := false
 	if dc.Labels["isManagedCluster"] == "true" {
 		delete(dc.Labels, "isManagedCluster")

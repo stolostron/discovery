@@ -5,7 +5,7 @@ metadata:
     alm-examples: |-
       [
         {
-          "apiVersion": "discovery.open-cluster-management.io/v1",
+          "apiVersion": "discovery.open-cluster-management.io/v1alpha1",
           "kind": "DiscoveryConfig",
           "metadata": {
             "name": "discovery"
@@ -21,9 +21,9 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.3.2
+    operators.operatorframework.io/builder: operator-sdk-v1.6.1+git
     operators.operatorframework.io/internal-objects: '["discoveredclusters.discovery.open-cluster-management.io"]'
-    operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: Red Hat
   name: discovery.v0.0.1
   namespace: placeholder
@@ -35,12 +35,12 @@ spec:
       displayName: Discovered Cluster
       kind: DiscoveredCluster
       name: discoveredclusters.discovery.open-cluster-management.io
-      version: v1
+      version: v1alpha1
     - description: DiscoveryConfig is the Schema for the discoveryconfigs API
       displayName: Discovery Config
       kind: DiscoveryConfig
       name: discoveryconfigs.discovery.open-cluster-management.io
-      version: v1
+      version: v1alpha1
   description: This operator discovers OpenShift Conatiner Platform clusters which are not yet under management by Open Cluster Management.
   displayName: Multicluster Discovery Operator
   icon:
@@ -139,12 +139,24 @@ spec:
             spec:
               containers:
               - args:
-                - --enable-leader-election
+                - --leader-elect
                 command:
                 - /manager
                 image: discovery-operator:latest
                 imagePullPolicy: Always
+                livenessProbe:
+                  httpGet:
+                    path: /healthz
+                    port: 8081
+                  initialDelaySeconds: 15
+                  periodSeconds: 20
                 name: discovery-operator
+                readinessProbe:
+                  httpGet:
+                    path: /readyz
+                    port: 8081
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
                 resources:
                   limits:
                     cpu: 300m
@@ -152,6 +164,8 @@ spec:
                   requests:
                     cpu: 100m
                     memory: 100Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
               imagePullSecrets:
               - name: discovery-operator-pull-secret
               serviceAccountName: discovery-operator

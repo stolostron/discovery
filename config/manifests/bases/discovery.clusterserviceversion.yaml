@@ -20,12 +20,12 @@ spec:
       displayName: Discovered Cluster
       kind: DiscoveredCluster
       name: discoveredclusters.discovery.open-cluster-management.io
-      version: v1
+      version: v1alpha1
     - description: DiscoveryConfig is the Schema for the discoveryconfigs API
       displayName: Discovery Config
       kind: DiscoveryConfig
       name: discoveryconfigs.discovery.open-cluster-management.io
-      version: v1
+      version: v1alpha1
   description: This operator discovers OpenShift Conatiner Platform clusters which are not yet under management by Open Cluster Management.
   displayName: Multicluster Discovery Operator
   icon:

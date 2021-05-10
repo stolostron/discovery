@@ -21,7 +21,7 @@ package controllers
 import (
 	"testing"
 
-	discoveryv1 "github.com/open-cluster-management/discovery/api/v1"
+	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -75,14 +75,14 @@ func Test_parseUserToken(t *testing.T) {
 }
 
 func Test_assignManagedStatus(t *testing.T) {
-	discovered := map[string]discoveryv1.DiscoveredCluster{
+	discovered := map[string]discovery.DiscoveredCluster{
 		"a": {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "a",
 				Namespace: "test",
 				Labels:    map[string]string{"isManagedCluster": "false"},
 			},
-			Spec: discoveryv1.DiscoveredClusterSpec{
+			Spec: discovery.DiscoveredClusterSpec{
 				IsManagedCluster: false,
 			},
 		},
@@ -163,88 +163,26 @@ func Test_assignManagedStatus(t *testing.T) {
 	})
 }
 
-func Test_merge(t *testing.T) {
-	type args struct {
-		clusters map[string]discoveryv1.DiscoveredCluster
-		dc       discoveryv1.DiscoveredCluster
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "Combine provider connections",
-			args: args{
-				clusters: map[string]discoveryv1.DiscoveredCluster{
-					"a": {
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "a",
-							Namespace: "test",
-							Labels:    map[string]string{"isManagedCluster": "false"},
-						},
-						Spec: discoveryv1.DiscoveredClusterSpec{
-							Name: "a",
-							ProviderConnections: []corev1.ObjectReference{
-								{
-									APIVersion: "v1",
-									Kind:       "Secret",
-									Name:       "testsecret1",
-									Namespace:  "test",
-								},
-							},
-						},
-					},
-				},
-				dc: discoveryv1.DiscoveredCluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "a",
-						Namespace: "test",
-					},
-					Spec: discoveryv1.DiscoveredClusterSpec{
-						Name: "a",
-						ProviderConnections: []corev1.ObjectReference{
-							{
-								APIVersion: "v1",
-								Kind:       "Secret",
-								Name:       "testsecret2",
-								Namespace:  "test",
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			merge(tt.args.clusters, tt.args.dc)
-			if len(tt.args.clusters["a"].Spec.ProviderConnections) != 2 {
-				t.Errorf("Expected merged providerConnections: %+v", tt.args.clusters["a"])
-			}
-		})
-	}
-}
-
 func Test_same(t *testing.T) {
-	cluster1 := discoveryv1.DiscoveredCluster{
+	cluster1 := discovery.DiscoveredCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "c1",
 			Namespace: "test",
 			Labels:    map[string]string{"isManagedCluster": "false"},
 		},
-		Spec: discoveryv1.DiscoveredClusterSpec{
+		Spec: discovery.DiscoveredClusterSpec{
 			Name:          "c1",
 			CloudProvider: "aws",
 			Status:        "Active",
 		},
 	}
-	cluster2 := discoveryv1.DiscoveredCluster{
+	cluster2 := discovery.DiscoveredCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "c2",
 			Namespace: "test",
 			Labels:    map[string]string{"isManagedCluster": "false"},
 		},
-		Spec: discoveryv1.DiscoveredClusterSpec{
+		Spec: discovery.DiscoveredClusterSpec{
 			Name:          "c2",
 			CloudProvider: "aws",
 			Status:        "Active",
@@ -253,8 +191,8 @@ func Test_same(t *testing.T) {
 
 	tests := []struct {
 		name string
-		c1   discoveryv1.DiscoveredCluster
-		c2   discoveryv1.DiscoveredCluster
+		c1   discovery.DiscoveredCluster
+		c2   discovery.DiscoveredCluster
 		want bool
 	}{
 		{
@@ -282,12 +220,12 @@ func Test_same(t *testing.T) {
 func Test_getURLOverride(t *testing.T) {
 	tests := []struct {
 		name   string
-		config *discoveryv1.DiscoveryConfig
+		config *discovery.DiscoveryConfig
 		want   string
 	}{
 		{
 			name: "Override annotated",
-			config: &discoveryv1.DiscoveryConfig{
+			config: &discovery.DiscoveryConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        "testconfig",
 					Namespace:   "test",
@@ -298,7 +236,7 @@ func Test_getURLOverride(t *testing.T) {
 		},
 		{
 			name: "No override specified",
-			config: &discoveryv1.DiscoveryConfig{
+			config: &discovery.DiscoveryConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "testconfig",
 					Namespace: "test",

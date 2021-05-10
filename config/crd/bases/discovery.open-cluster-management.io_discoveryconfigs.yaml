@@ -16,7 +16,7 @@ spec:
     singular: discoveryconfig
   scope: Namespaced
   versions:
-  - name: v1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: DiscoveryConfig is the Schema for the discoveryconfigs API
@@ -58,12 +58,6 @@ spec:
                       type: string
                     type: array
                 type: object
-              providerConnections:
-                description: ProviderConnections are the list of secrets containing
-                  credentials to connect to the OCM api on behalf of a user
-                items:
-                  type: string
-                type: array
             required:
             - credential
             type: object
