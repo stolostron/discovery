@@ -78,6 +78,7 @@ spec:
               status:
                 type: string
             required:
+            - apiUrl
             - displayName
             - isManagedCluster
             - name
