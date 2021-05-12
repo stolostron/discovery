@@ -185,3 +185,47 @@ func Test_computeDisplayName(t *testing.T) {
 		})
 	}
 }
+
+func Test_computeApiUrl(t *testing.T) {
+	tests := []struct {
+		name string
+		sub  subscription.Subscription
+		want string
+	}{
+		{
+			name: "Regular consoleURL",
+			sub: subscription.Subscription{
+				ConsoleURL: "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
+			},
+			want: "https://api.installer-pool-j88kj.dev01.red-chesterfield.com:6443",
+		},
+		{
+			name: "Irregular consoleURL",
+			sub: subscription.Subscription{
+				ConsoleURL: "https://console.apps.ocp.mylab.int",
+			},
+			want: "",
+		},
+		{
+			name: "No consoleURL",
+			sub: subscription.Subscription{
+				ConsoleURL: "",
+			},
+			want: "",
+		},
+		{
+			name: "Port in consoleURL",
+			sub: subscription.Subscription{
+				ConsoleURL: "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com:443",
+			},
+			want: "https://api.installer-pool-j88kj.dev01.red-chesterfield.com:6443",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := computeApiUrl(tt.sub); got != tt.want {
+				t.Errorf("computeApiUrl() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

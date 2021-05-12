@@ -2,6 +2,7 @@ package ocm
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
@@ -67,6 +68,7 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 			Name:              sub.ExternalClusterID,
 			DisplayName:       computeDisplayName(sub),
 			Console:           sub.ConsoleURL,
+			APIURL:            computeApiUrl(sub),
 			CreationTimestamp: sub.CreatedAt,
 			ActivityTimestamp: sub.UpdatedAt,
 			OpenshiftVersion:  sub.Metrics[0].OpenShiftVersion,
@@ -106,4 +108,23 @@ func computeDisplayName(sub subscription.Subscription) string {
 	}
 	// Use GUID as backup
 	return sub.ExternalClusterID
+}
+
+// computeApiUrl calculates the Kubernetes api endpoint from a subscription's consoleURL
+func computeApiUrl(sub subscription.Subscription) string {
+	consolePrefix := "https://console-openshift-console.apps."
+	apiPrefix, apiPort := "https://api", "6443"
+
+	if strings.HasPrefix(sub.ConsoleURL, consolePrefix) {
+		// trim common prefix
+		name := strings.TrimPrefix(sub.ConsoleURL, consolePrefix)
+		// trim port if present
+		i := strings.LastIndex(name, ":")
+		if i > -1 {
+			name = name[:i]
+		}
+		return fmt.Sprintf("%s.%s:%s", apiPrefix, name, apiPort)
+	}
+	// doesn't match common pattern
+	return ""
 }
