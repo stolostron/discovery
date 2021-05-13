@@ -47,6 +47,7 @@ var reportFile string
 var (
 	scheme             = runtime.NewScheme()
 	DiscoveryNamespace = flag.String("namespace", "open-cluster-management", "The namespace to run tests")
+	BaseURL            = flag.String("baseURL", "", "Service to reach mock server")
 )
 
 func init() {

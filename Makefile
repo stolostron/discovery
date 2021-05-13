@@ -276,6 +276,10 @@ kind-e2e-tests:
 	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
 	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)
 
+test-local:
+	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
+	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE) -baseURL http://localhost:3000
+
 ## Build the functional test image
 tests/docker-build:
 	@echo "Building $(REGISTRY)/$(IMG)-tests:$(VERSION)"

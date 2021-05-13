@@ -5,6 +5,8 @@ package e2e
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -34,8 +36,8 @@ const (
 var (
 	ctx                = context.Background()
 	globalsInitialized = false
-	// discoveryNamespace = "discovery"
 	discoveryNamespace = ""
+	baseURL            = ""
 	secondNamespace    = "secondary-test-ns"
 	k8sClient          client.Client
 
@@ -46,6 +48,7 @@ var (
 
 func initializeGlobals() {
 	discoveryNamespace = *DiscoveryNamespace
+	baseURL = *BaseURL
 	discoveryConfig = types.NamespacedName{
 		Name:      DiscoveryConfigName,
 		Namespace: discoveryNamespace,
@@ -67,9 +70,6 @@ var _ = Describe("Discoveryconfig controller", func() {
 			initializeGlobals()
 			globalsInitialized = true
 		}
-
-		// verify testserver is present in namespace
-		getTestserverDeployment()
 	})
 
 	AfterEach(func() {
@@ -544,9 +544,14 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 // annotate adds an annotation to modify the baseUrl used with the discoveryconfig
 func annotate(dc *discovery.DiscoveryConfig) *discovery.DiscoveryConfig {
-	baseUrl := fmt.Sprintf("http://mock-ocm-server.%s.svc.cluster.local:3000", discoveryNamespace)
-	dc.SetAnnotations(map[string]string{"ocmBaseURL": baseUrl})
-	return dc
+	if baseURL != "" {
+		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseURL})
+		return dc
+	} else {
+		baseUrl := fmt.Sprintf("http://mock-ocm-server.%s.svc.cluster.local:3000", discoveryNamespace)
+		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseUrl})
+		return dc
+	}
 }
 
 func getTestserverDeployment() *appsv1.Deployment {
@@ -568,6 +573,13 @@ func getTestserverPods() (*corev1.PodList, error) {
 // Updates the entrypoint argument of the testserver deployment. This changes the content the
 // deployment serves.
 func updateTestserverScenario(scenario string) {
+	if strings.Contains(baseURL, "localhost") {
+		resp, err := http.Get(fmt.Sprintf("%s/scenarios/%s", baseURL, scenario))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		return
+	}
+
 	arg := fmt.Sprintf("--scenario=%s", scenario)
 	tsd := getTestserverDeployment()
 	tsd.Spec.Template.Spec.Containers[0].Args = []string{arg}
