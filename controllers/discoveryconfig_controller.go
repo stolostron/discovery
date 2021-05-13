@@ -274,7 +274,7 @@ func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *di
 		return r.createCluster(ctx, config, dc)
 	}
 
-	if same(dc, current) {
+	if dc.Equal(current) {
 		// Discovered cluster has not changed
 		return nil
 	}
@@ -329,30 +329,4 @@ func getURLOverride(config *discovery.DiscoveryConfig) string {
 		return annotations[baseURLAnnotation]
 	}
 	return ""
-}
-
-func same(c1, c2 discovery.DiscoveredCluster) bool {
-	c1i, c2i := c1.Spec, c2.Spec
-	if c1i.CloudProvider != c2i.CloudProvider {
-		return false
-	}
-	if c1i.Console != c2i.Console {
-		return false
-	}
-	if c1i.Name != c2i.Name {
-		return false
-	}
-	if c1i.DisplayName != c2i.DisplayName {
-		return false
-	}
-	if c1i.OpenshiftVersion != c2i.OpenshiftVersion {
-		return false
-	}
-	if c1i.IsManagedCluster != c2i.IsManagedCluster {
-		return false
-	}
-	if c1i.Credential != c2i.Credential {
-		return false
-	}
-	return true
 }
