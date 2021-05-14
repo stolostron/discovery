@@ -19,6 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"time"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -68,4 +70,22 @@ type DiscoveredClusterList struct {
 
 func init() {
 	SchemeBuilder.Register(&DiscoveredCluster{}, &DiscoveredClusterList{})
+}
+
+// Equal reports whether the spec of a is equal to b.
+func (a DiscoveredCluster) Equal(b DiscoveredCluster) bool {
+	if a.Spec.Name != b.Spec.Name ||
+		a.Spec.DisplayName != b.Spec.DisplayName ||
+		a.Spec.Console != b.Spec.Console ||
+		a.Spec.APIURL != b.Spec.APIURL ||
+		a.Spec.CreationTimestamp.Truncate(time.Second) != b.Spec.CreationTimestamp.Truncate(time.Second) ||
+		a.Spec.ActivityTimestamp.Truncate(time.Second) != b.Spec.ActivityTimestamp.Truncate(time.Second) ||
+		a.Spec.OpenshiftVersion != b.Spec.OpenshiftVersion ||
+		a.Spec.CloudProvider != b.Spec.CloudProvider ||
+		a.Spec.Status != b.Spec.Status ||
+		a.Spec.IsManagedCluster != b.Spec.IsManagedCluster ||
+		a.Spec.Credential != b.Spec.Credential {
+		return false
+	}
+	return true
 }

@@ -163,60 +163,6 @@ func Test_assignManagedStatus(t *testing.T) {
 	})
 }
 
-func Test_same(t *testing.T) {
-	cluster1 := discovery.DiscoveredCluster{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "c1",
-			Namespace: "test",
-			Labels:    map[string]string{"isManagedCluster": "false"},
-		},
-		Spec: discovery.DiscoveredClusterSpec{
-			Name:          "c1",
-			CloudProvider: "aws",
-			Status:        "Active",
-		},
-	}
-	cluster2 := discovery.DiscoveredCluster{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "c2",
-			Namespace: "test",
-			Labels:    map[string]string{"isManagedCluster": "false"},
-		},
-		Spec: discovery.DiscoveredClusterSpec{
-			Name:          "c2",
-			CloudProvider: "aws",
-			Status:        "Active",
-		},
-	}
-
-	tests := []struct {
-		name string
-		c1   discovery.DiscoveredCluster
-		c2   discovery.DiscoveredCluster
-		want bool
-	}{
-		{
-			name: "Equivalent clusters",
-			c1:   cluster1,
-			c2:   cluster1,
-			want: true,
-		},
-		{
-			name: "Different clusters",
-			c1:   cluster1,
-			c2:   cluster2,
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := same(tt.c1, tt.c2); got != tt.want {
-				t.Errorf("same() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_getURLOverride(t *testing.T) {
 	tests := []struct {
 		name   string
