@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"path"
 	"time"
 )
 
@@ -145,20 +146,11 @@ func collectRandomExtId(n int) []string {
 
 }
 
-func main() {
-
-	wordPtr := flag.String("output", "./testserver/data/scenarios/onek_clusters/subscription_response.json", "File location to save output")
-	var numFlag = flag.Int("tot", 50, "The total number of clusters will be created. Default is 50")
-	var num = flag.Int("d", 10, "The number of days back we want our earliest possible created date to be")
-	flag.Parse()
-	e := os.Remove(*wordPtr)
-	if e != nil {
-		fmt.Println("No file was deleted")
-
-	}
-	ids := collectRandomId(*numFlag, 27)
-	clusterIds := collectRandomId(*numFlag, 32)
-	extIds := collectRandomExtId(*numFlag)
+// randomly generates a list of n Subscriptions
+func generateSubscriptions(n int) []Subscription {
+	ids := collectRandomId(n, 27)
+	clusterIds := collectRandomId(n, 32)
+	extIds := collectRandomExtId(n)
 	var test []Subscription
 	var mets []Metric
 	c := Creator{"1Yu9TMhpDebs1S6wjLPIgYLlOn4", "Account", "/api/accounts_mgmt/v1/accounts/1Yu9TMhpDebs1S6wjLPIgYLlOn4"}
@@ -169,9 +161,9 @@ func main() {
 	node_det_a := NodeDet{"0001-01-01T00:00:00Z", couplet_a, couplet_a}
 	metric := Metric{"healthy", node_det_a, node_det_a, node_det_a, node_det_a, node_det_a, node_det_a, node_det_a, node_a, "", upgrade_a, "ready", "", "4.6.9", "aws", "us-east-1", "https://console-openshift-console.apps.jdgray-kfmxg.dev01.red-chesterfield.com", 0, 0, 6, 3, 2, ""}
 	mets = append(mets, metric)
-	for i := 0; i < *numFlag; i++ {
+	for i := 0; i < n; i++ {
 		now := time.Now()
-		floor := now.AddDate(0, 0, -1**num)
+		floor := now.AddDate(0, 0, -10) // Date from last ten days
 		maxDelta := now.Sub(floor)
 		randomCreatedDelta := rand.Int63n(int64(maxDelta.Nanoseconds())) // #nosec G404 (cryptographic strength irrelevant)
 		createdDate := floor.Add(time.Nanosecond * time.Duration(randomCreatedDelta))
@@ -186,7 +178,71 @@ func main() {
 		s := Subscription{ids[i], "Subscription", "/api/accounts_mgmt/v1/subscriptions/1YuEObNEl4Z8b79mbbHD7a9hkl6", p, clusterIds[i], extIds[i], "1Yu9TWVAfvJu9Cj5hbMT6iYkdk8", telemDateStr, createdDateStr, updatedDateStr, "None", extIds[i], c, false, "Active", "Telemetry", "2020-03-10T20:43:46.428922Z", "https://console-openshift-console.apps.jdgray-c6mvq.dev01.red-chesterfield.com", "0001-01-01T00:00:00Z", mets, "aws", "us-east-1", "0001-01-01T00:00:00Z"}
 		test = append(test, s)
 	}
-	total := SubscriptionList{"SubscriptionList", 1, *numFlag, *numFlag, test}
-	b, _ := json.MarshalIndent(total, "", "    ")
-	_ = ioutil.WriteFile(*wordPtr, b, 0600)
+	return test
+}
+
+// paginateSubscriptions splits out the subscriptions into SubscriptionLists of size n
+func paginateSubscriptions(subs []Subscription, n int) []SubscriptionList {
+	pages := len(subs)/n + 1
+	sublists := make([]SubscriptionList, pages)
+
+	for i := 0; i < pages; i++ {
+		low := n * i
+		high := low + n
+		if high > len(subs) {
+			high = len(subs)
+		}
+		items := subs[low:high]
+		sl := SubscriptionList{
+			Kind:  "SubscriptionList",
+			Page:  i + 1,
+			Size:  len(items),
+			Total: len(subs),
+			Items: items,
+		}
+		sublists[i] = sl
+	}
+	return sublists
+}
+
+// saveToFolder splits the list into files for each page inside the dir
+func saveToFolder(sl []SubscriptionList, dir string) {
+	err := os.RemoveAll(dir)
+	if err != nil {
+		panic(err)
+	}
+	err = os.MkdirAll(dir, 0755)
+	if err != nil {
+		panic(err)
+	}
+
+	for i, page := range sl {
+		filename := "subscription_response.json"
+		if i > 0 {
+			// Additional pages end in _<page_num>
+			filename = fmt.Sprintf("subscription_response_%d.json", i+1)
+		}
+		b, _ := json.MarshalIndent(page, "", "    ")
+		err := ioutil.WriteFile(path.Join(dir, filename), b, 0600)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Wrote to file ", path.Join(dir, filename))
+	}
+}
+
+func main() {
+	outputDir := flag.String("output", "", "File location to save output. Example: './testserver/data/scenarios/onek_clusters'.")
+	total := flag.Int("total", 1, "The total number of clusters will be created. Default is 1.")
+	flag.Parse()
+
+	subscriptions := generateSubscriptions(*total)
+	pages := paginateSubscriptions(subscriptions, 1000)
+
+	if *outputDir == "" {
+		b, _ := json.MarshalIndent(pages, "", "  ")
+		fmt.Printf("%s", b)
+	} else {
+		saveToFolder(pages, *outputDir)
+	}
 }
