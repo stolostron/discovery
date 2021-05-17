@@ -5,8 +5,6 @@ package e2e
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -14,7 +12,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -106,16 +103,12 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 	Context("Creating a DiscoveryConfig", func() {
 		It("Should create discovered clusters ", func() {
-			By("Setting the testserver's response", func() {
-				updateTestserverScenario("tenClusters")
-			})
-
 			By("By creating a secret with OCM credentials", func() {
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
 			})
 
 			By("By creating a new DiscoveryConfig", func() {
-				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(defaultDiscoveryConfig(), "tenClusters"))).Should(Succeed())
 			})
 
 			By("By checking 10 discovered clusters have been created", func() {
@@ -156,9 +149,8 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 		It("Should mark matching discovered clusters as being managed", func() {
 			By("Creating unmanaged discovered clusters", func() {
-				updateTestserverScenario("tenClusters")
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
-				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(defaultDiscoveryConfig(), "tenClusters"))).Should(Succeed())
 			})
 
 			By("Checking that no DiscoveredClusters are labeled as managed", func() {
@@ -214,9 +206,8 @@ var _ = Describe("Discoveryconfig controller", func() {
 			})
 
 			By("Creating discovered clusters", func() {
-				updateTestserverScenario("tenClusters")
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
-				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(defaultDiscoveryConfig(), "tenClusters"))).Should(Succeed())
 			})
 
 			By("Checking that all ManagedClusters are recognized in their matching DiscoveredClusters", func() {
@@ -241,9 +232,8 @@ var _ = Describe("Discoveryconfig controller", func() {
 	Context("Unchanged DiscoveryConfig", func() {
 		It("Should update discovered clusters when the OCM responses change", func() {
 			By("Creating a DiscoveryConfig and discovered clusters", func() {
-				updateTestserverScenario("tenClusters")
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
-				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(defaultDiscoveryConfig(), "tenClusters"))).Should(Succeed())
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(10))
@@ -251,10 +241,6 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 			By("Changing the number of clusters returned from the testserver", func() {
 				updateTestserverScenario("fiveClusters")
-			})
-
-			By("Forcing the DiscoveryConfig to be reconciled on", func() {
-				byTriggeringReconcile()
 			})
 
 			By("By checking that discovered clusters have changed", func() {
@@ -268,9 +254,8 @@ var _ = Describe("Discoveryconfig controller", func() {
 	Context("Deleting a DiscoveryConfig", func() {
 		It("Should delete all discovered clusters via garbage collection", func() {
 			By("Creating a DiscoveryConfig and discovered clusters", func() {
-				updateTestserverScenario("tenClusters")
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
-				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(defaultDiscoveryConfig(), "tenClusters"))).Should(Succeed())
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters(discoveryNamespace)
 				}, timeout, interval).Should(Equal(10))
@@ -290,13 +275,9 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 	Context("Archived clusters", func() {
 		It("Should not create DiscoveredClusters out of archived clusters", func() {
-			By("Having OCM include archived clusters", func() {
-				updateTestserverScenario("archivedClusters")
-			})
-
 			By("Creating a DiscoveryConfig", func() {
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
-				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(defaultDiscoveryConfig(), "archivedClusters"))).Should(Succeed())
 			})
 
 			By("By checking only 8 discovered clusters have been created", func() {
@@ -316,16 +297,12 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 
 		It("Should delete discovered clusters when secret changes to an invalid one", func() {
-			By("Setting the testserver's response", func() {
-				updateTestserverScenario("tenClusters")
-			})
-
 			By("By creating a secret with OCM credentials", func() {
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
 			})
 
 			By("By creating a new DiscoveryConfig", func() {
-				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(defaultDiscoveryConfig(), "tenClusters"))).Should(Succeed())
 			})
 
 			By("By checking 10 discovered clusters have been created", func() {
@@ -351,16 +328,12 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 
 		It("Should delete discovered clusters after secret is deleted", func() {
-			By("Setting the testserver's response", func() {
-				updateTestserverScenario("tenClusters")
-			})
-
 			By("By creating a secret with OCM credentials", func() {
 				Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
 			})
 
 			By("By creating a new DiscoveryConfig", func() {
-				Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(defaultDiscoveryConfig(), "tenClusters"))).Should(Succeed())
 			})
 
 			By("By checking 10 discovered clusters have been created", func() {
@@ -431,22 +404,18 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 
 		It("Should manage DiscoveredClusters across namespaces", func() {
-			By("Configuring testserver to return multiple responses", func() {
-				updateTestserverScenario("multipleConnections")
-			})
-
 			By("Creating DiscoveryConfigs in separate namespaces", func() {
 				Expect(k8sClient.Create(ctx, customSecret("connection1", discoveryNamespace, "connection1"))).Should(Succeed())
 				Expect(k8sClient.Create(ctx, customSecret("connection2", secondNamespace, "connection2"))).Should(Succeed())
 
 				config1 := defaultDiscoveryConfig()
 				config1.Spec.Credential = "connection1"
-				Expect(k8sClient.Create(ctx, annotate(config1))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(config1, "multipleConnections"))).Should(Succeed())
 
 				config2 := defaultDiscoveryConfig()
 				config2.SetNamespace(secondNamespace)
 				config2.Spec.Credential = "connection2"
-				Expect(k8sClient.Create(ctx, annotate(config2))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(config2, "multipleConnections"))).Should(Succeed())
 			})
 
 			By("By checking discovered clusters have been created in both namespaces", func() {
@@ -481,22 +450,18 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 
 		It("Should update DiscoveredClusters' managed status across namespaces", func() {
-			By("Configuring testserver to return multiple responses", func() {
-				updateTestserverScenario("multipleConnections")
-			})
-
 			By("Creating DiscoveryConfigs in separate namespaces", func() {
 				Expect(k8sClient.Create(ctx, customSecret("connection1", discoveryNamespace, "connection1"))).Should(Succeed())
 				Expect(k8sClient.Create(ctx, customSecret("connection2", secondNamespace, "connection2"))).Should(Succeed())
 
 				config1 := defaultDiscoveryConfig()
 				config1.Spec.Credential = "connection1"
-				Expect(k8sClient.Create(ctx, annotate(config1))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(config1, "multipleConnections"))).Should(Succeed())
 
 				config2 := defaultDiscoveryConfig()
 				config2.SetNamespace(secondNamespace)
 				config2.Spec.Credential = "connection2"
-				Expect(k8sClient.Create(ctx, annotate(config2))).Should(Succeed())
+				Expect(k8sClient.Create(ctx, annotateWithScenario(config2, "multipleConnections"))).Should(Succeed())
 			})
 
 			By("By checking discovered clusters have been created in both namespaces", func() {
@@ -548,58 +513,33 @@ func annotate(dc *discovery.DiscoveryConfig) *discovery.DiscoveryConfig {
 		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseURL})
 		return dc
 	} else {
-		baseUrl := fmt.Sprintf("http://mock-ocm-server.%s.svc.cluster.local:3000", discoveryNamespace)
-		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseUrl})
+		dc.SetAnnotations(map[string]string{"ocmBaseURL": defaultBaseUrl()})
 		return dc
 	}
 }
 
-func getTestserverDeployment() *appsv1.Deployment {
-	testserverDeployment := &appsv1.Deployment{}
-	Eventually(func() error {
-		return k8sClient.Get(ctx, testserver, testserverDeployment)
-	}, timeout, interval).ShouldNot(HaveOccurred())
-	return testserverDeployment
+// annotateWithScenario adds an annotation to modify the baseUrl with a scenario path
+func annotateWithScenario(dc *discovery.DiscoveryConfig, scenario string) *discovery.DiscoveryConfig {
+	if baseURL != "" {
+		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseURL + "/" + scenario})
+		return dc
+	} else {
+		dc.SetAnnotations(map[string]string{"ocmBaseURL": defaultBaseUrl() + "/" + scenario})
+		return dc
+	}
 }
 
-func getTestserverPods() (*corev1.PodList, error) {
-	testserverPods := &corev1.PodList{}
-	err := k8sClient.List(ctx, testserverPods,
-		client.InNamespace(discoveryNamespace),
-		client.MatchingLabels{"app": "mock-ocm-server"})
-	return testserverPods, err
+func defaultBaseUrl() string {
+	return fmt.Sprintf("http://mock-ocm-server.%s.svc.cluster.local:3000", discoveryNamespace)
 }
 
 // Updates the entrypoint argument of the testserver deployment. This changes the content the
 // deployment serves.
 func updateTestserverScenario(scenario string) {
-	if strings.Contains(baseURL, "localhost") {
-		resp, err := http.Get(fmt.Sprintf("%s/scenarios/%s", baseURL, scenario))
-		Expect(err).ToNot(HaveOccurred())
-		Expect(resp.StatusCode).To(Equal(http.StatusOK))
-		return
-	}
-
-	arg := fmt.Sprintf("--scenario=%s", scenario)
-	tsd := getTestserverDeployment()
-	tsd.Spec.Template.Spec.Containers[0].Args = []string{arg}
-	Expect(k8sClient.Update(ctx, tsd)).To(Succeed())
-
-	Eventually(func() bool {
-		tsps, err := getTestserverPods()
-		if err != nil {
-			return false
-		}
-		for _, tsp := range tsps.Items {
-			if (tsp.Spec.Containers[0].Args[0] == arg) && (tsp.Status.Phase == corev1.PodRunning) {
-				return true
-			}
-		}
-		return false
-	}, time.Minute, interval).Should(BeTrue(), "Testserver should reach a running state with its entrypoint argument set to "+arg)
-
-	// Give time for testserver to begin serving new output
-	time.Sleep(time.Second * 15)
+	config := &discovery.DiscoveryConfig{}
+	Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
+	annotateWithScenario(config, scenario)
+	Expect(k8sClient.Update(ctx, config)).Should(Succeed())
 }
 
 func listDiscoveredClusters() (*discovery.DiscoveredClusterList, error) {
