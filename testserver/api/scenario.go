@@ -18,12 +18,14 @@ var scenarios = map[string]string{
 	"tenClusters": "data/scenarios/ten_clusters",
 	// responds with 5 active/stale clusters
 	"fiveClusters": "data/scenarios/five_clusters",
-	// responds with 1000 active/stale clusters
-	"nineninenineClusters": "data/scenarios/nineninenine_clusters",
 	// responds with 10 clusters: 8 active/stale, 2 archived
 	"archivedClusters": "data/scenarios/archived_clusters",
 	// responds with one of two options, depending on auth header content
 	"multipleConnections": "data/scenarios/multiple_connections",
+	// responds with 1,000 clusters
+	"1000": "data/scenarios/1000_clusters",
+	// responds with 10,000 clusters
+	"10000": "data/scenarios/10000_clusters",
 }
 
 func init() {
