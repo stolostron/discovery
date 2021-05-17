@@ -102,8 +102,11 @@ func computeDisplayName(sub subscription.Subscription) string {
 		// trim port if present
 		i := strings.LastIndex(hostport, ":")
 		if i > -1 {
-			return hostport[:i]
+			hostport = hostport[:i]
 		}
+		// replace '.' with '-'
+		hostport = strings.ReplaceAll(hostport, ".", "-")
+
 		return hostport
 	}
 	// Use GUID as backup

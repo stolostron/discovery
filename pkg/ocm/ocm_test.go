@@ -138,7 +138,7 @@ func Test_computeDisplayName(t *testing.T) {
 				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 				DisplayName:       "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 			},
-			want: "installer-pool-j88kj.dev01.red-chesterfield.com",
+			want: "installer-pool-j88kj-dev01-red-chesterfield-com",
 		},
 		{
 			name: "Displayname missing - use consoleURL",
@@ -147,7 +147,7 @@ func Test_computeDisplayName(t *testing.T) {
 				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 				DisplayName:       "",
 			},
-			want: "installer-pool-j88kj.dev01.red-chesterfield.com",
+			want: "installer-pool-j88kj-dev01-red-chesterfield-com",
 		},
 		{
 			name: "Displayname and consoleURL missing - use GUID",
@@ -174,7 +174,7 @@ func Test_computeDisplayName(t *testing.T) {
 				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 				DisplayName:       "",
 			},
-			want: "installer-pool-j88kj.dev01.red-chesterfield.com",
+			want: "installer-pool-j88kj-dev01-red-chesterfield-com",
 		},
 	}
 	for _, tt := range tests {
