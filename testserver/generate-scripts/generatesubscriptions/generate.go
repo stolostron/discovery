@@ -211,7 +211,7 @@ func saveToFolder(sl []SubscriptionList, dir string) {
 	if err != nil {
 		panic(err)
 	}
-	err = os.MkdirAll(dir, 0755)
+	err = os.MkdirAll(dir, 0750)
 	if err != nil {
 		panic(err)
 	}
