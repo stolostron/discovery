@@ -33,6 +33,7 @@ type DiscoveredClusterSpec struct {
 	APIURL            string       `json:"apiUrl" yaml:"apiUrl"`
 	CreationTimestamp *metav1.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
 	ActivityTimestamp *metav1.Time `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
+	Type              string       `json:"type,omitempty" yaml:"type,omitempty"`
 	OpenshiftVersion  string       `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
 	CloudProvider     string       `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
 	Status            string       `json:"status,omitempty" yaml:"status,omitempty"`
@@ -80,6 +81,7 @@ func (a DiscoveredCluster) Equal(b DiscoveredCluster) bool {
 		a.Spec.APIURL != b.Spec.APIURL ||
 		a.Spec.CreationTimestamp.Truncate(time.Second) != b.Spec.CreationTimestamp.Truncate(time.Second) ||
 		a.Spec.ActivityTimestamp.Truncate(time.Second) != b.Spec.ActivityTimestamp.Truncate(time.Second) ||
+		a.Spec.Type != b.Spec.Type ||
 		a.Spec.OpenshiftVersion != b.Spec.OpenshiftVersion ||
 		a.Spec.CloudProvider != b.Spec.CloudProvider ||
 		a.Spec.Status != b.Spec.Status ||
