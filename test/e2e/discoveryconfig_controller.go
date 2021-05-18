@@ -60,7 +60,7 @@ func initializeGlobals() {
 	}
 }
 
-var _ = Describe("Discoveryconfig controller", func() {
+var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 
 	BeforeEach(func() {
 		if !globalsInitialized {
