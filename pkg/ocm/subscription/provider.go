@@ -112,6 +112,7 @@ func parseResponse(response *http.Response) (*SubscriptionResponse, *Subscriptio
 // applyPreFilters adds fields to the http query to limit the number of items returned
 func applyPreFilters(query *url.Values, filters discovery.Filter) {
 	if filters.LastActive != 0 {
-		query.Add("search", fmt.Sprintf("updated_at >= '%s'", lastActiveDate(time.Now(), filters.LastActive).Format("2006-01-02")))
+		layoutISO := "2006-01-02T15:04:05"
+		query.Add("search", fmt.Sprintf("updated_at >= '%s'", lastActiveDateTime(time.Now(), filters.LastActive).Format(layoutISO)))
 	}
 }
