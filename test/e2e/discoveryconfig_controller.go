@@ -80,8 +80,6 @@ var _ = Describe("Discoveryconfig controller", func() {
 			Expect(apierrors.IsNotFound(err)).To(BeTrue())
 		}
 
-		byDeletingAllManagedCluster()
-
 		// Wait for secret to be gone
 		Eventually(func() bool {
 			err := k8sClient.Get(ctx, ocmSecret, &corev1.Secret{})
@@ -194,6 +192,10 @@ var _ = Describe("Discoveryconfig controller", func() {
 					}, timeout, interval).Should(Equal(0))
 				})
 			})
+
+			By("Deleting ManagedClusters", func() {
+				byDeletingManagedClusters([]string{"testmc0", "testmc1"})
+			})
 		})
 
 		It("Should unmark discovered clusters when they are no longer managed", func() {
@@ -216,8 +218,8 @@ var _ = Describe("Discoveryconfig controller", func() {
 				}, timeout, interval).Should(Equal(5))
 			})
 
-			By("Deleting all ManagedClusters", func() {
-				byDeletingAllManagedCluster()
+			By("Deleting ManagedClusters", func() {
+				byDeletingManagedClusters([]string{"testmc1", "testmc2", "testmc3", "testmc4", "testmc5"})
 			})
 
 			By("Checking that no DiscoveredClusters are labeled as managed", func() {
@@ -489,8 +491,8 @@ var _ = Describe("Discoveryconfig controller", func() {
 					}, timeout, interval).Should(Equal(2), fmt.Sprintf("Missing managed labels in namespace %s", secondNamespace))
 				})
 
-				By("Deleting all ManagedClusters", func() {
-					byDeletingAllManagedCluster()
+				By("Deleting ManagedClusters", func() {
+					byDeletingManagedClusters([]string{"mc-connection-1", "mc-connection-2", "mc-connection-both"})
 				})
 
 				By("Checking that no DiscoveredClusters are labeled as managed", func() {
@@ -584,38 +586,34 @@ func countDiscoveredClusters(namespace string) (int, error) {
 	return len(discoveredClusters.Items), nil
 }
 
-func countManagedClusters() (int, error) {
-	managedClusters := &unstructured.UnstructuredList{}
-	managedClusters.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   "cluster.open-cluster-management.io",
-		Kind:    "ManagedCluster",
-		Version: "v1",
-	})
-
-	err := k8sClient.List(ctx, managedClusters, client.InNamespace(discoveryNamespace))
-	if err != nil {
-		return -1, err
-	}
-	return len(managedClusters.Items), nil
-}
-
-func byDeletingAllManagedCluster() {
-	managedClusters := &unstructured.UnstructuredList{}
-	managedClusters.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   "cluster.open-cluster-management.io",
-		Kind:    "ManagedCluster",
-		Version: "v1",
-	})
-
-	Expect(k8sClient.List(ctx, managedClusters, client.InNamespace(discoveryNamespace))).To(Succeed())
-	for _, mc := range managedClusters.Items {
-		mc := mc
-		Expect(k8sClient.Delete(ctx, &mc)).Should(Succeed())
+func byDeletingManagedClusters(names []string) {
+	mc := func(n string) *unstructured.Unstructured {
+		u := &unstructured.Unstructured{}
+		u.SetGroupVersionKind(schema.GroupVersionKind{
+			Group:   "cluster.open-cluster-management.io",
+			Kind:    "ManagedCluster",
+			Version: "v1",
+		})
+		u.SetName(n)
+		return u
 	}
 
-	Eventually(func() (int, error) {
-		return countManagedClusters()
-	}, timeout, interval).Should(Equal(0))
+	for _, name := range names {
+		err := k8sClient.Delete(ctx, mc(name))
+		if err != nil {
+			Expect(apierrors.IsNotFound(err)).To(BeTrue())
+		}
+	}
+
+	Eventually(func() bool {
+		for _, name := range names {
+			err := k8sClient.Get(ctx, client.ObjectKey{Name: name}, mc(name))
+			if !apierrors.IsNotFound(err) {
+				return false
+			}
+		}
+		return true
+	}, timeout, interval).Should(BeTrue(), "There was an issue deleting managedclusters.")
 }
 
 func byTriggeringReconcile() {
@@ -665,16 +663,6 @@ func defaultDiscoveryConfig() *discovery.DiscoveryConfig {
 			Filters:    discovery.Filter{LastActive: 1000000},
 		},
 	}
-}
-
-func emptyManagedCluster() *unstructured.Unstructured {
-	mc := &unstructured.Unstructured{}
-	mc.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   "cluster.open-cluster-management.io",
-		Kind:    "ManagedCluster",
-		Version: "v1",
-	})
-	return mc
 }
 
 func newManagedCluster(name, clusterID string) *unstructured.Unstructured {
