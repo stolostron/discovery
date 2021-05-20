@@ -57,7 +57,7 @@ After your PR is ready to commit, please run following commands to check your co
 ```shell
 make manifests              ## Regenerate manifests if necessary
 make test                   ## Run unit tests
-make integration-tests      ## Run functional tests
+make deploy-and-test        ## Run functional tests
                         OR
 make verify                 ## Runs all of the above commands
 ```
@@ -72,3 +72,45 @@ make docker-build           ## Ensure build succeeds
 ```
 
 Now, you can follow the [README](./README.md) to work with the open-cluster-management/discovery API repository.
+
+## Running tests
+
+The functional tests use a test server to mock OCM responses. Before running the tests both the discovery-operator
+and the mock-ocm-server must be running against a cluster.
+
+### Outside the cluster
+
+Follow the instructions for installing the operator outside the cluster. Then, in a separate terminal, run the testserver.
+
+```shell
+make server-run
+```
+
+With both components running, initiate the tests with the following command:
+
+```shell
+make integration-tests-local
+```
+
+### Inside the cluster
+
+Follow the instructions for installing the operator inside the cluster. Then do the same for the test server.
+
+1. Build the image:
+    ```shell
+    make server-docker-build SERVER_URL=<registry>/<imagename>:<tag>
+    ```
+2. Push the image:
+    ```shell
+    make server-docker-push SERVER_URL=<registry>/<imagename>:<tag>
+    ```
+3. Deploy the server:
+    ```shell
+    make server-deploy SERVER_URL=<registry>/<imagename>:<tag>
+    ```
+
+With both deployments running in the same namespace, initiate the tests with the following command:
+
+```shell
+make integration-tests
+```
