@@ -51,7 +51,8 @@ const (
 
 var (
 	// baseURLAnnotation is the annotation set in a DiscoveryConfig that overrides the URL base used to find clusters
-	baseURLAnnotation = "ocmBaseURL"
+	baseURLAnnotation     = "ocmBaseURL"
+	baseAuthURLAnnotation = "authBaseURL"
 )
 
 var ErrBadFormat = errors.New("bad format")
@@ -149,8 +150,9 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	}
 
 	baseURL := getURLOverride(config)
+	baseAuthURL := getAuthURLOverride(config)
 	filters := config.Spec.Filters
-	discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
+	discovered, err := ocm.DiscoverClusters(userToken, baseURL, baseAuthURL, filters)
 	if err != nil {
 		if ocm.IsUnrecoverable(err) {
 			log.Info("Unrecoverable error. Cleaning up clusters.", "err", err.Error())
@@ -338,6 +340,13 @@ func (r *DiscoveryConfigReconciler) deleteAllClusters(ctx context.Context, confi
 func getURLOverride(config *discovery.DiscoveryConfig) string {
 	if annotations := config.GetAnnotations(); annotations != nil {
 		return annotations[baseURLAnnotation]
+	}
+	return ""
+}
+
+func getAuthURLOverride(config *discovery.DiscoveryConfig) string {
+	if annotations := config.GetAnnotations(); annotations != nil {
+		return annotations[baseAuthURLAnnotation]
 	}
 	return ""
 }
