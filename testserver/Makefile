@@ -25,7 +25,7 @@ server-docker-run: ## Run Mock OCM Server Image Locally.
 server-annotate: ## Annotate DiscoveryConfig with Mock OCM Server URL.
 	oc annotate discoveryconfig discovery ocmBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 -n $(NAMESPACE) --overwrite
 
-DUMMY_ENCRYPTION = $(shell echo "ocmAPIToken: dummytoken" | base64)
+DUMMY_ENCRYPTION = $(shell echo "dummytoken" | base64)
 server-secret:
 	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(DUMMY_ENCRYPTION)/g" |  sed -e "s/NAMESPACE/$(NAMESPACE)/g" | kubectl apply -f - || true
 

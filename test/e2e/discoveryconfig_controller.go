@@ -635,7 +635,7 @@ func dummySecret() *corev1.Secret {
 			Namespace: discoveryNamespace,
 		},
 		StringData: map[string]string{
-			"metadata": "ocmAPIToken: dummytoken",
+			"ocmAPIToken": "dummytoken",
 		},
 	}
 }
@@ -647,7 +647,7 @@ func customSecret(name, namespace, token string) *corev1.Secret {
 			Namespace: namespace,
 		},
 		StringData: map[string]string{
-			"metadata": fmt.Sprintf("ocmAPIToken: %s", token),
+			"ocmAPIToken": token,
 		},
 	}
 }

@@ -86,7 +86,7 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet `go list ./... | grep -v test`
 
-ENCRYPTED = $(shell echo "ocmAPIToken: ${OCM_API_TOKEN}" | base64)
+ENCRYPTED = $(shell echo "${OCM_API_TOKEN}" | base64)
 secret: ## Generate secret for OCM access
 	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(ENCRYPTED)/g" |  sed -e "s/NAMESPACE/$(NAMESPACE)/g" | kubectl apply -f - || true
 
