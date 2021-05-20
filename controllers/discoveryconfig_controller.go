@@ -21,6 +21,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -35,7 +36,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/yaml"
 
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	"github.com/open-cluster-management/discovery/pkg/ocm"
@@ -60,11 +60,6 @@ type DiscoveryConfigReconciler struct {
 	client.Client
 	Scheme  *runtime.Scheme
 	Trigger chan event.GenericEvent
-}
-
-// CloudRedHatCredential ...
-type CloudRedHatCredential struct {
-	OCMApiToken string `yaml:"ocmAPIToken"`
 }
 
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete;deletecollection
@@ -152,7 +147,7 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
 	if err != nil {
 		if ocm.IsUnrecoverable(err) {
-			log.Info("Error is unrecoverable. Cleaning up clusters.")
+			log.Info("Unrecoverable error. Cleaning up clusters.", "err", err.Error())
 			return r.deleteAllClusters(ctx, config)
 		}
 		return err
@@ -209,17 +204,12 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 
 // getUserToken takes a secret cotaining credentials and returns the stored OCM api token.
 func parseUserToken(secret *corev1.Secret) (string, error) {
-	if _, ok := secret.Data["metadata"]; !ok {
-		// return "", fmt.Errorf("Secret '%s' does not contain 'metadata' field", secret.Name)
+	token, ok := secret.Data["ocmAPIToken"]
+	if !ok {
 		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
 	}
 
-	cred := &CloudRedHatCredential{}
-	if err := yaml.Unmarshal(secret.Data["metadata"], cred); err != nil {
-		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
-	}
-
-	return cred.OCMApiToken, nil
+	return strings.TrimSuffix(string(token), "\n"), nil
 }
 
 // assignManagedStatus marks clusters in the discovered map as managed if they are in the managed list
