@@ -1,6 +1,6 @@
 // Copyright Contributors to the Open Cluster Management project
 
-// Package license scans the repo for missing license or copyright headers
+// Package licensetest scans the repo for missing copyright headers
 package licensetest
 
 import (
