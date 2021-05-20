@@ -1,7 +1,7 @@
 # Copyright Contributors to the Open Cluster Management project
 
-## Append samples you want in your CSV to this file as resources ##
 resources:
-# - discovery_v1_discoveredcluster.yaml
 - discovery_v1_discoveryconfig.yaml
-# +kubebuilder:scaffold:manifestskustomizesamples
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: open-cluster-management

@@ -154,11 +154,12 @@ func Test_openshiftVersionFilter(t *testing.T) {
 }
 
 func Test_lastActiveFilter(t *testing.T) {
-	theDay := metav1.NewTime(time.Date(2020, 5, 29, 6, 0, 0, 0, time.UTC))
-	dayOfEarlier := metav1.NewTime(time.Date(2020, 5, 29, 5, 0, 0, 0, time.UTC))
-	dayOfLater := metav1.NewTime(time.Date(2020, 5, 29, 7, 0, 0, 0, time.UTC))
-	dayAfter := metav1.NewTime(time.Date(2020, 5, 30, 0, 0, 0, 0, time.UTC))
-	dayBefore := metav1.NewTime(time.Date(2020, 5, 28, 0, 0, 0, 0, time.UTC))
+	today := metav1.NewTime(time.Date(2020, 5, 29, 6, 0, 0, 0, time.UTC))
+	earlier := metav1.NewTime(time.Date(2020, 5, 29, 5, 0, 0, 0, time.UTC))
+	later := metav1.NewTime(time.Date(2020, 5, 29, 7, 0, 0, 0, time.UTC))
+	tomorrow := metav1.NewTime(time.Date(2020, 5, 30, 6, 0, 0, 0, time.UTC))
+	yesterday := metav1.NewTime(time.Date(2020, 5, 28, 7, 0, 0, 0, time.UTC))
+	earlyYesterday := metav1.NewTime(time.Date(2020, 5, 28, 5, 0, 0, 0, time.UTC))
 
 	tests := []struct {
 		name    string
@@ -169,29 +170,43 @@ func Test_lastActiveFilter(t *testing.T) {
 	}{
 		{
 			name:    "Same day earlier",
-			sub:     Subscription{UpdatedAt: &dayOfEarlier},
-			current: theDay.Time,
-			daysAgo: 0,
-			want:    true,
-		},
-		{
-			name:    "Same day later",
-			sub:     Subscription{UpdatedAt: &dayOfLater},
-			current: theDay.Time,
-			daysAgo: 1,
-			want:    true,
-		},
-		{
-			name:    "Day before",
-			sub:     Subscription{UpdatedAt: &dayBefore},
-			current: theDay.Time,
+			sub:     Subscription{UpdatedAt: &earlier},
+			current: today.Time,
 			daysAgo: 0,
 			want:    false,
 		},
 		{
+			name:    "Same day later",
+			sub:     Subscription{UpdatedAt: &later},
+			current: today.Time,
+			daysAgo: 0,
+			want:    true,
+		},
+		{
+			name:    "Day before",
+			sub:     Subscription{UpdatedAt: &yesterday},
+			current: today.Time,
+			daysAgo: 0,
+			want:    false,
+		},
+		{
+			name:    "Later yesterday",
+			sub:     Subscription{UpdatedAt: &yesterday},
+			current: today.Time,
+			daysAgo: 1,
+			want:    true,
+		},
+		{
+			name:    "Earlier yesterday",
+			sub:     Subscription{UpdatedAt: &earlyYesterday},
+			current: today.Time,
+			daysAgo: 1,
+			want:    false,
+		},
+		{
 			name:    "Two days apart",
-			sub:     Subscription{UpdatedAt: &dayBefore},
-			current: dayAfter.Time,
+			sub:     Subscription{UpdatedAt: &yesterday},
+			current: tomorrow.Time,
 			daysAgo: 1,
 			want:    false,
 		},

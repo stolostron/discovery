@@ -76,30 +76,19 @@ func openshiftVersionFilter(versions []discovery.Semver) filterFunc {
 
 // lastActiveFilter filters out clusters that haven't been updated in the last n days
 func lastActiveFilter(currentDate time.Time, n int) filterFunc {
-	d := lastActiveDate(currentDate, n)
+	t := lastActiveDateTime(currentDate, n)
 	return func(sub Subscription) bool {
 		if sub.UpdatedAt == nil {
 			return false
 		}
-		return onOrAfterDate(d, sub.UpdatedAt.Time)
+		return sub.UpdatedAt.Time.After(t)
 	}
 }
 
-// return the date that is `daysAgo` days before `currentDate`
-func lastActiveDate(currentDate time.Time, daysAgo int) time.Time {
+// return the time that is `daysAgo` days before `currentDate`
+func lastActiveDateTime(currentDate time.Time, daysAgo int) time.Time {
 	if daysAgo < 0 {
 		daysAgo = 0
 	}
 	return currentDate.AddDate(0, 0, -daysAgo)
-}
-
-// onOrAfterDate returns true if d2 is on the same date as or later than d1
-func onOrAfterDate(t1, t2 time.Time) bool {
-	if t1.Year() < t2.Year() {
-		return true
-	} else if t1.Year() == t2.Year() {
-		return t1.YearDay() <= t2.YearDay()
-	} else {
-		return false
-	}
 }

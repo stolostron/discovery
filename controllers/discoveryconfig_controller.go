@@ -21,6 +21,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -35,13 +36,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/yaml"
 
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	"github.com/open-cluster-management/discovery/pkg/ocm"
 	"github.com/open-cluster-management/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -152,7 +153,7 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	discovered, err := ocm.DiscoverClusters(userToken, baseURL, filters)
 	if err != nil {
 		if ocm.IsUnrecoverable(err) {
-			log.Info("Error is unrecoverable. Cleaning up clusters.")
+			log.Info("Unrecoverable error. Cleaning up clusters.", "err", err.Error())
 			return r.deleteAllClusters(ctx, config)
 		}
 		return err
@@ -209,8 +210,18 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 
 // getUserToken takes a secret cotaining credentials and returns the stored OCM api token.
 func parseUserToken(secret *corev1.Secret) (string, error) {
+	token, ok := secret.Data["ocmAPIToken"]
+	if !ok {
+		return oldParseUserToken(secret)
+		// return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
+	}
+
+	return strings.TrimSuffix(string(token), "\n"), nil
+}
+
+// old parsing function for backwards-compatibility
+func oldParseUserToken(secret *corev1.Secret) (string, error) {
 	if _, ok := secret.Data["metadata"]; !ok {
-		// return "", fmt.Errorf("Secret '%s' does not contain 'metadata' field", secret.Name)
 		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
 	}
 

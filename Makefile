@@ -54,8 +54,6 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
--include testserver/Makefile
-
 all: build
 
 ##@ General
@@ -88,21 +86,15 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet `go list ./... | grep -v test`
 
-test: manifests generate fmt vet ## Run tests.
-	go test `go list ./... | grep -v e2e` -coverprofile cover.out
-
-integration-tests: install deploy server/deploy ## Run integration tests
-	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
-	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n $(NAMESPACE)
-	kubectl wait --for=condition=available --timeout=60s deployment/mock-ocm-server -n $(NAMESPACE)
-	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)
-
-ENCRYPTED = $(shell echo "ocmAPIToken: ${OCM_API_TOKEN}" | base64)
+ENCRYPTED = $(shell echo "${OCM_API_TOKEN}" | base64)
 secret: ## Generate secret for OCM access
-	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(ENCRYPTED)/g" | kubectl apply -f - || true
+	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(ENCRYPTED)/g" |  sed -e "s/NAMESPACE/$(NAMESPACE)/g" | kubectl apply -f - || true
 
-samples: ## Create custom resources
+.PHONY: config
+config: ## Create custom resources
+	cd config/samples && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
 	$(KUSTOMIZE) build config/samples | kubectl apply -f -
+	cd config/samples && $(KUSTOMIZE) edit set namespace open-cluster-management
 
 logs: ## Print operator logs
 	@kubectl logs -f $(shell kubectl get pod -l app=discovery-operator -o jsonpath="{.items[0].metadata.name}")
@@ -116,7 +108,7 @@ unannotate: ## Remove mock server annotation
 set-copyright:
 	@bash ./cicd-scripts/set-copyright.sh
 
-verify: test integration-tests manifests
+verify: test deploy-and-test manifests
 
 ##@ Build
 
@@ -238,6 +230,38 @@ catalog-build: opm ## Build a catalog image.
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
 
+##@ Testing
+
+test: ## Run unit tests.
+	go test `go list ./... | grep -v e2e` -coverprofile cover.out
+
+integration-tests: ## Run functional/integration tests
+	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
+	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)
+
+integration-tests-local: ## Run functional tests with binaries running locally
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
+	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE) -baseURL http://localhost:3000
+
+deploy-and-test: install deploy server-deploy ## Install CRDs, deploy components, and run tests
+	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
+	kubectl wait --for=condition=available --timeout=60s deployment/discovery-operator -n $(NAMESPACE)
+	kubectl wait --for=condition=available --timeout=60s deployment/mock-ocm-server -n $(NAMESPACE)
+	sleep 10
+	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)
+
+docker-build-tests: ## Build the functional test image
+	@echo "Building $(REGISTRY)/$(IMG)-tests:$(VERSION)"
+	docker build . -f test/e2e/build/Dockerfile -t $(REGISTRY)/$(IMG)-tests:$(VERSION)
+
+docker-run-tests: ## Run the containerized functional tests
+	docker run --network host \
+		--volume ~/.kube/config:/opt/.kube/config \
+		$(REGISTRY)/$(IMG)-tests:$(VERSION)
+
+-include testserver/Makefile
+
 ############################################################
 # e2e test section
 ############################################################
@@ -275,18 +299,3 @@ kind-delete-cluster:
 kind-e2e-tests:
 	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
 	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE)
-
-test-local:
-	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
-	go test -v ./test/e2e -coverprofile cover.out -args -ginkgo.v -ginkgo.trace -namespace $(NAMESPACE) -baseURL http://localhost:3000
-
-## Build the functional test image
-tests/docker-build:
-	@echo "Building $(REGISTRY)/$(IMG)-tests:$(VERSION)"
-	docker build . -f test/e2e/build/Dockerfile -t $(REGISTRY)/$(IMG)-tests:$(VERSION)
-
-## Run the downstream functional tests
-tests/docker-run:
-	docker run --network host \
-		--volume ~/.kube/config:/opt/.kube/config \
-		$(REGISTRY)/$(IMG)-tests:$(VERSION)
