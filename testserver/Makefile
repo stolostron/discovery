@@ -38,6 +38,8 @@ server-deploy:
 	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="mock-ocm-server:latest"
 	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace open-cluster-management
 
+server-update-dates:
+	python3 testserver/data/date-update-scripts/update-dates.py
 
 ############################################################
 # e2e test section
