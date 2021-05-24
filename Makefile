@@ -102,7 +102,6 @@ logs: ## Print operator logs
 annotate: ## Annotate discoveryconfig to target mock server
 	kubectl annotate discoveryconfig discovery ocmBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 authBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 -n $(NAMESPACE) --overwrite
 
-
 unannotate: ## Remove mock server annotation
 	kubectl annotate discoveryconfig discovery -n $(NAMESPACE) ocmBaseURL- authBaseURL-
 
