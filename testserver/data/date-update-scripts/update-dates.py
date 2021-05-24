@@ -1,3 +1,5 @@
+# Copyright Contributors to the Open Cluster Management project
+
 import datetime
 import os
 import json
