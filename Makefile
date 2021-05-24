@@ -106,7 +106,6 @@ annotate: ## Annotate discoveryconfig to target mock server
 
 unannotate: ## Remove mock server annotation
 	kubectl annotate discoveryconfig discovery -n $(NAMESPACE) ocmBaseURL- authBaseURL-
-	kubectl annotate discoveryconfig discovery authBaseURL-
 
 set-copyright:
 	@bash ./cicd-scripts/set-copyright.sh
