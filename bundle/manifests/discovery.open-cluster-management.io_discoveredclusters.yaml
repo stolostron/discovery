@@ -77,11 +77,14 @@ spec:
                 type: string
               status:
                 type: string
+              type:
+                type: string
             required:
             - apiUrl
             - displayName
             - isManagedCluster
             - name
+            - type
             type: object
           status:
             description: DiscoveredClusterStatus defines the observed state of DiscoveredCluster

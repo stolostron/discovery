@@ -23,7 +23,7 @@ server-docker-run: ## Run Mock OCM Server Image Locally.
 	docker run -p 3000:3000 "${SERVER_URL}"
 
 server-annotate: ## Annotate DiscoveryConfig with Mock OCM Server URL.
-	oc annotate discoveryconfig discovery ocmBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 -n $(NAMESPACE) --overwrite
+	kubectl annotate discoveryconfig discovery ocmBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 authBaseURL=http://mock-ocm-server.$(NAMESPACE).svc.cluster.local:3000 -n $(NAMESPACE) --overwrite
 
 DUMMY_ENCRYPTION = $(shell echo "dummytoken" | base64)
 server-secret:
@@ -38,6 +38,8 @@ server-deploy:
 	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="mock-ocm-server:latest"
 	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace open-cluster-management
 
+server-update-dates:
+	python3 testserver/data/date-update-scripts/update-dates.py
 
 ############################################################
 # e2e test section

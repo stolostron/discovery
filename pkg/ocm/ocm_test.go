@@ -53,9 +53,10 @@ func subscriptionResponse(testdata string) func() ([]subscription.Subscription, 
 
 func TestDiscoverClusters(t *testing.T) {
 	type args struct {
-		token   string
-		baseURL string
-		filters discovery.Filter
+		token       string
+		baseURL     string
+		baseAuthURL string
+		filters     discovery.Filter
 	}
 	tests := []struct {
 		name             string
@@ -74,9 +75,10 @@ func TestDiscoverClusters(t *testing.T) {
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
 			subscriptionFunc: subscriptionResponse("testdata/1_mock_subscription.json"),
 			args: args{
-				token:   "test",
-				baseURL: "test",
-				filters: discovery.Filter{},
+				token:       "test",
+				baseURL:     "test",
+				baseAuthURL: "test",
+				filters:     discovery.Filter{},
 			},
 			want:    1,
 			wantErr: false,
@@ -90,9 +92,10 @@ func TestDiscoverClusters(t *testing.T) {
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
 			subscriptionFunc: subscriptionResponse("testdata/3_mock_subscriptions.json"),
 			args: args{
-				token:   "test",
-				baseURL: "test",
-				filters: discovery.Filter{},
+				token:       "test",
+				baseURL:     "test",
+				baseAuthURL: "test",
+				filters:     discovery.Filter{},
 			},
 			want:    2,
 			wantErr: false,
@@ -106,7 +109,7 @@ func TestDiscoverClusters(t *testing.T) {
 			getTokenFunc = tt.authfunc
 			getSubscriptionsFunc = tt.subscriptionFunc
 
-			got, err := DiscoverClusters(tt.args.token, tt.args.baseURL, tt.args.filters)
+			got, err := DiscoverClusters(tt.args.token, tt.args.baseURL, tt.args.baseAuthURL, tt.args.filters)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DiscoverClusters() error = %v, wantErr %v", err, tt.wantErr)
 				return

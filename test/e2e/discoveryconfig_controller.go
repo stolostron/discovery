@@ -512,10 +512,11 @@ var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 // annotate adds an annotation to modify the baseUrl used with the discoveryconfig
 func annotate(dc *discovery.DiscoveryConfig) *discovery.DiscoveryConfig {
 	if baseURL != "" {
-		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseURL})
+		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseURL, "authBaseURL": baseURL})
 		return dc
 	} else {
-		dc.SetAnnotations(map[string]string{"ocmBaseURL": defaultBaseUrl()})
+		dc.SetAnnotations(map[string]string{"ocmBaseURL": defaultBaseUrl(), "authBaseURL": defaultBaseUrl()})
+
 		return dc
 	}
 }
@@ -523,10 +524,10 @@ func annotate(dc *discovery.DiscoveryConfig) *discovery.DiscoveryConfig {
 // annotateWithScenario adds an annotation to modify the baseUrl with a scenario path
 func annotateWithScenario(dc *discovery.DiscoveryConfig, scenario string) *discovery.DiscoveryConfig {
 	if baseURL != "" {
-		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseURL + "/" + scenario})
+		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseURL + "/" + scenario, "authBaseURL": baseURL + "/" + scenario})
 		return dc
 	} else {
-		dc.SetAnnotations(map[string]string{"ocmBaseURL": defaultBaseUrl() + "/" + scenario})
+		dc.SetAnnotations(map[string]string{"ocmBaseURL": defaultBaseUrl() + "/" + scenario, "authBaseURL": defaultBaseUrl() + "/" + scenario})
 		return dc
 	}
 }
