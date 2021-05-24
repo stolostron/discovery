@@ -234,3 +234,46 @@ func Test_computeApiUrl(t *testing.T) {
 		})
 	}
 }
+
+func Test_computeType(t *testing.T) {
+	tests := []struct {
+		name string
+		sub  subscription.Subscription
+		want string
+	}{
+		{
+			name: "Regular type",
+			sub: subscription.Subscription{
+				Plan: subscription.StandardKind{
+					ID: "OCP",
+				},
+			},
+			want: "OCP",
+		},
+		{
+			name: "Anything goes",
+			sub: subscription.Subscription{
+				Plan: subscription.StandardKind{
+					ID: "ABC123",
+				},
+			},
+			want: "ABC123",
+		},
+		{
+			name: "ROSA transform",
+			sub: subscription.Subscription{
+				Plan: subscription.StandardKind{
+					ID: "MOA",
+				},
+			},
+			want: "ROSA",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := computeType(tt.sub); got != tt.want {
+				t.Errorf("computeType() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

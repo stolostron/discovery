@@ -73,7 +73,7 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 			APIURL:            computeApiUrl(sub),
 			CreationTimestamp: sub.CreatedAt,
 			ActivityTimestamp: sub.UpdatedAt,
-			Type:              sub.Plan.ID,
+			Type:              computeType(sub),
 			OpenshiftVersion:  sub.Metrics[0].OpenShiftVersion,
 			CloudProvider:     sub.CloudProviderID,
 			Status:            sub.Status,
@@ -133,4 +133,16 @@ func computeApiUrl(sub subscription.Subscription) string {
 	}
 	// doesn't match common pattern
 	return ""
+}
+
+// computeType calculates the type of the cluster based on subscription.plan.id
+func computeType(sub subscription.Subscription) string {
+
+	clusterType := sub.Plan.ID
+
+	if clusterType == "MOA" { // API returns MOA but this is displayed in OCM as ROSA
+		clusterType = "ROSA"
+	}
+
+	return clusterType
 }
