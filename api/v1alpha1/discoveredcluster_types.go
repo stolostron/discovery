@@ -33,7 +33,7 @@ type DiscoveredClusterSpec struct {
 	APIURL            string       `json:"apiUrl" yaml:"apiUrl"`
 	CreationTimestamp *metav1.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
 	ActivityTimestamp *metav1.Time `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
-	Type              string       `json:"type,omitempty" yaml:"type,omitempty"`
+	Type              string       `json:"type" yaml:"type"`
 	OpenshiftVersion  string       `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
 	CloudProvider     string       `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
 	Status            string       `json:"status,omitempty" yaml:"status,omitempty"`
