@@ -3,12 +3,14 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/open-cluster-management/discovery/pkg/ocm/subscription"
@@ -45,6 +47,8 @@ func GetSubscriptions(c *gin.Context) {
 		})
 		return
 	}
+
+	file = setTime(file, time.Now())
 
 	// Validate file can be unmarshalled into SubscriptionResponse
 	var subscriptionList subscription.SubscriptionResponse
@@ -85,6 +89,8 @@ func (s Scenario) GetSubscriptions(c *gin.Context) {
 		return
 	}
 
+	file = setTime(file, time.Now())
+
 	// Validate file can be unmarshalled into SubscriptionResponse
 	var subscriptionList subscription.SubscriptionResponse
 	err = json.Unmarshal(file, &subscriptionList)
@@ -108,4 +114,10 @@ func paginate(file, page string) string {
 	newPath := strings.TrimSuffix(file, extension)
 
 	return fmt.Sprintf("%s_%s%s", newPath, page, extension)
+}
+
+// Replaces time placeholders in the subscription template with the current time
+func setTime(in []byte, now time.Time) []byte {
+	// truncates to the hour so it doesn't change every time
+	return bytes.ReplaceAll(in, []byte("--TODAY--"), []byte(now.Truncate(time.Hour).Format("2006-01-02T15:04:05.000000Z")))
 }

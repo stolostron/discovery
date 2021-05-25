@@ -168,14 +168,14 @@ func generateSubscriptions(n int) []Subscription {
 		randomCreatedDelta := rand.Int63n(int64(maxDelta.Nanoseconds())) // #nosec G404 (cryptographic strength irrelevant)
 		createdDate := floor.Add(time.Nanosecond * time.Duration(randomCreatedDelta))
 		updateDelta := now.Sub(createdDate)
-		randomUpdatedDelta := rand.Int63n(int64(updateDelta.Nanoseconds())) // #nosec G404 (cryptographic strength irrelevant)
-		updatedDate := createdDate.Add(time.Nanosecond * time.Duration(randomUpdatedDelta))
+		// randomUpdatedDelta := rand.Int63n(int64(updateDelta.Nanoseconds())) // #nosec G404 (cryptographic strength irrelevant)
+		// updatedDate := createdDate.Add(time.Nanosecond * time.Duration(randomUpdatedDelta))
 		randomTelemDelta := rand.Int63n(int64(updateDelta.Nanoseconds())) // #nosec G404 (cryptographic strength irrelevant)
 		telemDate := createdDate.Add(time.Nanosecond * time.Duration(randomTelemDelta))
-		createdDateStr := createdDate.UTC().Format("2006-01-02T15:04:05.000000Z0700")
-		updatedDateStr := updatedDate.UTC().Format("2006-01-02T15:04:05.000000Z0700")
+		// createdDateStr := createdDate.UTC().Format("2006-01-02T15:04:05.000000Z0700")
+		// updatedDateStr := updatedDate.UTC().Format("2006-01-02T15:04:05.000000Z0700")
 		telemDateStr := telemDate.UTC().Format("2006-01-02T15:04:05.000000Z0700")
-		s := Subscription{ids[i], "Subscription", "/api/accounts_mgmt/v1/subscriptions/1YuEObNEl4Z8b79mbbHD7a9hkl6", p, clusterIds[i], extIds[i], "1Yu9TWVAfvJu9Cj5hbMT6iYkdk8", telemDateStr, createdDateStr, updatedDateStr, "None", extIds[i], c, false, "Active", "Telemetry", "2020-03-10T20:43:46.428922Z", "https://console-openshift-console.apps.jdgray-c6mvq.dev01.red-chesterfield.com", "0001-01-01T00:00:00Z", mets, "aws", "us-east-1", "0001-01-01T00:00:00Z"}
+		s := Subscription{ids[i], "Subscription", "/api/accounts_mgmt/v1/subscriptions/1YuEObNEl4Z8b79mbbHD7a9hkl6", p, clusterIds[i], extIds[i], "1Yu9TWVAfvJu9Cj5hbMT6iYkdk8", telemDateStr, "--TODAY--", "--TODAY--", "None", extIds[i], c, false, "Active", "Telemetry", "2020-03-10T20:43:46.428922Z", "https://console-openshift-console.apps.jdgray-c6mvq.dev01.red-chesterfield.com", "0001-01-01T00:00:00Z", mets, "aws", "us-east-1", "0001-01-01T00:00:00Z"}
 		test = append(test, s)
 	}
 	return test
