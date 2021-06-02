@@ -1,0 +1,85 @@
+name: KinD tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - release-2.3
+
+defaults:
+  run:
+    shell: bash
+    working-directory: discovery
+
+jobs:
+  kind-tests:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: localhost:5000
+    strategy:
+      matrix:
+        go:
+          - '1.16'
+        kind:
+          - 'latest'
+    name: KinD tests
+    steps:
+    - name: Checkout Discovery
+      uses: actions/checkout@v2
+      with:
+        path: discovery
+        fetch-depth: 0 # Fetch all history for all tags and branches
+
+    - name: Set up Go - ${{ matrix.go }}
+      uses: actions/setup-go@v2
+      id: go
+      with:
+        go-version: ${{ matrix.go }}
+
+    - name: Verify modules
+      run: |
+        go mod verify
+        
+    - name: Verify format
+      run: |
+        make fmt
+        git diff --exit-code
+        
+    - name: Unit Tests
+      run: |
+        make test
+        
+    - name: Create K8s KinD Cluster - ${{ matrix.kind }}
+      env:
+        KIND_VERSION: ${{ matrix.kind }}
+      run: |
+        make kind-create-cluster
+        
+    - name: Build and Push Image to KinD node
+      env:
+        TAG: ${{ github.sha }}
+      run: |
+        make docker-build
+        make server-docker-build
+        make kind-load-image
+        make kind-load-testserver-image
+        
+    - name: Deploy to KinD
+      env:
+        TAG: ${{ github.sha }}
+      run: |
+        make kind-deploy-controller
+        make kind-deploy-testserver
+        
+    - name: Integration Tests
+      run: |
+        make integration-tests
+    - name: Debug
+      if: ${{ failure() }}
+      run: |
+        make kind-debug
+        
+    - name: Clean up cluster
+      if: ${{ always() }}
+      run: |
+        make kind-delete-cluster
