@@ -261,6 +261,9 @@ docker-run-tests: ## Run the containerized functional tests
 		--volume ~/.kube/config:/opt/.kube/config \
 		$(REGISTRY)/$(IMG)-tests:$(VERSION)
 
+scale-test: ## Run scalability test
+	go run test/scale/scale.go
+
 -include testserver/Makefile
 
 ############################################################
