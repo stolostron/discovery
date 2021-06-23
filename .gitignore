@@ -37,3 +37,4 @@ build-harness-extensions
 
 # Functional test results
 test/e2e/results
+test/scale/results
