@@ -179,9 +179,12 @@ func cleanup() {
 	for i := 0; i < configTotal; i++ {
 		ns := fmt.Sprintf("scale%d", i)
 		fmt.Println("Deleting namespace ", ns)
-		k8sClient.Delete(context.TODO(), &corev1.Namespace{
+		err := k8sClient.Delete(context.TODO(), &corev1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{Name: ns},
 		})
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
@@ -212,12 +215,12 @@ func startMetricsLogger(done <-chan bool) {
 	if err != nil {
 		log.Fatalln("error creating results file:", err)
 	}
-	defer file.Close()
 
 	writer := csv.NewWriter(file)
-	// writer := csv.NewWriter(os.Stdout)
-	defer writer.Flush()
-	writer.Write([]string{"Time elapsed", "Configs", "CPU usage", "Memory usage"})
+	err = writer.Write([]string{"Time elapsed", "Configs", "CPU usage", "Memory usage"})
+	if err != nil {
+		log.Println("error on write:", err)
+	}
 
 	now := time.Now()
 	secondsPassed := func() int {
@@ -229,6 +232,9 @@ func startMetricsLogger(done <-chan bool) {
 		select {
 		case <-done:
 			ticker.Stop()
+			if err := file.Close(); err != nil {
+				log.Println("error closing file:", err)
+			}
 			return
 		case <-ticker.C:
 			configs, cpu, mem := getMetricsFromMetricsAPI(mc, podName, ns)
