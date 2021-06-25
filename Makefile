@@ -115,7 +115,7 @@ verify: test deploy-and-test manifests
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
-run: manifests generate fmt vet ## Run a controller from your host.
+run: manifests generate fmt ## Run a controller from your host.
 	go run ./main.go
 
 docker-build: ## Build docker image with the manager.

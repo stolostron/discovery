@@ -42,7 +42,7 @@ func Test_parseUserToken(t *testing.T) {
 					Namespace: "test",
 				},
 				Data: map[string][]byte{
-					"metadata": []byte("ocmAPIToken: dummytoken"),
+					"ocmAPIToken": []byte("dummytoken"),
 				},
 			},
 			want:    "dummytoken",

@@ -41,7 +41,6 @@ import (
 	"github.com/open-cluster-management/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -61,11 +60,6 @@ type DiscoveryConfigReconciler struct {
 	client.Client
 	Scheme  *runtime.Scheme
 	Trigger chan event.GenericEvent
-}
-
-// CloudRedHatCredential ...
-type CloudRedHatCredential struct {
-	OCMApiToken string `yaml:"ocmAPIToken"`
 }
 
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete;deletecollection
@@ -209,25 +203,10 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 func parseUserToken(secret *corev1.Secret) (string, error) {
 	token, ok := secret.Data["ocmAPIToken"]
 	if !ok {
-		return oldParseUserToken(secret)
-		// return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
+		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
 	}
 
 	return strings.TrimSuffix(string(token), "\n"), nil
-}
-
-// old parsing function for backwards-compatibility
-func oldParseUserToken(secret *corev1.Secret) (string, error) {
-	if _, ok := secret.Data["metadata"]; !ok {
-		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
-	}
-
-	cred := &CloudRedHatCredential{}
-	if err := yaml.Unmarshal(secret.Data["metadata"], cred); err != nil {
-		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
-	}
-
-	return cred.OCMApiToken, nil
 }
 
 // assignManagedStatus marks clusters in the discovered map as managed if they are in the managed list

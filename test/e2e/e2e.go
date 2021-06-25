@@ -68,7 +68,7 @@ func RunE2ETests(t *testing.T) {
 	RegisterFailHandler(Fail)
 	junitReporter := reporters.NewJUnitReporter(reportFile)
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"Controller Suite",
+		"Discovery",
 		[]Reporter{junitReporter})
 }
 
