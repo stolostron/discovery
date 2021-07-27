@@ -26,7 +26,8 @@ spec:
       kind: DiscoveryConfig
       name: discoveryconfigs.discovery.open-cluster-management.io
       version: v1alpha1
-  description: This operator discovers OpenShift Conatiner Platform clusters which are not yet under management by Open Cluster Management.
+  description: This operator discovers OpenShift Conatiner Platform clusters which
+    are not yet under management by Open Cluster Management.
   displayName: Multicluster Discovery Operator
   icon:
   - base64data: ""
