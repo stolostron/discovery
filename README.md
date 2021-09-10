@@ -10,7 +10,7 @@ Operator for managing discovered clusters from OpenShift Cluster Manager
 
 ## Prerequisites
 
-- Go v1.16+
+- Go v1.17+
 - kubectl 1.19+
 - Operator-sdk v1.7.1
 - Docker
