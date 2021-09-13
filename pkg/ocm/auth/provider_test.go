@@ -4,7 +4,7 @@ package auth
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -29,7 +29,7 @@ func TestGetTokenNoError(t *testing.T) {
 	postRequestFunc = func(url string, data url.Values) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"access_token":"ephemeral_access_token","not-before-policy":0,"session_state":"random-session-state","scope":"openid offline_access"}`)),
+			Body:       io.NopCloser(strings.NewReader(`{"access_token":"ephemeral_access_token","not-before-policy":0,"session_state":"random-session-state","scope":"openid offline_access"}`)),
 		}, nil
 	}
 	httpClient = &postClientMock{} //without this line, the real api is fired
@@ -45,7 +45,7 @@ func TestGetTokenInvalidApiKey(t *testing.T) {
 		postRequestFunc = func(url string, data url.Values) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: http.StatusBadRequest,
-				Body:       ioutil.NopCloser(strings.NewReader(`{"error":"invalid_grant","error_description":"Invalid refresh token"}`)),
+				Body:       io.NopCloser(strings.NewReader(`{"error":"invalid_grant","error_description":"Invalid refresh token"}`)),
 			}, nil
 		}
 		httpClient = &postClientMock{} //without this line, the real api is fired
@@ -63,7 +63,7 @@ func TestGetTokenInvalidApiKey(t *testing.T) {
 		postRequestFunc = func(url string, data url.Values) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: http.StatusBadRequest,
-				Body:       ioutil.NopCloser(strings.NewReader(`{"error":"invalid_grant","error_description":"Invalid refresh token"}`)),
+				Body:       io.NopCloser(strings.NewReader(`{"error":"invalid_grant","error_description":"Invalid refresh token"}`)),
 			}, nil
 		}
 		httpClient = &postClientMock{} //without this line, the real api is fired
@@ -82,7 +82,7 @@ func TestGetTokenMissingFormData(t *testing.T) {
 		postRequestFunc = func(url string, data url.Values) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: http.StatusBadRequest,
-				Body:       ioutil.NopCloser(strings.NewReader(`{"error":"invalid_request","error_description":"Missing form parameter: grant_type"}`)),
+				Body:       io.NopCloser(strings.NewReader(`{"error":"invalid_request","error_description":"Missing form parameter: grant_type"}`)),
 			}, nil
 		}
 		httpClient = &postClientMock{} //without this line, the real api is fired
@@ -98,7 +98,7 @@ func TestGetTokenMissingFormData(t *testing.T) {
 		postRequestFunc = func(url string, data url.Values) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: http.StatusBadRequest,
-				Body:       ioutil.NopCloser(strings.NewReader(`{"error":"unauthorized_client","error_description":"INVALID_CREDENTIALS: Invalid client credentials"}`)),
+				Body:       io.NopCloser(strings.NewReader(`{"error":"unauthorized_client","error_description":"INVALID_CREDENTIALS: Invalid client credentials"}`)),
 			}, nil
 		}
 		httpClient = &postClientMock{} //without this line, the real api is fired
@@ -118,7 +118,7 @@ func TestGetTokenInvalidErrorInterface(t *testing.T) {
 	postRequestFunc = func(url string, data url.Values) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusMethodNotAllowed,
-			Body:       ioutil.NopCloser(strings.NewReader(unexpectedJSONResponse)),
+			Body:       io.NopCloser(strings.NewReader(unexpectedJSONResponse)),
 		}, nil
 	}
 	httpClient = &postClientMock{} //without this line, the real api is fired
@@ -136,7 +136,7 @@ func TestGetTokenInvalidResponseInterface(t *testing.T) {
 	postRequestFunc = func(url string, data url.Values) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(unexpectedJSONResponse)),
+			Body:       io.NopCloser(strings.NewReader(unexpectedJSONResponse)),
 		}, nil
 	}
 	httpClient = &postClientMock{} //without this line, the real api is fired
@@ -154,7 +154,7 @@ func TestGetTokenNoAccessToken(t *testing.T) {
 	postRequestFunc = func(url string, data url.Values) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(missingTokenJSONResponse)),
+			Body:       io.NopCloser(strings.NewReader(missingTokenJSONResponse)),
 		}, nil
 	}
 	httpClient = &postClientMock{} //without this line, the real api is fired

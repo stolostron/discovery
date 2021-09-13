@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -77,7 +77,7 @@ func prepareRequest(request SubscriptionRequest) (*http.Request, error) {
 }
 
 func parseResponse(response *http.Response) (*SubscriptionResponse, *SubscriptionError) {
-	bytes, err := ioutil.ReadAll(response.Body)
+	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, &SubscriptionError{
 			Error: fmt.Errorf("%s: %w", "couldn't read response body", err),

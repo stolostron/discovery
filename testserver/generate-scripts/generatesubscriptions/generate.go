@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"path"
@@ -223,7 +222,7 @@ func saveToFolder(sl []SubscriptionList, dir string) {
 			filename = fmt.Sprintf("subscription_response_%d.json", i+1)
 		}
 		b, _ := json.MarshalIndent(page, "", "    ")
-		err := ioutil.WriteFile(path.Join(dir, filename), b, 0600)
+		err := os.WriteFile(path.Join(dir, filename), b, 0600)
 		if err != nil {
 			panic(err)
 		}

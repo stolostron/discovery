@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -58,7 +58,7 @@ func (a *authProvider) GetToken(request AuthRequest) (*AuthTokenResponse, *AuthE
 }
 
 func parseResponse(response *http.Response) (*AuthTokenResponse, *AuthError) {
-	bytes, err := ioutil.ReadAll(response.Body)
+	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, &AuthError{
 			Error: err,

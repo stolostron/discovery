@@ -4,7 +4,7 @@ package ocm
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
@@ -44,7 +44,7 @@ func (m *subscriptionClientGeneratorMock) NewClient(config subscription.Subscrip
 // clustersResponse takes in a file with subscription data and returns a new mock function
 func subscriptionResponse(testdata string) func() ([]subscription.Subscription, error) {
 	return func() ([]subscription.Subscription, error) {
-		file, _ := ioutil.ReadFile(testdata)
+		file, _ := os.ReadFile(testdata)
 		subscriptions := []subscription.Subscription{}
 		err := json.Unmarshal([]byte(file), &subscriptions)
 		return subscriptions, err

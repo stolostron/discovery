@@ -3,7 +3,7 @@
 package subscription
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"testing"
@@ -31,7 +31,7 @@ func TestProviderGetSubscriptionsNoError(t *testing.T) {
 		}
 		return &http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(file),
+			Body:       io.NopCloser(file),
 		}, nil
 	}
 	httpClient = &getClientMock{} //without this line, the real api is fired
