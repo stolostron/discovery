@@ -7,4 +7,3 @@ kind: Kustomization
 images:
 - name: controller
   newName: discovery-operator
-  newTag: latest
