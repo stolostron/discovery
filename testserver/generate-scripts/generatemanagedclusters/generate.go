@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 
@@ -142,7 +141,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	file, _ := ioutil.ReadFile(*input)
+	file, _ := os.ReadFile(*input)
 
 	data := SubscriptionList{}
 

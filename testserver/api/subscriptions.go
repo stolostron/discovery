@@ -6,8 +6,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -33,12 +33,12 @@ func GetSubscriptions(c *gin.Context) {
 	var err error
 	if strings.Contains(auth, "connection1") {
 		fmt.Println("Returning connection1 response")
-		file, err = ioutil.ReadFile(path.Join(dataFolder, "connection1/subscription_response.json"))
+		file, err = os.ReadFile(path.Join(dataFolder, "connection1/subscription_response.json"))
 	} else if strings.Contains(auth, "connection2") {
 		fmt.Println("Returning connection2 response")
-		file, err = ioutil.ReadFile(path.Join(dataFolder, "connection2/subscription_response.json"))
+		file, err = os.ReadFile(path.Join(dataFolder, "connection2/subscription_response.json"))
 	} else {
-		file, err = ioutil.ReadFile(paginate(path.Join(dataFolder, "subscription_response.json"), page))
+		file, err = os.ReadFile(paginate(path.Join(dataFolder, "subscription_response.json"), page))
 	}
 
 	if err != nil {
@@ -74,12 +74,12 @@ func (s Scenario) GetSubscriptions(c *gin.Context) {
 	var err error
 	if strings.Contains(auth, "connection1") {
 		fmt.Println("Returning connection1 response")
-		file, err = ioutil.ReadFile(path.Join(s.Path(), "connection1/subscription_response.json"))
+		file, err = os.ReadFile(path.Join(s.Path(), "connection1/subscription_response.json"))
 	} else if strings.Contains(auth, "connection2") {
 		fmt.Println("Returning connection2 response")
-		file, err = ioutil.ReadFile(path.Join(s.Path(), "connection2/subscription_response.json"))
+		file, err = os.ReadFile(path.Join(s.Path(), "connection2/subscription_response.json"))
 	} else {
-		file, err = ioutil.ReadFile(paginate(path.Join(s.Path(), "subscription_response.json"), page))
+		file, err = os.ReadFile(paginate(path.Join(s.Path(), "subscription_response.json"), page))
 	}
 
 	if err != nil {
