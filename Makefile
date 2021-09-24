@@ -1,13 +1,5 @@
 # Copyright Contributors to the Open Cluster Management project
 
-# Allow operator-sdk version/binary to be used to be specified externally via
-# an environment variable.
-#
-# Default to currrent dev approach of using a version specific alias or
-# symbolic link called "osdk".
-
-OPERATOR_SDK ?= osdk
-
 # Current Operator version
 VERSION ?= 0.0.1
 
@@ -175,10 +167,10 @@ endif
 
 .PHONY: bundle
 bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.
-	$(OPERATOR_SDK) generate kustomize manifests -q
+	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
-	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
-	$(OPERATOR_SDK) bundle validate ./bundle
+	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+	operator-sdk bundle validate ./bundle
 	cd config/manager && $(KUSTOMIZE) edit set image controller="discovery-operator:latest"
 
 .PHONY: bundle-build
