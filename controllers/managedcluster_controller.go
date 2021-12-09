@@ -16,19 +16,19 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
@@ -41,29 +41,37 @@ var managedClusterGVK = schema.GroupVersionKind{
 // ManagedClusterReconciler reconciles a ManagedCluster object
 type ManagedClusterReconciler struct {
 	client.Client
-	Name   string
-	Scheme *runtime.Scheme
-	Log    logr.Logger
+	Scheme  *runtime.Scheme
+	Trigger chan event.GenericEvent
+	Log     logr.Logger
 }
 
 // +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters,verbs=get;list;watch
 
 func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logr.FromContext(ctx)
-	log.Info("Reconciling Managed Clusters")
 
-	managedClusters := &unstructured.UnstructuredList{}
-	managedClusters.SetGroupVersionKind(managedClusterGVK)
-	if err := r.List(ctx, managedClusters); err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "error listing managed clusters")
+	if req.Name != "" {
+		r.Trigger <- event.GenericEvent{Object: &clusterapiv1.ManagedCluster{ObjectMeta: metav1.ObjectMeta{Name: ""}}}
+		return ctrl.Result{}, nil
 	}
+
+	log.Info("Reconciling managedcluster", "Name", req.Name)
 
 	discoveredClusters := &discovery.DiscoveredClusterList{}
 	if err := r.List(ctx, discoveredClusters); err != nil {
 		return ctrl.Result{}, errors.Wrapf(err, "error listing discovered clusters")
 	}
+	if len(discoveredClusters.Items) == 0 {
+		return ctrl.Result{}, nil
+	}
 
-	if err := r.updateManagedLabels(ctx, managedClusters, discoveredClusters); err != nil {
+	managedMeta := &metav1.PartialObjectMetadataList{TypeMeta: metav1.TypeMeta{Kind: "ManagedClusterList", APIVersion: "cluster.open-cluster-management.io/v1"}}
+	if err := r.Client.List(ctx, managedMeta); err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "error listing managed clusters")
+	}
+
+	if err := r.updateManagedLabels(ctx, managedMeta, discoveredClusters); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -71,58 +79,27 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 }
 
 // SetupWithManager ...
-func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Controller, error) {
-	managedClusterController, err := controller.NewUnmanaged(r.Name, mgr, controller.Options{
-		Reconciler: r,
-		Log:        r.Log,
-	})
+func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	c, err := ctrl.NewControllerManagedBy(mgr).
+		For(&clusterapiv1.ManagedCluster{}, builder.OnlyMetadata).
+		Build(r)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error creating controller")
+		return errors.Wrapf(err, "error creating controller")
 	}
 
-	u := &unstructured.Unstructured{}
-	u.SetGroupVersionKind(managedClusterGVK)
-	// Watch for Pod create / update / delete events and call Reconcile
-	err = managedClusterController.Watch(
-		&source.Kind{Type: u},
+	if err := c.Watch(
+		&source.Channel{Source: r.Trigger},
 		&handler.EnqueueRequestForObject{},
-		predicate.LabelChangedPredicate{})
-	if err != nil {
-		return nil, errors.Wrapf(err, "error watching managedclusters")
+	); err != nil {
+		return errors.Wrapf(err, "failed adding a watch channel")
 	}
 
-	return managedClusterController, nil
-}
-
-func StartManagedClusterController(c controller.Controller, mgr ctrl.Manager, log logr.Logger) {
-	// Start our controller in a goroutine so that we do not block.
-	go func() {
-		// Block until our controller manager is elected leader. We presume our
-		// entire process will terminate if we lose leadership, so we don't need
-		// to handle that.
-		<-mgr.Elected()
-
-		for {
-			_, err := mgr.GetRESTMapper().RESTMapping(managedClusterGVK.GroupKind(), managedClusterGVK.Version)
-
-			if err != nil {
-				// Do not create controller
-				time.Sleep(10 * time.Second)
-				continue
-			}
-
-			// Start our controller. This will block until the stop channel is
-			// closed, or the controller returns an error.
-			if err := c.Start(context.TODO()); err != nil {
-				log.Error(err, "cannot run ManagedCluster controller")
-			}
-		}
-	}()
+	return nil
 }
 
 // updateManagedLabels adds managed labels to discovered clusters that need them and removes the labels if the discoveredclusters
 // have the label but should not, based on the list of managedclusters.
-func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, managedClusters *unstructured.UnstructuredList, discoveredClusters *discovery.DiscoveredClusterList) error {
+func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, managedClusters *metav1.PartialObjectMetadataList, discoveredClusters *discovery.DiscoveredClusterList) error {
 	log := logr.FromContext(ctx)
 
 	isManaged := map[string]bool{}
@@ -159,7 +136,7 @@ func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, mana
 }
 
 // getClusterID returns the clusterID from a managedCluster
-func getClusterID(managedCluster unstructured.Unstructured) string {
+func getClusterID(managedCluster metav1.PartialObjectMetadata) string {
 	if labels := managedCluster.GetLabels(); labels != nil {
 		return labels["clusterID"]
 	}

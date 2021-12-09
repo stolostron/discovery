@@ -15,6 +15,7 @@ require (
 	k8s.io/apimachinery v0.22.1
 	k8s.io/client-go v0.22.1
 	k8s.io/metrics v0.22.1
+	open-cluster-management.io/api v0.5.0
 	sigs.k8s.io/controller-runtime v0.10.0
 	sigs.k8s.io/yaml v1.2.0
 )

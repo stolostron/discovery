@@ -24,7 +24,6 @@ import (
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 func Test_parseUserToken(t *testing.T) {
@@ -100,35 +99,23 @@ func Test_assignManagedStatus(t *testing.T) {
 		},
 	}
 
-	managed := []unstructured.Unstructured{
+	managed := []metav1.PartialObjectMetadata{
 		{
-			Object: map[string]interface{}{
-				"apiVersion": "cluster.open-cluster-management.io/v1",
-				"kind":       "ManagedCluster",
-				"metadata": map[string]interface{}{
-					"name":   "a",
-					"labels": map[string]interface{}{"clusterID": "a"},
-				},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   "a",
+				Labels: map[string]string{"clusterID": "a"},
 			},
 		},
 		{
-			Object: map[string]interface{}{
-				"apiVersion": "cluster.open-cluster-management.io/v1",
-				"kind":       "ManagedCluster",
-				"metadata": map[string]interface{}{
-					"name":   "b",
-					"labels": map[string]interface{}{"clusterID": "b"},
-				},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   "b",
+				Labels: map[string]string{"clusterID": "b"},
 			},
 		},
 		{
-			Object: map[string]interface{}{
-				"apiVersion": "cluster.open-cluster-management.io/v1",
-				"kind":       "ManagedCluster",
-				"metadata": map[string]interface{}{
-					"name":   "d",
-					"labels": map[string]interface{}{"clusterID": "d"},
-				},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   "d",
+				Labels: map[string]string{"clusterID": "d"},
 			},
 		},
 	}

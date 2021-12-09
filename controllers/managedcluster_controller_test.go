@@ -7,40 +7,31 @@ import (
 
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 func Test_getClusterID(t *testing.T) {
 	tests := []struct {
 		name           string
-		managedCluster unstructured.Unstructured
+		managedCluster metav1.PartialObjectMetadata
 		want           string
 	}{
 		{
 			name: "Managed cluster without labels populated",
-			managedCluster: unstructured.Unstructured{
-				Object: map[string]interface{}{
-					"apiVersion": "cluster.open-cluster-management.io/v1",
-					"kind":       "ManagedCluster",
-					"metadata": map[string]interface{}{
-						"name":      "managedcluster1",
-						"namespace": "test",
-					},
+			managedCluster: metav1.PartialObjectMetadata{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "managedcluster1",
+					Namespace: "test",
 				},
 			},
 			want: "",
 		},
 		{
 			name: "Managed cluster with labels populated",
-			managedCluster: unstructured.Unstructured{
-				Object: map[string]interface{}{
-					"apiVersion": "cluster.open-cluster-management.io/v1",
-					"kind":       "ManagedCluster",
-					"metadata": map[string]interface{}{
-						"name":      "managedcluster1",
-						"namespace": "test",
-						"labels":    map[string]interface{}{"clusterID": "cluster-id-1"},
-					},
+			managedCluster: metav1.PartialObjectMetadata{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "managedcluster1",
+					Namespace: "test",
+					Labels:    map[string]string{"clusterID": "cluster-id-1"},
 				},
 			},
 			want: "cluster-id-1",
