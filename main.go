@@ -42,6 +42,7 @@ import (
 
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	"github.com/open-cluster-management/discovery/controllers"
+	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -54,6 +55,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(discovery.AddToScheme(scheme))
+	utilruntime.Must(clusterapiv1.AddToScheme(scheme))
 
 	utilruntime.Must(corev1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
@@ -95,26 +97,22 @@ func main() {
 	events := make(chan event.GenericEvent)
 
 	if err = (&controllers.DiscoveryConfigReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Trigger: events,
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "DiscoveryConfig")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
 
-	managedClusterController, err := (&controllers.ManagedClusterReconciler{
-		Name:   "managed-cluster-controller",
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr)
-	if err != nil {
+	if err = (&controllers.ManagedClusterReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Trigger: events,
+	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ManagedCluster")
 		os.Exit(1)
 	}
-
-	controllers.StartManagedClusterController(managedClusterController, mgr, setupLog)
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")

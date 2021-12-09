@@ -26,21 +26,17 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	apimeta "k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ref "k8s.io/client-go/tools/reference"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	"github.com/open-cluster-management/discovery/pkg/ocm"
 	"github.com/open-cluster-management/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 const (
@@ -58,8 +54,7 @@ var ErrBadFormat = errors.New("bad format")
 // DiscoveryConfigReconciler reconciles a DiscoveryConfig object
 type DiscoveryConfigReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	Trigger chan event.GenericEvent
+	Scheme *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete;deletecollection
@@ -102,21 +97,9 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 // SetupWithManager ...
 func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	c, err := ctrl.NewControllerManagedBy(mgr).
+	return ctrl.NewControllerManagedBy(mgr).
 		For(&discovery.DiscoveryConfig{}).
-		Build(r)
-	if err != nil {
-		return errors.Wrapf(err, "error creating controller")
-	}
-
-	if err := c.Watch(
-		&source.Channel{Source: r.Trigger},
-		&handler.EnqueueRequestForObject{},
-	); err != nil {
-		return errors.Wrapf(err, "failed adding a watch channel")
-	}
-
-	return nil
+		Complete(r)
 }
 
 func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context, config *discovery.DiscoveryConfig) error {
@@ -210,7 +193,7 @@ func parseUserToken(secret *corev1.Secret) (string, error) {
 }
 
 // assignManagedStatus marks clusters in the discovered map as managed if they are in the managed list
-func assignManagedStatus(discovered map[string]discovery.DiscoveredCluster, managed []unstructured.Unstructured) {
+func assignManagedStatus(discovered map[string]discovery.DiscoveredCluster, managed []metav1.PartialObjectMetadata) {
 	for _, mc := range managed {
 		id := getClusterID(mc)
 		if id != "" {
@@ -223,20 +206,14 @@ func assignManagedStatus(discovered map[string]discovery.DiscoveredCluster, mana
 	}
 }
 
-func (r *DiscoveryConfigReconciler) getManagedClusters() ([]unstructured.Unstructured, error) {
+func (r *DiscoveryConfigReconciler) getManagedClusters() ([]metav1.PartialObjectMetadata, error) {
 	ctx := context.Background()
 
-	// List all existing managed clusters
-	managedList := &unstructured.UnstructuredList{}
-	managedList.SetGroupVersionKind(managedClusterGVK)
-	if err := r.List(ctx, managedList); err != nil {
-		// Capture case were ManagedClusters resource does not exist
-		if apimeta.IsNoMatchError(err) {
-			return nil, nil
-		}
+	managedMeta := &metav1.PartialObjectMetadataList{TypeMeta: metav1.TypeMeta{Kind: "ManagedClusterList", APIVersion: "cluster.open-cluster-management.io/v1"}}
+	if err := r.Client.List(ctx, managedMeta); client.IgnoreNotFound(err) != nil {
 		return nil, errors.Wrapf(err, "error listing managed clusters")
 	}
-	return managedList.Items, nil
+	return managedMeta.Items, nil
 }
 
 func (r *DiscoveryConfigReconciler) getExistingClusterMap(ctx context.Context, config *discovery.DiscoveryConfig) (map[string]discovery.DiscoveredCluster, error) {
