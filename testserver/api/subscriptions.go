@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/open-cluster-management/discovery/pkg/ocm/subscription"
+	"github.com/stolostron/discovery/pkg/ocm/subscription"
 )
 
 type Scenario string

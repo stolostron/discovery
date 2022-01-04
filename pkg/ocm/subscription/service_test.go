@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
+	discovery "github.com/stolostron/discovery/api/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
 )
