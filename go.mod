@@ -1,4 +1,4 @@
-module github.com/open-cluster-management/discovery
+module github.com/stolostron/discovery
 
 go 1.17
 

@@ -5,7 +5,7 @@ package main
 import (
 	"os"
 
-	api "github.com/open-cluster-management/discovery/testserver/api"
+	api "github.com/stolostron/discovery/testserver/api"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
