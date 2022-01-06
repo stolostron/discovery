@@ -36,9 +36,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
-	"github.com/open-cluster-management/discovery/pkg/ocm"
-	"github.com/open-cluster-management/discovery/util/reconciler"
+	discovery "github.com/stolostron/discovery/api/v1alpha1"
+	"github.com/stolostron/discovery/pkg/ocm"
+	"github.com/stolostron/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )

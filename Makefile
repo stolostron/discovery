@@ -16,15 +16,15 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 # This variable is used to construct full image tags for bundle and catalog images.
 #
 # For example, running 'make bundle-build bundle-push catalog-build catalog-push' will build and push both
-# open-cluster-management.io/discovery-bundle:$VERSION and open-cluster-management.io/discovery-catalog:$VERSION.
-IMAGE_TAG_BASE ?= open-cluster-management/discovery
+# stolostron.io/discovery-bundle:$VERSION and stolostron.io/discovery-catalog:$VERSION.
+IMAGE_TAG_BASE ?= stolostron/discovery
 
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
 BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 
 # Image URL to use all building/pushing image targets
-REGISTRY ?= quay.io/rhibmcollab
+REGISTRY ?= quay.io/stolostron
 IMG ?= discovery-operator
 URL ?= $(REGISTRY)/$(IMG):$(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)

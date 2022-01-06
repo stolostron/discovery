@@ -19,8 +19,8 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
 	"github.com/pkg/errors"
+	discovery "github.com/stolostron/discovery/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
