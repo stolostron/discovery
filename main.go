@@ -40,8 +40,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
-	"github.com/open-cluster-management/discovery/controllers"
+	discovery "github.com/stolostron/discovery/api/v1alpha1"
+	"github.com/stolostron/discovery/controllers"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
 	// +kubebuilder:scaffold:imports
 )
