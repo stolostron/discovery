@@ -5,7 +5,7 @@ plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: discovery
-repo: github.com/open-cluster-management/discovery
+repo: github.com/stolostron/discovery
 resources:
 - api:
     crdVersion: v1
@@ -14,7 +14,7 @@ resources:
   domain: open-cluster-management.io
   group: discovery
   kind: DiscoveryConfig
-  path: github.com/open-cluster-management/discovery/api/v1alpha1
+  path: github.com/stolostron/discovery/api/v1alpha1
   version: v1alpha1
 - api:
     crdVersion: v1
@@ -22,6 +22,6 @@ resources:
   domain: open-cluster-management.io
   group: discovery
   kind: DiscoveredCluster
-  path: github.com/open-cluster-management/discovery/api/v1alpha1
+  path: github.com/stolostron/discovery/api/v1alpha1
   version: v1alpha1
 version: "3"

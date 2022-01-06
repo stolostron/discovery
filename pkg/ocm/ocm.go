@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"strings"
 
-	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
-	"github.com/open-cluster-management/discovery/pkg/ocm/auth"
-	"github.com/open-cluster-management/discovery/pkg/ocm/subscription"
+	discovery "github.com/stolostron/discovery/api/v1alpha1"
+	"github.com/stolostron/discovery/pkg/ocm/auth"
+	"github.com/stolostron/discovery/pkg/ocm/subscription"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	discovery "github.com/open-cluster-management/discovery/api/v1alpha1"
+	discovery "github.com/stolostron/discovery/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
