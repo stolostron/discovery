@@ -1,0 +1,6 @@
+- op: add
+  path: /spec/versions/1/deprecated
+  value: true
+- op: add
+  path: /spec/versions/1/deprecationWarning
+  value: "discovery.open-cluster-management.io/v1alpha1 DiscoveryConfig is deprecated in v2.5+, unavailable in v2.6+; use discovery.open-cluster-management.io/v1 DiscoveryConfig"

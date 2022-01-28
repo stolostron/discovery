@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	discovery "github.com/stolostron/discovery/api/v1alpha1"
+	discovery "github.com/stolostron/discovery/api/v1"
 )
 
 // filterFunc returns true if the Subscription passes the filter

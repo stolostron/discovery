@@ -20,7 +20,17 @@ spec:
       displayName: Discovered Cluster
       kind: DiscoveredCluster
       name: discoveredclusters.discovery.open-cluster-management.io
+      version: v1
+    - description: DiscoveredCluster is the Schema for the discoveredclusters API
+      displayName: Discovered Cluster
+      kind: DiscoveredCluster
+      name: discoveredclusters.discovery.open-cluster-management.io
       version: v1alpha1
+    - description: DiscoveryConfig is the Schema for the discoveryconfigs API
+      displayName: Discovery Config
+      kind: DiscoveryConfig
+      name: discoveryconfigs.discovery.open-cluster-management.io
+      version: v1
     - description: DiscoveryConfig is the Schema for the discoveryconfigs API
       displayName: Discovery Config
       kind: DiscoveryConfig

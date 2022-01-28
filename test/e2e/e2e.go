@@ -35,7 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	discovery "github.com/stolostron/discovery/api/v1alpha1"
+	discovery "github.com/stolostron/discovery/api/v1"
 	// +kubebuilder:scaffold:imports
 )
 

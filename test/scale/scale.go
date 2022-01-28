@@ -22,7 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	discovery "github.com/stolostron/discovery/api/v1alpha1"
+	discovery "github.com/stolostron/discovery/api/v1"
 )
 
 const (

@@ -5,7 +5,7 @@ metadata:
     alm-examples: |-
       [
         {
-          "apiVersion": "discovery.open-cluster-management.io/v1alpha1",
+          "apiVersion": "discovery.open-cluster-management.io/v1",
           "kind": "DiscoveryConfig",
           "metadata": {
             "name": "discovery",
@@ -22,7 +22,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.12.0
+    operators.operatorframework.io/builder: operator-sdk-v1.16.0
     operators.operatorframework.io/internal-objects: '["discoveredclusters.discovery.open-cluster-management.io"]'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: Red Hat
@@ -36,7 +36,17 @@ spec:
       displayName: Discovered Cluster
       kind: DiscoveredCluster
       name: discoveredclusters.discovery.open-cluster-management.io
+      version: v1
+    - description: DiscoveredCluster is the Schema for the discoveredclusters API
+      displayName: Discovered Cluster
+      kind: DiscoveredCluster
+      name: discoveredclusters.discovery.open-cluster-management.io
       version: v1alpha1
+    - description: DiscoveryConfig is the Schema for the discoveryconfigs API
+      displayName: Discovery Config
+      kind: DiscoveryConfig
+      name: discoveryconfigs.discovery.open-cluster-management.io
+      version: v1
     - description: DiscoveryConfig is the Schema for the discoveryconfigs API
       displayName: Discovery Config
       kind: DiscoveryConfig

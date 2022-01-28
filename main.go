@@ -40,9 +40,10 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	discovery "github.com/stolostron/discovery/api/v1alpha1"
-	"github.com/stolostron/discovery/controllers"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
+
+	discoveryv1 "github.com/stolostron/discovery/api/v1"
+	"github.com/stolostron/discovery/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -54,10 +55,10 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(discovery.AddToScheme(scheme))
 	utilruntime.Must(clusterapiv1.AddToScheme(scheme))
 
 	utilruntime.Must(corev1.AddToScheme(scheme))
+	utilruntime.Must(discoveryv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
