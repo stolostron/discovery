@@ -1,6 +1,4 @@
-# Copyright Contributors to the Open Cluster Management project
-
-apiVersion: discovery.open-cluster-management.io/v1alpha1
+apiVersion: discovery.open-cluster-management.io/v1
 kind: DiscoveryConfig
 metadata:
   name: discovery

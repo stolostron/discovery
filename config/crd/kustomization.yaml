@@ -8,6 +8,20 @@ resources:
 - bases/discovery.open-cluster-management.io_discoveryconfigs.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
+patchesJson6902:
+- path: patches/deprecation_warning_discoveredclusters.yaml
+  target:
+    group: apiextensions.k8s.io
+    version: v1
+    kind: CustomResourceDefinition
+    name: discoveredclusters.discovery.open-cluster-management.io
+- path: patches/deprecation_warning_discoveryconfigs.yaml
+  target:
+    group: apiextensions.k8s.io
+    version: v1
+    kind: CustomResourceDefinition
+    name: discoveryconfigs.discovery.open-cluster-management.io
+    
 patchesStrategicMerge:
 # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix.
 # patches here are for enabling the conversion webhook for each CRD

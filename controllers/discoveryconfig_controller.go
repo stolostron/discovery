@@ -33,7 +33,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	discovery "github.com/stolostron/discovery/api/v1alpha1"
+	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm"
 	"github.com/stolostron/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"

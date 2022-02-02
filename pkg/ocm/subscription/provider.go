@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"time"
 
-	discovery "github.com/stolostron/discovery/api/v1alpha1"
+	discovery "github.com/stolostron/discovery/api/v1"
 )
 
 const (
