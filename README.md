@@ -23,7 +23,7 @@ Before deploying, the Discovery CRDs need to be installed onto the cluster.
 ```shell
 make install
 ```
-
+ 
 ### Outside the Cluster
 
 The operator can be run locally against the configured Kubernetes cluster in ~/.kube/config with the following command:
