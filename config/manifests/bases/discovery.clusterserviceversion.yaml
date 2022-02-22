@@ -5,6 +5,8 @@ metadata:
     alm-examples: '[]'
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
+    description: This operator discovers OpenShift Conatiner Platform clusters which
+      are not yet under management by Open Cluster Management.
     operatorframework.io/suggested-namespace: open-cluster-management
     operators.operatorframework.io/builder: operator-sdk-v1.1.0
     operators.operatorframework.io/internal-objects: '["discoveredclusters.discovery.open-cluster-management.io"]'
