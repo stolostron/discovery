@@ -49,7 +49,7 @@ type ManagedClusterReconciler struct {
 // +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters,verbs=get;list;watch
 
 func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := logr.FromContext(ctx)
+	log, _ := logr.FromContext(ctx)
 
 	if req.Name != "" {
 		r.Trigger <- event.GenericEvent{Object: &clusterapiv1.ManagedCluster{ObjectMeta: metav1.ObjectMeta{Name: ""}}}
@@ -100,7 +100,7 @@ func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // updateManagedLabels adds managed labels to discovered clusters that need them and removes the labels if the discoveredclusters
 // have the label but should not, based on the list of managedclusters.
 func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, managedClusters *metav1.PartialObjectMetadataList, discoveredClusters *discovery.DiscoveredClusterList) error {
-	log := logr.FromContext(ctx)
+	log, _ := logr.FromContext(ctx)
 
 	isManaged := map[string]bool{}
 	for _, m := range managedClusters.Items {
