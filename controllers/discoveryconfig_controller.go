@@ -66,7 +66,7 @@ type DiscoveryConfigReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
 func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log, _ := logr.FromContext(ctx)
+	log := logr.FromContext(ctx)
 	log.Info("Reconciling DiscoveryConfig")
 
 	r.updateCustomMetrics(ctx)
@@ -104,7 +104,7 @@ func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context, config *discovery.DiscoveryConfig) error {
 	allClusters := map[string]discovery.DiscoveredCluster{}
-	log, _ := logr.FromContext(ctx)
+	log := logr.FromContext(ctx)
 
 	// Parse user token from secret
 	ocmSecret := &corev1.Secret{}
@@ -248,7 +248,7 @@ func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *di
 }
 
 func (r *DiscoveryConfigReconciler) createCluster(ctx context.Context, config *discovery.DiscoveryConfig, dc discovery.DiscoveredCluster) error {
-	log, _ := logr.FromContext(ctx)
+	log := logr.FromContext(ctx)
 	if err := ctrl.SetControllerReference(config, &dc, r.Scheme); err != nil {
 		return errors.Wrapf(err, "Error setting controller reference on DiscoveredCluster %s", dc.Name)
 	}
@@ -260,7 +260,7 @@ func (r *DiscoveryConfigReconciler) createCluster(ctx context.Context, config *d
 }
 
 func (r *DiscoveryConfigReconciler) updateCluster(ctx context.Context, config *discovery.DiscoveryConfig, new, old discovery.DiscoveredCluster) error {
-	log, _ := logr.FromContext(ctx)
+	log := logr.FromContext(ctx)
 	updated := old
 	updated.Spec = new.Spec
 	if err := r.Update(ctx, &updated); err != nil {
@@ -271,7 +271,7 @@ func (r *DiscoveryConfigReconciler) updateCluster(ctx context.Context, config *d
 }
 
 func (r *DiscoveryConfigReconciler) deleteCluster(ctx context.Context, dc discovery.DiscoveredCluster) error {
-	log, _ := logr.FromContext(ctx)
+	log := logr.FromContext(ctx)
 	if err := r.Delete(ctx, &dc); err != nil {
 		return errors.Wrapf(err, "Error deleting DiscoveredCluster %s", dc.Name)
 	}
@@ -280,7 +280,7 @@ func (r *DiscoveryConfigReconciler) deleteCluster(ctx context.Context, dc discov
 }
 
 func (r *DiscoveryConfigReconciler) deleteAllClusters(ctx context.Context, config *discovery.DiscoveryConfig) error {
-	log, _ := logr.FromContext(ctx)
+	log := logr.FromContext(ctx)
 	if err := r.DeleteAllOf(ctx, &discovery.DiscoveredCluster{}, client.InNamespace(config.Namespace)); err != nil {
 		return errors.Wrapf(err, "Error clearing namespace %s", config.Namespace)
 	}
