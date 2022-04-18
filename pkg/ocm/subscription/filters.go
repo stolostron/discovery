@@ -38,16 +38,24 @@ func all(s Subscription, fs []filterFunc) bool {
 // createFilters returns a list of filter functions generated from the Filter spec
 func createFilters(f discovery.Filter) []filterFunc {
 	return []filterFunc{
-		archiveFilter(),
+		statusFilter(),
 		openshiftVersionFilter(f.OpenShiftVersions),
 		lastActiveFilter(time.Now(), f.LastActive),
 	}
 }
 
-// archiveFilter filters out clusters with an 'Archived' status
-func archiveFilter() filterFunc {
+// statusFilter filters out clusters with non-functioning status
+func statusFilter() filterFunc {
 	return func(sub Subscription) bool {
-		return sub.Status != "Archived"
+		return sub.Status != "Archived" &&
+			sub.Status != "Deprovisioned"
+	}
+}
+
+// deprovisionedFilter filters out clusters with a 'Deprovisioned' status
+func deprovisionedFilter() filterFunc {
+	return func(sub Subscription) bool {
+		return sub.Status != "Deprovisioned"
 	}
 }
 
