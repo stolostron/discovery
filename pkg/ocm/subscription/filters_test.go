@@ -75,7 +75,7 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-func Test_archiveFilter(t *testing.T) {
+func Test_statusFilter(t *testing.T) {
 	tests := []struct {
 		name string
 		sub  Subscription
@@ -84,6 +84,11 @@ func Test_archiveFilter(t *testing.T) {
 		{
 			name: "Archived sub",
 			sub:  Subscription{Status: "Archived"},
+			want: false,
+		},
+		{
+			name: "Deprovisioned sub",
+			sub:  Subscription{Status: "Deprovisioned"},
 			want: false,
 		},
 		{
@@ -99,7 +104,7 @@ func Test_archiveFilter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			filter := archiveFilter()
+			filter := statusFilter()
 			if got := filter(tt.sub); got != tt.want {
 				t.Errorf("archiveFilter() = %v, want %v", got, tt.want)
 			}
