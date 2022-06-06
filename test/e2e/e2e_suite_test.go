@@ -33,8 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	. "github.com/onsi/ginkgo"
-	"github.com/onsi/ginkgo/reporters"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	// +kubebuilder:scaffold:imports
 )
@@ -71,10 +70,7 @@ func TestE2E(t *testing.T) {
 
 func RunE2ETests(t *testing.T) {
 	RegisterFailHandler(Fail)
-	junitReporter := reporters.NewJUnitReporter(reportFile)
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Discovery",
-		[]Reporter{junitReporter})
+	RunSpecs(t, "Discovery")
 }
 
 var _ = BeforeSuite(func() {
