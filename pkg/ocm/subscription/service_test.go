@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	discovery "github.com/stolostron/discovery/api/v1"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -69,4 +68,13 @@ func TestGetSubscriptionsNoError(t *testing.T) {
 	response, err := subscriptionClient.GetSubscriptions()
 	assert.Nil(t, err)
 	assert.NotNil(t, response)
+}
+
+func TestNewClient(t *testing.T) {
+	subscriptionRequestConfig := SubscriptionRequest{
+		Token:   "test",
+		BaseURL: "testURL",
+	}
+	subscriptionClient := SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
+	assert.NotNil(t, subscriptionClient)
 }

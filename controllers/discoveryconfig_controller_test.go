@@ -186,3 +186,41 @@ func Test_getURLOverride(t *testing.T) {
 		})
 	}
 }
+
+func Test_getAuthURLOverride(t *testing.T) {
+	//config *discovery.DiscoveryConfig
+	tests := []struct {
+		name   string
+		config *discovery.DiscoveryConfig
+		want   string
+	}{
+		{
+			name: "Override annotated",
+			config: &discovery.DiscoveryConfig{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        "testconfig",
+					Namespace:   "test",
+					Annotations: map[string]string{baseAuthURLAnnotation: "http://mock-ocm-server.test.svc.cluster.local:3000"},
+				},
+			},
+			want: "http://mock-ocm-server.test.svc.cluster.local:3000",
+		},
+		{
+			name: "No override specified",
+			config: &discovery.DiscoveryConfig{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "testconfig",
+					Namespace: "test",
+				},
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getAuthURLOverride(tt.config); got != tt.want {
+				t.Errorf("getAuthURLOverride() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
