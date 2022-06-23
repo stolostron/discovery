@@ -46,6 +46,48 @@ func Test_getClusterID(t *testing.T) {
 	}
 }
 
+func Test_getDiscoveredID(t *testing.T) {
+	tests := []struct {
+		name string
+		dc   *discovery.DiscoveredCluster
+		want string
+	}{
+		{
+			name: "Managed cluster without labels populated",
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "Test A",
+					Namespace: "b",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					Name: "managedcluster1",
+				},
+			},
+			want: "managedcluster1",
+		},
+		{
+			name: "Managed cluster without labels populated",
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "Test B",
+					Namespace: "c",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					Name: "managedcluster2",
+				},
+			},
+			want: "managedcluster2",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getDiscoveredID(*tt.dc); got != tt.want {
+				t.Errorf("getDiscoveredID() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_setManagedStatus(t *testing.T) {
 	tests := []struct {
 		name string

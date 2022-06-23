@@ -4,12 +4,14 @@ package ocm
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"testing"
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
+	sub "github.com/stolostron/discovery/pkg/ocm/subscription"
 )
 
 var (
@@ -276,4 +278,64 @@ func Test_computeType(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestIsRecoverable(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{
+			name: "Unrecoverable Invalid Token Error",
+			err:  auth.ErrInvalidToken,
+			want: true,
+		},
+		{
+			name: "Recoverable Error",
+			err:  errors.New("test error"),
+			want: false,
+		},
+		{
+			name: "Empty Error",
+			err:  nil,
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsUnrecoverable(tt.err); got != tt.want {
+				t.Errorf("IsUnrecoverable() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+}
+
+func TestFormatCLusterError(t *testing.T) {
+	tests := []struct {
+		name string
+		sub  sub.Subscription
+		dc   discovery.DiscoveredCluster
+		want bool
+	}{
+		{
+			name: "No ExternalClusterID",
+			sub: sub.Subscription{
+				ExternalClusterID: "",
+				DisplayName:       "my-custom-name",
+				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
+			},
+			dc:   discovery.DiscoveredCluster{},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, got := formatCluster(tt.sub); got != tt.want {
+				t.Errorf("formatCluster() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
 }
