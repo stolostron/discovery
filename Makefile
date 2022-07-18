@@ -265,7 +265,7 @@ $(ENVTEST): $(LOCALBIN)
 ############################################################
 
 # Create deployment and configure it to never download image
-kind-deploy-controller:
+kind-deploy-controller: kustomize
 	@echo Installing discovery controller
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	
