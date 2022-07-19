@@ -21,6 +21,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -50,6 +51,10 @@ var (
 )
 
 var ErrBadFormat = errors.New("bad format")
+
+var mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
+	return []discovery.DiscoveredCluster{}, nil
+}
 
 // DiscoveryConfigReconciler reconciles a DiscoveryConfig object
 type DiscoveryConfigReconciler struct {
@@ -124,7 +129,13 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	baseURL := getURLOverride(config)
 	baseAuthURL := getAuthURLOverride(config)
 	filters := config.Spec.Filters
-	discovered, err := ocm.DiscoverClusters(userToken, baseURL, baseAuthURL, filters)
+
+	discovered, err := []discovery.DiscoveredCluster{}, nil
+	if val, ok := os.LookupEnv("UNIT_TEST"); ok && val == "true" {
+		discovered, err = mockDiscoveredCluster()
+	} else {
+		discovered, err = ocm.DiscoverClusters(userToken, baseURL, baseAuthURL, filters)
+	}
 	if err != nil {
 		if ocm.IsUnrecoverable(err) {
 			log.Info("Unrecoverable error. Cleaning up clusters.", "err", err.Error())

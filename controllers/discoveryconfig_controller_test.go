@@ -19,12 +19,204 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
 	"testing"
+	"time"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 
 	discovery "github.com/stolostron/discovery/api/v1"
+	"github.com/stolostron/discovery/pkg/ocm/auth"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+const (
+	TestDiscoveryConfigName = "discovery"
+	TestDiscoveryNamespace  = "discovery"
+	TestSecretName          = "test-connection-secret"
+
+	timeout  = time.Second * 30
+	interval = time.Millisecond * 250
+)
+
+var (
+	ctx                 = context.Background()
+	testDiscoveryConfig = types.NamespacedName{Name: TestDiscoveryConfigName, Namespace: TestDiscoveryNamespace}
+	mockTime            = metav1.NewTime(time.Date(2020, 5, 29, 6, 0, 0, 0, time.UTC))
+	mockCluster410      = discovery.DiscoveredCluster{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "t2",
+			Namespace: TestDiscoveryNamespace,
+		},
+		Spec: discovery.DiscoveredClusterSpec{
+			Name:              "t2",
+			DisplayName:       "t2",
+			OpenshiftVersion:  "4.10.0",
+			CreationTimestamp: &mockTime,
+			ActivityTimestamp: &mockTime,
+		},
+	}
+	mockCluster411 = discovery.DiscoveredCluster{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "t1",
+			Namespace: TestDiscoveryNamespace,
+		},
+		Spec: discovery.DiscoveredClusterSpec{
+			Name:              "t1",
+			DisplayName:       "t1",
+			OpenshiftVersion:  "4.11.0",
+			CreationTimestamp: &mockTime,
+			ActivityTimestamp: &mockTime,
+		},
+	}
+)
+
+var _ = Describe("Discoveryconfig controller", func() {
+
+	Context("Creating a DiscoveryConfig", func() {
+		It("Should create discovered clusters ", func() {
+			By("By creating a namespace", func() {
+				err := k8sClient.Create(ctx, &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: TestDiscoveryNamespace},
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			By("By creating a secret with OCM credentials", func() {
+				Expect(k8sClient.Create(ctx, &corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      TestSecretName,
+						Namespace: TestDiscoveryNamespace,
+					},
+					StringData: map[string]string{
+						"ocmAPIToken": "dummytoken",
+					},
+				})).Should(Succeed())
+			})
+
+			By("By creating a new DiscoveryConfig", func() {
+				Expect(k8sClient.Create(ctx, &discovery.DiscoveryConfig{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      TestDiscoveryConfigName,
+						Namespace: TestDiscoveryNamespace,
+					},
+					Spec: discovery.DiscoveryConfigSpec{
+						Credential: TestSecretName,
+						Filters:    discovery.Filter{LastActive: 7},
+					},
+				})).Should(Succeed())
+			})
+
+			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
+				return []discovery.DiscoveredCluster{
+					mockCluster410,
+					mockCluster411,
+				}, nil
+			}
+
+			By("By checking 2 discovered clusters have been created", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(TestDiscoveryNamespace)
+				}, timeout, interval).Should(Equal(2))
+			})
+
+			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
+				mockCluster411.Spec.DisplayName = "newname"
+				return []discovery.DiscoveredCluster{
+					mockCluster411,
+				}, nil
+			}
+
+			By("By adding a filter to DiscoveryConfig", func() {
+				config := &discovery.DiscoveryConfig{}
+				Expect(k8sClient.Get(ctx, testDiscoveryConfig, config)).To(Succeed())
+				config.Spec.Filters = discovery.Filter{OpenShiftVersions: []discovery.Semver{"4.11"}}
+				Expect(k8sClient.Update(ctx, config)).Should(Succeed())
+			})
+
+			By("By checking 1 discovered cluster remains and is updated", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(TestDiscoveryNamespace)
+				}, timeout, interval).Should(Equal(1))
+
+			})
+
+			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
+				return nil, auth.ErrInvalidToken
+			}
+
+			By("By removing a filter to DiscoveryConfig", func() {
+				config := &discovery.DiscoveryConfig{}
+				Expect(k8sClient.Get(ctx, testDiscoveryConfig, config)).To(Succeed())
+				config.Spec.Filters = discovery.Filter{OpenShiftVersions: []discovery.Semver{"4.12"}}
+				Expect(k8sClient.Update(ctx, config)).Should(Succeed())
+			})
+
+			By("By checking no discovered clusters remain", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(TestDiscoveryNamespace)
+				}, timeout, interval).Should(Equal(0))
+
+			})
+
+		})
+	})
+
+	Context("Creating an invalid DiscoveryConfig", func() {
+		It("Should not create discovered clusters ", func() {
+			By("By creating a namespace", func() {
+				err := k8sClient.Create(ctx, &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "invalid"},
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			By("By creating a secret with OCM credentials", func() {
+				Expect(k8sClient.Create(ctx, &corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      TestSecretName,
+						Namespace: "invalid",
+					},
+					StringData: map[string]string{
+						"ocmAPIToken": "dummytoken",
+					},
+				})).Should(Succeed())
+			})
+
+			By("By creating a new DiscoveryConfig", func() {
+				Expect(k8sClient.Create(ctx, &discovery.DiscoveryConfig{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "invalid-name",
+						Namespace: "invalid",
+					},
+					Spec: discovery.DiscoveryConfigSpec{
+						Credential: TestSecretName,
+						Filters:    discovery.Filter{LastActive: 7},
+					},
+				})).Should(Succeed())
+			})
+
+			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
+				return []discovery.DiscoveredCluster{
+					mockCluster410,
+					mockCluster411,
+				}, nil
+			}
+
+			By("By checking no discovered clusters have been created", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(TestDiscoveryNamespace)
+				}, 5*time.Second, interval).Should(Equal(0))
+			})
+
+		})
+	})
+
+})
 
 func Test_parseUserToken(t *testing.T) {
 	tests := []struct {
@@ -223,4 +415,13 @@ func Test_getAuthURLOverride(t *testing.T) {
 			}
 		})
 	}
+}
+
+func countDiscoveredClusters(namespace string) (int, error) {
+	discoveredClusters := &discovery.DiscoveredClusterList{}
+	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(namespace))
+	if err != nil {
+		return -1, err
+	}
+	return len(discoveredClusters.Items), nil
 }
