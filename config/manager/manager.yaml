@@ -56,7 +56,19 @@ spec:
           requests:
             cpu: 100m
             memory: 100Mi
+        volumeMounts:
+          - mountPath: /etc/pki/ca-trust/extracted/pem/
+            name: trusted-ca-bundle
       terminationGracePeriodSeconds: 10
       imagePullSecrets:
         - name: discovery-operator-pull-secret
       serviceAccountName: discovery-operator
+      volumes:
+        - configMap:
+            defaultMode: 440
+            items:
+              - key: ca-bundle.crt
+                path: tsl-ca-bundle.pem
+            name: trusted-ca-bundle
+            optional: true
+          name: trusted-ca-bundle
