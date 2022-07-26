@@ -183,10 +183,22 @@ spec:
                     memory: 100Mi
                 securityContext:
                   allowPrivilegeEscalation: false
+                volumeMounts:
+                - mountPath: /etc/pki/ca-trust/extracted/pem/
+                  name: trusted-ca-bundle
               imagePullSecrets:
               - name: discovery-operator-pull-secret
               serviceAccountName: discovery-operator
               terminationGracePeriodSeconds: 10
+              volumes:
+              - configMap:
+                  defaultMode: 440
+                  items:
+                  - key: ca-bundle.crt
+                    path: tsl-ca-bundle.pem
+                  name: trusted-ca-bundle
+                  optional: true
+                name: trusted-ca-bundle
       permissions:
       - rules:
         - apiGroups:
