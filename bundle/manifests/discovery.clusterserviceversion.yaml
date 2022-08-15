@@ -24,7 +24,7 @@ metadata:
     description: This operator discovers OpenShift Conatiner Platform clusters which
       are not yet under management by Open Cluster Management.
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.17.0
+    operators.operatorframework.io/builder: operator-sdk-v1.22.2
     operators.operatorframework.io/internal-objects: '["discoveredclusters.discovery.open-cluster-management.io"]'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: Red Hat
@@ -139,7 +139,9 @@ spec:
           - update
         serviceAccountName: discovery-operator
       deployments:
-      - name: discovery-operator
+      - label:
+          app: discovery-operator
+        name: discovery-operator
         spec:
           replicas: 1
           selector:
