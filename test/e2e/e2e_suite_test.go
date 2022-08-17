@@ -22,20 +22,20 @@ import (
 	"flag"
 	"testing"
 
-	. "github.com/onsi/ginkgo"
-	"github.com/onsi/ginkgo/reporters"
-	. "github.com/onsi/gomega"
+	discovery "github.com/stolostron/discovery/api/v1"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	discovery "github.com/stolostron/discovery/api/v1"
+	"github.com/onsi/ginkgo/reporters"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -45,6 +45,8 @@ import (
 var reportFile string
 
 var (
+	reportFile         string
+	inCanary           bool
 	scheme             = runtime.NewScheme()
 	DiscoveryNamespace = flag.String("namespace", "open-cluster-management", "The namespace to run tests")
 	BaseURL            = flag.String("baseURL", "", "Service to reach mock server")
@@ -57,19 +59,24 @@ func init() {
 
 	utilruntime.Must(corev1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
+
+	flag.StringVar(&reportFile, "report-file", "./results/e2e-results.xml", "Provide the path to where the junit results will be printed.")
+	flag.BoolVar(&inCanary, "inCanary", false, "The e2e tests are running in a canary environment")
 }
 
-func init() {
-	flag.StringVar(&reportFile, "report-file", "./results/e2e-results.xml", "Provide the path to where the junit results will be printed.")
-	// flag.StringVar(&discoveryNamespace, "namespace", "open-cluster-management", "The namespace to run tests")
+func TestE2E(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	RunE2ETests(t)
 }
 
 func RunE2ETests(t *testing.T) {
 	RegisterFailHandler(Fail)
 	junitReporter := reporters.NewJUnitReporter(reportFile)
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Discovery",
-		[]Reporter{junitReporter})
+	RunSpecsWithDefaultAndCustomReporters(
+		t, "Discovery", []Reporter{junitReporter},
+	)
 }
 
 var _ = BeforeSuite(func() {
@@ -85,5 +92,4 @@ var _ = BeforeSuite(func() {
 	k8sClient, err = client.New(c, client.Options{Scheme: scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
-
 })
