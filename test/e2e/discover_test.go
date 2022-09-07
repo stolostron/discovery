@@ -461,6 +461,10 @@ var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 		})
 
 		It("Should update DiscoveredClusters' managed status across namespaces", func() {
+			if inCanary {
+				Skip("Skipping test in a canary environment")
+			}
+
 			By("Creating DiscoveryConfigs in separate namespaces", func() {
 				Expect(k8sClient.Create(ctx, customSecret("connection1", discoveryNamespace, "connection1"))).Should(Succeed())
 				Expect(k8sClient.Create(ctx, customSecret("connection2", secondNamespace, "connection2"))).Should(Succeed())
