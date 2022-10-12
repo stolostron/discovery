@@ -199,6 +199,10 @@ var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 		})
 
 		It("Should unmark discovered clusters when they are no longer managed", func() {
+			if inCanary {
+				Skip("Skipping test in a canary environment")
+			}
+
 			By("Creating ManagedClusters", func() {
 				Expect(k8sClient.Create(ctx, newManagedCluster("testmc1", "844b3bf1-8d70-469c-a113-f1cd5db45c63"))).To(Succeed())
 				Expect(k8sClient.Create(ctx, newManagedCluster("testmc2", "dbcbbeeb-7a15-4c64-9975-6f6c331255c8"))).To(Succeed())
@@ -452,6 +456,10 @@ var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 		})
 
 		It("Should update DiscoveredClusters' managed status across namespaces", func() {
+			if inCanary {
+				Skip("Skipping test in a canary environment")
+			}
+
 			By("Creating DiscoveryConfigs in separate namespaces", func() {
 				Expect(k8sClient.Create(ctx, customSecret("connection1", discoveryNamespace, "connection1"))).Should(Succeed())
 				Expect(k8sClient.Create(ctx, customSecret("connection2", secondNamespace, "connection2"))).Should(Succeed())
