@@ -24,7 +24,7 @@ func (cm *postClientMock) Post(request string, data url.Values) (*http.Response,
 	return postRequestFunc(request, data)
 }
 
-//When the everything is good
+// When the everything is good
 func TestGetTokenNoError(t *testing.T) {
 	postRequestFunc = func(url string, data url.Values) (*http.Response, error) {
 		return &http.Response{
@@ -111,8 +111,8 @@ func TestGetTokenMissingFormData(t *testing.T) {
 	})
 }
 
-//When the error response is invalid, here the code is supposed to be an integer, but a string was given.
-//This can happen when the api owner changes some data types in the api
+// When the error response is invalid, here the code is supposed to be an integer, but a string was given.
+// This can happen when the api owner changes some data types in the api
 func TestGetTokenInvalidErrorInterface(t *testing.T) {
 	unexpectedJSONResponse := `{"code": 405, "message":"RESTEASY003650: No resource method found for GET, return 405 with Allow header"}`
 	postRequestFunc = func(url string, data url.Values) (*http.Response, error) {

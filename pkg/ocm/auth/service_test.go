@@ -20,7 +20,7 @@ func (cm *authProviderMock) GetToken(request AuthRequest) (*AuthTokenResponse, *
 	return getTokenFunc(request)
 }
 
-//When the everything is good
+// When the everything is good
 func TestProviderGetTokenNoError(t *testing.T) {
 	getTokenFunc = func(request AuthRequest) (*AuthTokenResponse, *AuthError) {
 		return &AuthTokenResponse{
