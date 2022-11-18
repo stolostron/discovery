@@ -39,7 +39,7 @@ const (
 	TestDiscoveryNamespace  = "discovery"
 	TestSecretName          = "test-connection-secret"
 
-	timeout  = time.Second * 30
+	timeout  = time.Second * 60
 	interval = time.Millisecond * 250
 )
 
@@ -210,7 +210,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			By("By checking no discovered clusters have been created", func() {
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters(TestDiscoveryNamespace)
-				}, 5*time.Second, interval).Should(Equal(0))
+				}, timeout, interval).Should(Equal(0))
 			})
 
 		})
