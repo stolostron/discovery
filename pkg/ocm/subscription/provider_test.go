@@ -22,7 +22,7 @@ func (cm *getClientMock) Get(request *http.Request) (*http.Response, error) {
 	return getRequestFunc(request)
 }
 
-//When the everything is good
+// When the everything is good
 func TestProviderGetSubscriptionsNoError(t *testing.T) {
 	getRequestFunc = func(*http.Request) (*http.Response, error) {
 		file, err := os.Open("testdata/accounts_mgmt_mock.json")
