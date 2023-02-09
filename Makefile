@@ -221,6 +221,7 @@ docker-build-tests: ## Build the functional test image
 docker-run-tests: ## Run the containerized functional tests
 	docker run --network host \
 		--volume ~/.kube/config:/opt/.kube/config \
+		--volume $(shell pwd)/test/e2e/results:/results \
 		$(REGISTRY)/$(IMG)-tests:$(VERSION)
 
 scale-test: ## Run scalability test
