@@ -22,4 +22,4 @@ WORKDIR /
 
 COPY --from=builder /workspace/test/e2e/e2e.test e2e.test
 
-ENTRYPOINT ["/e2e.test", "-ginkgo.v"]
+ENTRYPOINT ["/e2e.test", "--ginkgo.v", "--ginkgo.junit-report=./results/e2e-results.xml"]
