@@ -11,7 +11,7 @@ Operator for managing discovered clusters from OpenShift Cluster Manager
 ## Prerequisites
 
 - Go v1.17+
-- kubectl 1.19+
+- kubectl 1.20+
 - Operator-sdk v1.12.0
 - Docker
 - Connection to an existing Kubernetes cluster
