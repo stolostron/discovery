@@ -19,7 +19,6 @@ limitations under the License.
 package main
 
 import (
-
 	"flag"
 	"fmt"
 	"os"
@@ -39,9 +38,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"time"
 	corev1 "k8s.io/api/core/v1"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
+	"time"
 
 	discoveryv1 "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/controllers"
