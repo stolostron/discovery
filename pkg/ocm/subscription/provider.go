@@ -40,7 +40,7 @@ type ISubscriptionProvider interface {
 
 type subscriptionProvider struct{}
 
-func (c *subscriptionProvider) GetSubscriptions(request SubscriptionRequest) (*SubscriptionResponse, *SubscriptionError) {
+func (c *subscriptionProvider) GetSubscriptions(request SubscriptionRequest) (retRes *SubscriptionResponse, retErr *SubscriptionError) {
 	getRequest, err := prepareRequest(request)
 	if err != nil {
 		return nil, &SubscriptionError{
@@ -54,9 +54,18 @@ func (c *subscriptionProvider) GetSubscriptions(request SubscriptionRequest) (*S
 			Error: fmt.Errorf("%s: %w", "error during request", err),
 		}
 	}
-	defer response.Body.Close()
 
-	return parseResponse(response)
+	defer func() {
+		err := response.Body.Close()
+		if err != nil && retErr == nil {
+			retErr = &SubscriptionError{
+				Error: fmt.Errorf("%s: %w", "error closing response body", err),
+			}
+		}
+	}()
+
+	retRes, retErr = parseResponse(response)
+	return
 }
 
 func prepareRequest(request SubscriptionRequest) (*http.Request, error) {

@@ -38,7 +38,7 @@ type IAuthProvider interface {
 
 type authProvider struct{}
 
-func (a *authProvider) GetToken(request AuthRequest) (*AuthTokenResponse, *AuthError) {
+func (a *authProvider) GetToken(request AuthRequest) (retRes *AuthTokenResponse, retErr *AuthError) {
 	postUrl := fmt.Sprintf(authEndpoint, request.BaseURL)
 	data := url.Values{
 		"grant_type":    {"refresh_token"},
@@ -52,9 +52,18 @@ func (a *authProvider) GetToken(request AuthRequest) (*AuthTokenResponse, *AuthE
 			Error: err,
 		}
 	}
-	defer response.Body.Close()
 
-	return parseResponse(response)
+	defer func() {
+		err := response.Body.Close()
+		if err != nil && retErr == nil {
+			retErr = &AuthError{
+				Error: fmt.Errorf("%s: %w", "error closing response body", err),
+			}
+		}
+	}()
+
+	retRes, retErr = parseResponse(response)
+	return
 }
 
 func parseResponse(response *http.Response) (*AuthTokenResponse, *AuthError) {
