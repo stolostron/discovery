@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -29,6 +30,7 @@ import (
 
 	goruntime "runtime"
 
+	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -40,7 +42,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
-	"time"
 
 	discoveryv1 "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/controllers"
@@ -89,6 +90,7 @@ func main() {
 		"of a leadership. This is only applicable if leader election is enabled.")
 	opts := zap.Options{
 		Development: true,
+		TimeEncoder: zapcore.ISO8601TimeEncoder,
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
