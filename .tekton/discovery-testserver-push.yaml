@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   annotations:
+    build.appstudio.openshift.io/repo: https://github.com/stolostron/discovery?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "3"
@@ -10,10 +11,10 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: mce-24
-    appstudio.openshift.io/component: discovery-operator
+    appstudio.openshift.io/component: discovery-testserver
     pipelines.appstudio.openshift.io/type: build
-  name: discovery-operator-on-push
-  namespace: red-hat-acm-tenant
+  name: discovery-testserver-on-push
+  namespace: crt-redhat-acm-tenant
 spec:
   params:
   - name: dockerfile
@@ -21,7 +22,7 @@ spec:
   - name: git-url
     value: '{{repo_url}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/red-hat-acm-tenant/mce-24/discovery-operator:{{revision}}
+    value: quay.io/redhat-user-workloads/crt-redhat-acm-tenant/mce-24/discovery-testserver:{{revision}}
   - name: path-context
     value: .
   - name: revision
@@ -46,7 +47,7 @@ spec:
       - name: build-task-status
         value: $(tasks.build-container.status)
       taskRef:
-        bundle: quay.io/redhat-appstudio-tekton-catalog/task-summary:0.1@sha256:bd6a2285974541df01260deca99a84b3b48a6b40759049e7e41e96b4942d83d3
+        bundle: quay.io/redhat-appstudio-tekton-catalog/task-summary:0.1@sha256:9e21e57456c026c15765db23b986e47fc1394fa5d4823d3038b697971dd1a2bd
         name: summary
     params:
     - description: Source Repository URL
@@ -87,7 +88,7 @@ spec:
       description: Java build
       name: java
       type: string
-    - default: "snyk-secret"
+    - default: ""
       description: Snyk Token Secret Name
       name: snyk-secret
       type: string
@@ -184,7 +185,7 @@ spec:
       runAfter:
       - prefetch-dependencies
       taskRef:
-        bundle: quay.io/redhat-appstudio-tekton-catalog/task-buildah:0.1@sha256:9cec47762c7fb80f2d0662f8ed979a89d64687880339bcbe20c271cf01c90e49
+        bundle: quay.io/redhat-appstudio-tekton-catalog/task-buildah:0.1@sha256:0852e61c1018d7f7a47ac2bd63fbda1d3d2247392624c2176ec341e343386b7c
         name: buildah
       when:
       - input: $(tasks.init.results.build)
@@ -251,7 +252,7 @@ spec:
       - name: BASE_IMAGES_DIGESTS
         value: $(tasks.build-container.results.BASE_IMAGES_DIGESTS)
       taskRef:
-        bundle: quay.io/redhat-appstudio-tekton-catalog/task-deprecated-image-check:0.2@sha256:82c9fa69ac8d25de99346222c4a29123f54f1051e03e226849df2210bf3f6330
+        bundle: quay.io/redhat-appstudio-tekton-catalog/task-deprecated-image-check:0.2@sha256:f6ad9c9b2a019d28e712287cf3cb5fe42df3078a02af0db75f0e76e6060063ca
         name: deprecated-image-check
       when:
       - input: $(params.skip-checks)
