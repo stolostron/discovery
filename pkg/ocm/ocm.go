@@ -137,12 +137,11 @@ func computeApiUrl(sub subscription.Subscription) string {
 
 // computeType calculates the type of the cluster based on subscription.plan.id
 func computeType(sub subscription.Subscription) string {
+	switch sub.Plan.ID {
+	case "MOA", "MOA-HostedControlPlane": // API returns MOA but this is displayed in OCM as ROSA
+		return "ROSA"
 
-	clusterType := sub.Plan.ID
-
-	if clusterType == "MOA" { // API returns MOA but this is displayed in OCM as ROSA
-		clusterType = "ROSA"
+	default:
+		return sub.Plan.ID
 	}
-
-	return clusterType
 }
