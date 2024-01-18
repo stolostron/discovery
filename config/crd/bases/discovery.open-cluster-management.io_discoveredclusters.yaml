@@ -42,6 +42,8 @@ spec:
                 type: string
               cloudProvider:
                 type: string
+              rhocmClusterID:
+                type: string
               console:
                 type: string
               creationTimestamp:
@@ -159,6 +161,8 @@ spec:
               apiUrl:
                 type: string
               cloudProvider:
+                type: string
+              rhocmClusterId:
                 type: string
               console:
                 type: string

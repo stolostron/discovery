@@ -28,6 +28,7 @@ import (
 type DiscoveredClusterSpec struct {
 	Name              string       `json:"name" yaml:"name"`
 	DisplayName       string       `json:"displayName" yaml:"displayName"`
+	RHOCMClusterID    string       `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
 	Console           string       `json:"console,omitempty" yaml:"console,omitempty"`
 	APIURL            string       `json:"apiUrl" yaml:"apiUrl"`
 	CreationTimestamp *metav1.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
