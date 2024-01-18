@@ -42,7 +42,7 @@ spec:
                 type: string
               cloudProvider:
                 type: string
-              rhocmClusterID:
+              rhocmClusterId:
                 type: string
               console:
                 type: string
