@@ -28,6 +28,7 @@ import (
 type DiscoveredClusterSpec struct {
 	Name              string       `json:"name" yaml:"name"`
 	DisplayName       string       `json:"displayName" yaml:"displayName"`
+	OCPClusterID      string       `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
 	RHOCMClusterID    string       `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
 	Console           string       `json:"console,omitempty" yaml:"console,omitempty"`
 	APIURL            string       `json:"apiUrl" yaml:"apiUrl"`
