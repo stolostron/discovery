@@ -42,6 +42,8 @@ spec:
                 type: string
               cloudProvider:
                 type: string
+              ocpClusterId:
+                type: string
               rhocmClusterId:
                 type: string
               console:
@@ -161,6 +163,8 @@ spec:
               apiUrl:
                 type: string
               cloudProvider:
+                type: string
+              ocpClusterId:
                 type: string
               rhocmClusterId:
                 type: string
