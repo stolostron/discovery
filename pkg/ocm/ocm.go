@@ -9,6 +9,7 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
+	"github.com/stolostron/discovery/pkg/ocm/cluster"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -34,6 +35,18 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 	}
 	subscriptionClient := subscription.SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
 	subscriptions, err := subscriptionClient.GetSubscriptions()
+	if err != nil {
+		return nil, err
+	}
+
+	// Get clusters from clusters_mgmt api
+	requestConfig := cluster.ClusterRequest{
+		Token:   accessToken,
+		BaseURL: baseURL,
+		Filter:  filters,
+	}
+	clusterClient := cluster.ClusterClientGenerator.NewClient(requestConfig)
+	_, err = clusterClient.GetClusters()
 	if err != nil {
 		return nil, err
 	}
