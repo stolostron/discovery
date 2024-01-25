@@ -14,7 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// DiscoverClusters returns a list of DiscoveredClusters found in both the accounts_mgmt and
+// DiscoverClusters returns a list of DiscoveredClusters found in both the clusters_mgmt and
 // accounts_mgmt apis with the given filters
 func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters discovery.Filter) ([]discovery.DiscoveredCluster, error) {
 	// Request ephemeral access token with user token. This will be used for OCM requests
