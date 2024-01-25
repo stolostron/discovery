@@ -147,6 +147,7 @@ func TestDiscoverClusters(t *testing.T) {
 				t.Errorf("DiscoverClusters() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			// TODO: Only checking the length doesn't actually check if the data was imported correctly
 			if len(got) != tt.want {
 				t.Errorf("DiscoverClusters() = %v, wanted %d clusters", got, tt.want)
 			}
