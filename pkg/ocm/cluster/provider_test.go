@@ -25,7 +25,7 @@ func (cm *getClientMock) Get(request *http.Request) (*http.Response, error) {
 // When the everything is good
 func TestProviderGetClustersNoError(t *testing.T) {
 	getRequestFunc = func(*http.Request) (*http.Response, error) {
-		file, err := os.Open("testdata/accounts_mgmt_mock.json")
+		file, err := os.Open("testdata/ocm_mock.json")
 		if err != nil {
 			t.Error(err)
 		}
