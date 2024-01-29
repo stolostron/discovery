@@ -79,7 +79,7 @@ jobs:
     #   run: |
     #     make kind-debug
         
-    # - name: Clean up cluster
-    #   if: ${{ always() }}
-    #   run: |
-    #     make kind-delete-cluster
+    - name: Clean up cluster
+      if: ${{ always() }}
+      run: |
+        make kind-delete-cluster
