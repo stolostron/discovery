@@ -25,6 +25,7 @@ type Cluster struct {
 	ID                       string                 `json:"id"`
 	Href                     string                 `json:"href"`
 	Name                     string                 `json:"name"`
+	API                      APISettings            `json:"api,omitempty"`
 	ExternalID               string                 `json:"external_id"`
 	DisplayName              string                 `json:"display_name"`
 	CreationTimestamp        *metav1.Time           `json:"creation_timestamp,omitempty"`
@@ -51,6 +52,11 @@ type Cluster struct {
 	HealthState              string                 `json:"health_state,omitempty"`
 	Product                  StandardKind           `json:"product,omitempty"`
 	DNSReady                 bool                   `json:"dns_ready,omitempty"`
+}
+
+type APISettings struct {
+	URL       string `json:"url,omitempty"`
+	Listening string `json:"listening,omitempty"`
 }
 
 // ClusterResponse represents the successful response format by OCM on a cluster request

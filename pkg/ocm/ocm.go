@@ -46,6 +46,7 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 		Filter:  filters,
 	}
 	clusterClient := cluster.ClusterClientGenerator.NewClient(requestConfig)
+	// TODO: Use cluster to get the API URL for ROSA clusters.
 	_, err = clusterClient.GetClusters()
 	if err != nil {
 		return nil, err
@@ -100,10 +101,7 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 // IsUnrecoverable returns true if the specified error is not temporary
 // and will continue to occur with the current state.
 func IsUnrecoverable(err error) bool {
-	if errors.Is(err, auth.ErrInvalidToken) {
-		return true
-	}
-	return false
+	return errors.Is(err, auth.ErrInvalidToken)
 }
 
 // computeDisplayName tries to provide a more user-friendly name if set
