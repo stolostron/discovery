@@ -9,11 +9,12 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
+	"github.com/stolostron/discovery/pkg/ocm/cluster"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// DiscoverClusters returns a list of DiscoveredClusters found in both the accounts_mgmt and
+// DiscoverClusters returns a list of DiscoveredClusters found in both the clusters_mgmt and
 // accounts_mgmt apis with the given filters
 func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters discovery.Filter) ([]discovery.DiscoveredCluster, error) {
 	// Request ephemeral access token with user token. This will be used for OCM requests
@@ -34,6 +35,19 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 	}
 	subscriptionClient := subscription.SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
 	subscriptions, err := subscriptionClient.GetSubscriptions()
+	if err != nil {
+		return nil, err
+	}
+
+	// Get clusters from clusters_mgmt api
+	requestConfig := cluster.ClusterRequest{
+		Token:   accessToken,
+		BaseURL: baseURL,
+		Filter:  filters,
+	}
+	clusterClient := cluster.ClusterClientGenerator.NewClient(requestConfig)
+	// TODO: Use cluster to get the API URL for ROSA clusters.
+	_, err = clusterClient.GetClusters()
 	if err != nil {
 		return nil, err
 	}
@@ -87,10 +101,7 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 // IsUnrecoverable returns true if the specified error is not temporary
 // and will continue to occur with the current state.
 func IsUnrecoverable(err error) bool {
-	if errors.Is(err, auth.ErrInvalidToken) {
-		return true
-	}
-	return false
+	return errors.Is(err, auth.ErrInvalidToken)
 }
 
 // computeDisplayName tries to provide a more user-friendly name if set
