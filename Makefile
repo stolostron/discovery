@@ -1,7 +1,7 @@
 # Copyright Contributors to the Open Cluster Management project
 
 # Current Operator version
-VERSION ?= 0.0.1
+VERSION ?= latest
 
 # Options for 'bundle-build'
 ifneq ($(origin CHANNELS), undefined)
@@ -25,7 +25,7 @@ BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 
 # Image URL to use all building/pushing image targets
 REGISTRY ?= quay.io/stolostron
-IMG ?= discovery-operator
+IMG ?= discovery-operator-tests
 URL ?= $(REGISTRY)/$(IMG):$(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:crdVersions=v1"
@@ -131,7 +131,7 @@ deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in
 	cd config/default && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 	# Reset values
-	cd config/manager && $(KUSTOMIZE) edit set image controller="discovery-operator:latest"
+	cd config/manager && $(KUSTOMIZE) edit set image controller="discovery-operator-tests:latest"
 	cd config/default && $(KUSTOMIZE) edit set namespace open-cluster-management
 
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
@@ -143,7 +143,7 @@ bundle: manifests kustomize ## Generate bundle manifests and metadata, then vali
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	operator-sdk bundle validate ./bundle
-	cd config/manager && $(KUSTOMIZE) edit set image controller="discovery-operator:latest"
+	cd config/manager && $(KUSTOMIZE) edit set image controller="discovery-operator-tests:latest"
 
 .PHONY: bundle-build
 bundle-build: ## Build the bundle image.
