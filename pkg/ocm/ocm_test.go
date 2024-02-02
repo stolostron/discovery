@@ -10,15 +10,12 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
-	"github.com/stolostron/discovery/pkg/ocm/cluster"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
+	sub "github.com/stolostron/discovery/pkg/ocm/subscription"
 )
 
 var (
 	getTokenFunc func(auth.AuthRequest) (string, error)
-
-	getClustersFunc func() ([]cluster.Cluster, error)
-	clusterGetter   = clusterGetterMock{}
 
 	getSubscriptionsFunc func() ([]subscription.Subscription, error)
 	subscriptionGetter   = subscriptionGetterMock{}
@@ -33,19 +30,6 @@ func (m *authServiceMock) GetToken(request auth.AuthRequest) (string, error) {
 
 // The mocks the GetClusters request to return a select few clusters without connection
 // to an external datasource
-type clusterGetterMock struct{}
-
-func (m *clusterGetterMock) GetClusters() ([]cluster.Cluster, error) {
-	return getClustersFunc()
-}
-
-// This mocks the NewClient function and returns an instance of the subscriptionGetterMock
-type clusterClientGeneratorMock struct{}
-
-func (m *clusterClientGeneratorMock) NewClient(config cluster.ClusterRequest) cluster.ClusterGetter {
-	return &clusterGetter
-}
-
 type subscriptionGetterMock struct{}
 
 func (m *subscriptionGetterMock) GetSubscriptions() ([]subscription.Subscription, error) {
@@ -57,16 +41,6 @@ type subscriptionClientGeneratorMock struct{}
 
 func (m *subscriptionClientGeneratorMock) NewClient(config subscription.SubscriptionRequest) subscription.SubscriptionGetter {
 	return &subscriptionGetter
-}
-
-// clustersResponse takes in a file with subscription data and returns a new mock function
-func clusterResponse(testdata string) func() ([]cluster.Cluster, error) {
-	return func() ([]cluster.Cluster, error) {
-		file, _ := os.ReadFile(testdata)
-		clusters := []cluster.Cluster{}
-		err := json.Unmarshal([]byte(file), &clusters)
-		return clusters, err
-	}
 }
 
 // clustersResponse takes in a file with subscription data and returns a new mock function
@@ -89,7 +63,6 @@ func TestDiscoverClusters(t *testing.T) {
 	tests := []struct {
 		name             string
 		authfunc         func(auth.AuthRequest) (string, error)
-		clusterFunc      func() ([]cluster.Cluster, error)
 		subscriptionFunc func() ([]subscription.Subscription, error)
 		args             args
 		want             int
@@ -102,7 +75,6 @@ func TestDiscoverClusters(t *testing.T) {
 				return "valid_access_token", nil
 			},
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
-			clusterFunc:      clusterResponse("testdata/1_mock_cluster.json"),
 			subscriptionFunc: subscriptionResponse("testdata/1_mock_subscription.json"),
 			args: args{
 				token:       "test",
@@ -120,7 +92,6 @@ func TestDiscoverClusters(t *testing.T) {
 				return "valid_access_token", nil
 			},
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
-			clusterFunc:      clusterResponse("testdata/3_mock_clusters.json"),
 			subscriptionFunc: subscriptionResponse("testdata/3_mock_subscriptions.json"),
 			args: args{
 				token:       "test",
@@ -136,10 +107,9 @@ func TestDiscoverClusters(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			auth.AuthClient = &authServiceMock{}                                          // Mocks out the call to auth service
 			subscription.SubscriptionClientGenerator = &subscriptionClientGeneratorMock{} // Mocks out the subscription client creation
-			cluster.ClusterClientGenerator = &clusterClientGeneratorMock{}                // Mocks out the cluster client
 
 			getTokenFunc = tt.authfunc
-			getClustersFunc = tt.clusterFunc
+			// TODO: Running `getSubscriptionsFunc` should yield the subscriptions to test against, but we don't do this
 			getSubscriptionsFunc = tt.subscriptionFunc
 
 			got, err := DiscoverClusters(tt.args.token, tt.args.baseURL, tt.args.baseAuthURL, tt.args.filters)
@@ -347,16 +317,16 @@ func TestIsRecoverable(t *testing.T) {
 func TestFormatCLusterError(t *testing.T) {
 	tests := []struct {
 		name string
-		sub  subscription.Subscription
+		sub  sub.Subscription
 		dc   discovery.DiscoveredCluster
 		want bool
 	}{
 		{
 			name: "No ExternalClusterID",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ExternalClusterID: "",
 				DisplayName:       "my-custom-name",
-				Metrics:           []subscription.Metrics{{OpenShiftVersion: "4.8.5"}},
+				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
 			},
 			dc:   discovery.DiscoveredCluster{},
 			want: false,
