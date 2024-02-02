@@ -62,22 +62,21 @@ jobs:
         make server-docker-build
         make kind-load-image
         make kind-load-testserver-image
-    
-    # TODO: Fix and re-enable kind testing.
-    # - name: Deploy to KinD
-    #   env:
-    #     TAG: ${{ github.sha }}
-    #   run: |
-    #     make kind-deploy-controller
-    #     make kind-deploy-testserver
         
-    # - name: Integration Tests
-    #   run: |
-    #     make integration-tests
-    # - name: Debug
-    #   if: ${{ failure() }}
-    #   run: |
-    #     make kind-debug
+    - name: Deploy to KinD
+      env:
+        TAG: ${{ github.sha }}
+      run: |
+        make kind-deploy-controller
+        make kind-deploy-testserver
+        
+    - name: Integration Tests
+      run: |
+        make integration-tests
+    - name: Debug
+      if: ${{ failure() }}
+      run: |
+        make kind-debug
         
     - name: Clean up cluster
       if: ${{ always() }}
