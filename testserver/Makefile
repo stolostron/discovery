@@ -32,7 +32,7 @@ server-deploy:
 	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="${SERVER_URL}"
 	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace ${NAMESPACE}
 	$(KUSTOMIZE) build testserver/build/local-server | kubectl apply -f -
-	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="mock-ocm-server:latest"
+	cd testserver/build/local-server && $(KUSTOMIZE) edit set image testserver="discovery-testserver:latest"
 	cd testserver/build/local-server && $(KUSTOMIZE) edit set namespace open-cluster-management
 
 server-update-dates:
