@@ -29,7 +29,7 @@ type Subscription struct {
 	ConsoleURL        string       `json:"console_url,omitempty"`
 	ExternalClusterID string       `json:"external_cluster_id,omitempty"`
 	OrganizationID    string       `json:"organization_id,omitempty"`
-	LastTelemetryDate string       `json:"last_telemetry_date,omitempty"`
+	LastTelemetryDate *metav1.Time `json:"last_telemetry_date,omitempty"`
 	CreatedAt         *metav1.Time `json:"created_at,omitempty"`
 	UpdatedAt         *metav1.Time `json:"updated_at,omitempty"`
 	Metrics           []Metrics    `json:"metrics,omitempty"`
