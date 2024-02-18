@@ -88,10 +88,10 @@ func openshiftVersionFilter(versions []discovery.Semver) filterFunc {
 func lastActiveFilter(currentDate time.Time, n int) filterFunc {
 	t := lastActiveDateTime(currentDate, n)
 	return func(sub Subscription) bool {
-		if sub.UpdatedAt == nil {
+		if sub.LastTelemetryDate == nil {
 			return false
 		}
-		return sub.UpdatedAt.Time.After(t)
+		return sub.LastTelemetryDate.Time.After(t)
 	}
 }
 

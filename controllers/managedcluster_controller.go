@@ -49,14 +49,12 @@ type ManagedClusterReconciler struct {
 // +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters,verbs=get;list;watch
 
 func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log, _ := logr.FromContext(ctx)
-
 	if req.Name != "" {
 		r.Trigger <- event.GenericEvent{Object: &clusterapiv1.ManagedCluster{ObjectMeta: metav1.ObjectMeta{Name: ""}}}
 		return ctrl.Result{}, nil
 	}
 
-	log.Info("Reconciling managedcluster", "Name", req.Name)
+	logf.Info("Reconciling managedcluster", "Name", req.Name)
 
 	discoveredClusters := &discovery.DiscoveredClusterList{}
 	if err := r.List(ctx, discoveredClusters); err != nil {
