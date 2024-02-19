@@ -33,6 +33,7 @@ import (
 	ref "k8s.io/client-go/tools/reference"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm"
@@ -43,6 +44,8 @@ import (
 const (
 	defaultDiscoveryConfigName = "discovery"
 )
+
+var logf = log.Log.WithName("reconcile")
 
 var (
 	// baseURLAnnotation is the annotation set in a DiscoveryConfig that overrides the URL base used to find clusters
@@ -71,32 +74,36 @@ type DiscoveryConfigReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
 func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log, _ := logr.FromContext(ctx)
-	log.Info("Reconciling DiscoveryConfig")
+	logf.Info("Reconciling DiscoveryConfig")
 
-	r.updateCustomMetrics(ctx)
+	// Update custom metric based on the number of items in the DiscoveryConfigList.
+	if err := r.updateCustomMetrics(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
 
-	if req.Name != defaultDiscoveryConfigName {
-		err := fmt.Errorf("DiscoveryConfig resource name must be '%s'", defaultDiscoveryConfigName)
-		log.Error(err, "Invalid DiscoveryConfig resource name")
-		return ctrl.Result{}, nil
+	// Validate that the request name matches the discovery config name.
+	if err := r.validateDiscoveryConfigName(req.Name); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	config := &discovery.DiscoveryConfig{}
 	err := r.Get(ctx, req.NamespacedName, config)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
+			logf.Info("DiscoveryConfig resource not found. Ignoring since object may have been deleted.")
 			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, err
+
+		// If there's an error other than "Not Found", return with the error.
+		return ctrl.Result{}, fmt.Errorf("failed to get DiscoveryConfig %s: %w", req.Name, err)
 	}
 
 	if err = r.updateDiscoveredClusters(ctx, config); err != nil {
-		log.Error(err, "Error updating DiscoveredClusters")
+		logf.Error(err, "Error updating DiscoveredClusters")
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Reconcile complete. Rescheduling.", "time", reconciler.RefreshInterval)
+	logf.Info("Reconciliation complete. Scheduling next reconcilation for", "next_time", reconciler.RefreshInterval)
 	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
 }
 
@@ -109,20 +116,26 @@ func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context, config *discovery.DiscoveryConfig) error {
 	allClusters := map[string]discovery.DiscoveredCluster{}
-	log, _ := logr.FromContext(ctx)
 
-	// Parse user token from secret
+	// Fetch secret that contains ocm credentials.
+	secretName := config.Spec.Credential
 	ocmSecret := &corev1.Secret{}
-	if err := r.Get(context.TODO(), types.NamespacedName{Name: config.Spec.Credential, Namespace: config.Namespace}, ocmSecret); err != nil {
+	if err := r.Get(context.TODO(),
+		types.NamespacedName{Name: secretName, Namespace: config.Namespace}, ocmSecret); err != nil {
+
 		if apierrors.IsNotFound(err) {
-			log.Info("Secret does not exist")
+			logf.Info("Secret does not exist. Deleting all clusters.", "Secret", secretName)
 			return r.deleteAllClusters(ctx, config)
 		}
+
+		logf.Error(err, "Failed to retrieve secret", "Secret", secretName)
 		return err
 	}
+
+	// Parse user token from ocm secret.
 	userToken, err := parseUserToken(ocmSecret)
 	if err != nil {
-		log.Error(err, "Error parsing token from secret")
+		logf.Error(err, "Error parsing token from secret. Deleting all clusters.", "Secret", ocmSecret.GetName())
 		return r.deleteAllClusters(ctx, config)
 	}
 
@@ -136,9 +149,10 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	} else {
 		discovered, err = ocm.DiscoverClusters(userToken, baseURL, baseAuthURL, filters)
 	}
+
 	if err != nil {
 		if ocm.IsUnrecoverable(err) {
-			log.Info("Unrecoverable error. Cleaning up clusters.", "err", err.Error())
+			logf.Info("Unrecoverable error. Cleaning up clusters.", "Error", err.Error())
 			return r.deleteAllClusters(ctx, config)
 		}
 		return err
@@ -161,10 +175,11 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	if err != nil {
 		return err
 	}
-	if managed != nil && len(managed) > 0 {
+
+	if len(managed) > 0 {
 		assignManagedStatus(allClusters, managed)
 	} else {
-		log.Info("No managed clusters available")
+		logf.Info("No managed clusters found in the list of clusters.")
 	}
 
 	// Create map to check if cluster already discovered
@@ -193,7 +208,19 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	return nil
 }
 
-// getUserToken takes a secret cotaining credentials and returns the stored OCM api token.
+/*
+ValidateDiscoveryConfigName validates the name of the DiscoveryConfig resource.
+It ensures that the provided name matches the defaultDiscoveryConfigName.
+*/
+func (r *DiscoveryConfigReconciler) validateDiscoveryConfigName(reqName string) error {
+	if reqName != defaultDiscoveryConfigName {
+		return fmt.Errorf("invalid DiscoveryConfig resource name '%s', it must be '%s'",
+			reqName, defaultDiscoveryConfigName)
+	}
+	return nil
+}
+
+// parseUserToken takes a secret cotaining credentials and returns the stored OCM api token.
 func parseUserToken(secret *corev1.Secret) (string, error) {
 	token, ok := secret.Data["ocmAPIToken"]
 	if !ok {
@@ -259,34 +286,53 @@ func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *di
 }
 
 func (r *DiscoveryConfigReconciler) createCluster(ctx context.Context, config *discovery.DiscoveryConfig, dc discovery.DiscoveredCluster) error {
-	log, _ := logr.FromContext(ctx)
+	// Try to get the existing cluster
+	existingCluster := &discovery.DiscoveredCluster{}
+	err := r.Get(ctx, types.NamespacedName{Namespace: dc.GetNamespace(), Name: dc.GetName()}, existingCluster)
+	if err == nil {
+		// Cluster already exists, log and return
+		logf.Info("Cluster already exists, skipping creation", "Name", dc.Name)
+		return nil
+	}
+
+	// Set controller reference
 	if err := ctrl.SetControllerReference(config, &dc, r.Scheme); err != nil {
 		return errors.Wrapf(err, "Error setting controller reference on DiscoveredCluster %s", dc.Name)
 	}
+
+	// Create the cluster
 	if err := r.Create(ctx, &dc); err != nil {
+		if apierrors.IsAlreadyExists(err) {
+			return nil
+		}
 		return errors.Wrapf(err, "Error creating DiscoveredCluster %s", dc.Name)
 	}
-	log.Info("Created cluster", "Name", dc.Name)
+
+	logf.Info("Created cluster", "Name", dc.Name)
 	return nil
 }
 
 func (r *DiscoveryConfigReconciler) updateCluster(ctx context.Context, config *discovery.DiscoveryConfig, new, old discovery.DiscoveredCluster) error {
-	log, _ := logr.FromContext(ctx)
 	updated := old
 	updated.Spec = new.Spec
 	if err := r.Update(ctx, &updated); err != nil {
 		return errors.Wrapf(err, "Error updating DiscoveredCluster %s", updated.Name)
 	}
-	log.Info("Updated cluster", "Name", updated.Name)
+
+	logf.Info("Updated cluster", "Name", updated.Name)
 	return nil
 }
 
 func (r *DiscoveryConfigReconciler) deleteCluster(ctx context.Context, dc discovery.DiscoveredCluster) error {
-	log, _ := logr.FromContext(ctx)
 	if err := r.Delete(ctx, &dc); err != nil {
+		if apierrors.IsNotFound(err) {
+			logf.Info("Cluster does not exist, skipping deletion", "Name", dc.Name)
+			return nil
+		}
 		return errors.Wrapf(err, "Error deleting DiscoveredCluster %s", dc.Name)
 	}
-	log.Info("Deleted cluster", "Name", dc.Name)
+
+	logf.Info("Deleted cluster", "Name", dc.Name)
 	return nil
 }
 
@@ -299,11 +345,20 @@ func (r *DiscoveryConfigReconciler) deleteAllClusters(ctx context.Context, confi
 	return nil
 }
 
-func (r *DiscoveryConfigReconciler) updateCustomMetrics(ctx context.Context) {
+/*
+updateCustomMetrics updates the totalConfigs Prometheus metric based on the number of items in the
+DiscoveryConfigList retrieved from the cluster. It retrieves the list of DiscoveryConfigs,
+sets the totalConfigs metric to the length of the items list, and reports any errors encountered
+during the process.
+*/
+func (r *DiscoveryConfigReconciler) updateCustomMetrics(ctx context.Context) error {
 	configs := &discovery.DiscoveryConfigList{}
 	if err := r.List(ctx, configs); err != nil {
+		return fmt.Errorf("failed to list DiscoveryConfigs: %w", err)
 	}
+
 	totalConfigs.Set(float64(len(configs.Items)))
+	return nil
 }
 
 func getURLOverride(config *discovery.DiscoveryConfig) string {
