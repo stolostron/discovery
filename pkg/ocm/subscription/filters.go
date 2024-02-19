@@ -44,6 +44,7 @@ func createFilters(f discovery.Filter) []filterFunc {
 	}
 }
 
+// BOOKMARK: This is where clusters are filtered
 // statusFilter filters out clusters with non-functioning status
 func statusFilter() filterFunc {
 	return func(sub Subscription) bool {

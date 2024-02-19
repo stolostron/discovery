@@ -314,6 +314,7 @@ func TestIsRecoverable(t *testing.T) {
 
 }
 
+// BOOKMARK: This is the test for No ExternalClusterID
 func TestFormatCLusterError(t *testing.T) {
 	tests := []struct {
 		name string
@@ -326,6 +327,17 @@ func TestFormatCLusterError(t *testing.T) {
 			sub: sub.Subscription{
 				ExternalClusterID: "",
 				DisplayName:       "my-custom-name",
+				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
+			},
+			dc:   discovery.DiscoveredCluster{},
+			want: false,
+		},
+		{
+			name: "Reserved Cluster Status",
+			sub: sub.Subscription{
+				ExternalClusterID: "exists",
+				DisplayName:       "my-custom-name",
+				Status:            "Reserved",
 				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
 			},
 			dc:   discovery.DiscoveredCluster{},
