@@ -120,7 +120,9 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	// Fetch secret that contains ocm credentials.
 	secretName := config.Spec.Credential
 	ocmSecret := &corev1.Secret{}
-	if err := r.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: config.Namespace}, ocmSecret); err != nil {
+	if err := r.Get(context.TODO(),
+		types.NamespacedName{Name: secretName, Namespace: config.Namespace}, ocmSecret); err != nil {
+
 		if apierrors.IsNotFound(err) {
 			logf.Info("Secret does not exist. Deleting all clusters.", "Secret", secretName)
 			return r.deleteAllClusters(ctx, config)
