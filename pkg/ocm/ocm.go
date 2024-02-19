@@ -52,10 +52,14 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 // formatCluster converts a cluster from OCM form to DiscoveredCluster form, or returns false if it is not valid
 func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, bool) {
 	discoveredCluster := discovery.DiscoveredCluster{}
+	// TODO: consider refactoring to "filter" clusters ouside this function to retain function clarity
 	if len(sub.Metrics) == 0 {
 		return discoveredCluster, false
 	}
 	if sub.ExternalClusterID == "" {
+		return discoveredCluster, false
+	}
+	if sub.Status == "Reserved" {
 		return discoveredCluster, false
 	}
 	discoveredCluster = discovery.DiscoveredCluster{
