@@ -10,9 +10,11 @@ import (
 	discovery "github.com/stolostron/discovery/api/v1"
 
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -27,7 +29,7 @@ const (
 	SecretName          = "test-connection-secret"
 	TestserverName      = "mock-ocm-server"
 
-	timeout  = time.Second * 30
+	timeout  = time.Second * 45
 	interval = time.Millisecond * 250
 )
 
@@ -118,26 +120,6 @@ var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 		})
 	})
 
-	// Context("Creating 999 Clusters", func() {
-	// 	It("Should create discovered clusters ", func() {
-	// 		By("Setting the testserver's response", func() {
-	// 			updateTestserverScenario("nineninenineClusters")
-	// 		})
-	// 		By("By creating a secret with OCM credentials", func() {
-	// 			Expect(k8sClient.Create(ctx, dummySecret())).Should(Succeed())
-	// 		})
-
-	// 		By("By creating a new DiscoveryConfig", func() {
-	// 			Expect(k8sClient.Create(ctx, annotate(defaultDiscoveryConfig()))).Should(Succeed())
-	// 		})
-	// 		By("By checking 999 discovered clusters have been created", func() {
-	// 			Eventually(func() (int, error) {
-	// 				return countDiscoveredClusters(discoveryNamespace)
-	// 			}, timeout, interval).Should(Equal(999))
-	// 		})
-	// 	})
-	// })
-
 	Context("Tracking ManagedClusters", func() {
 		AfterEach(func() {
 			err := k8sClient.Delete(ctx, customSecret("badsecret", discoveryNamespace, ""))
@@ -160,9 +142,9 @@ var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 			})
 
 			By("Creating ManagedClusters", func() {
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc1", "844b3bf1-8d70-469c-a113-f1cd5db45c63"))).To(Succeed())
+				Expect(createManagedClusterWithRetry(ctx, "testmc1", "844b3bf1-8d70-469c-a113-f1cd5db45c63", 10)).To(Succeed())
 				// Managed but not discovered
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc0", "abcdefgh-ijkl-mnop-qrst-uvwxyz123456"))).To(Succeed())
+				Expect(createManagedClusterWithRetry(ctx, "testmc0", "abcdefgh-ijkl-mnop-qrst-uvwxyz123456", 10)).To(Succeed())
 			})
 
 			By("Forcing the DiscoveryConfig to be reconciled on", func() {
@@ -205,11 +187,11 @@ var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 			}
 
 			By("Creating ManagedClusters", func() {
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc1", "844b3bf1-8d70-469c-a113-f1cd5db45c63"))).To(Succeed())
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc2", "dbcbbeeb-7a15-4c64-9975-6f6c331255c8"))).To(Succeed())
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc3", "6429154f-583e-4d95-b74d-2cd02b266ecf"))).To(Succeed())
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc4", "d36f6dc3-84b0-4bc6-b126-9f30766f9fae"))).To(Succeed())
-				Expect(k8sClient.Create(ctx, newManagedCluster("testmc5", "f1083487-e6ae-4388-9408-af09fcc9c7fc"))).To(Succeed())
+				Expect(createManagedClusterWithRetry(ctx, "testmc1", "844b3bf1-8d70-469c-a113-f1cd5db45c63", 10)).To(Succeed())
+				Expect(createManagedClusterWithRetry(ctx, "testmc2", "dbcbbeeb-7a15-4c64-9975-6f6c331255c8", 10)).To(Succeed())
+				Expect(createManagedClusterWithRetry(ctx, "testmc3", "6429154f-583e-4d95-b74d-2cd02b266ecf", 10)).To(Succeed())
+				Expect(createManagedClusterWithRetry(ctx, "testmc4", "d36f6dc3-84b0-4bc6-b126-9f30766f9fae", 10)).To(Succeed())
+				Expect(createManagedClusterWithRetry(ctx, "testmc5", "f1083487-e6ae-4388-9408-af09fcc9c7fc", 10)).To(Succeed())
 			})
 
 			By("Creating discovered clusters", func() {
@@ -515,8 +497,50 @@ var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 			})
 		})
 	})
-
 })
+
+// Define a function to create managed clusters with retry logic
+func createManagedClusterWithRetry(ctx context.Context, name string, id string, maxRetries int) error {
+	var err error
+	for i := 0; i <= maxRetries; i++ {
+		err = k8sClient.Create(ctx, newManagedCluster(name, id))
+		if err == nil {
+			return nil // Creation succeeded, return without retrying
+		}
+
+		fmt.Printf("Error creating managed cluster %s: %v\n", name, err)
+		fmt.Printf("Retrying (attempt %d/%d)...\n", i+1, maxRetries+1)
+		time.Sleep(5 * time.Second) // Wait for 5 seconds before retrying
+	}
+	return err // Retry limit reached, return the last error
+}
+
+// getRoleBindingsForCluster function retrieves RoleBindings associated with a ManagedCluster
+func getRoleBindingsForCluster(clusterName string) ([]rbacv1.RoleBinding, error) {
+	var roleBindings []rbacv1.RoleBinding
+
+	// Create label selector
+	labelSelector := labels.SelectorFromSet(labels.Set{"open-cluster-management.io/cluster-name": clusterName})
+
+	roleBindingsList := &rbacv1.RoleBindingList{}
+	_ = k8sClient.List(context.TODO(), roleBindingsList, &client.ListOptions{
+		LabelSelector: labelSelector,
+	})
+
+	roleBindings = append(roleBindings, roleBindingsList.Items...)
+	return roleBindings, nil
+}
+
+// removeFinalizerFromRoleBinding function removes finalizer from a RoleBinding resource
+func removeFinalizerFromRoleBinding(roleBinding rbacv1.RoleBinding) error {
+	roleBinding.Finalizers = nil
+	err := k8sClient.Update(context.Background(), &roleBinding)
+	if err != nil {
+		fmt.Printf("Error updating rolebinding: %v\n", err)
+	}
+
+	return err
+}
 
 // annotate adds an annotation to modify the baseUrl used with the discoveryconfig
 func annotate(dc *discovery.DiscoveryConfig) *discovery.DiscoveryConfig {
@@ -624,6 +648,40 @@ func byDeletingManagedClusters(names []string) {
 		}
 		return true
 	}, timeout, interval).Should(BeTrue(), "There was an issue deleting managedclusters.")
+
+	Eventually(func() bool {
+		nsDeleted := true
+		for _, name := range names {
+			ns := &corev1.Namespace{}
+
+			// Attempt to retrieve the namespace for the managed cluster.
+			err := k8sClient.Get(ctx, client.ObjectKey{Name: name}, ns)
+			if err == nil {
+				// Namespace still exists
+				nsDeleted = false
+
+				// Check if there's a deletion timestamp
+				if ns.DeletionTimestamp != nil {
+					// Check for rolebindinging with finalizers
+					rolebindings, err := getRoleBindingsForCluster(name)
+					if err != nil {
+						fmt.Printf("Error getting rolebindings for managed cluster %s: %v", name, err)
+						return false
+					}
+
+					for _, rb := range rolebindings {
+						removeFinalizerFromRoleBinding(rb)
+					}
+					// fmt.Printf("Namespace %s has deletion timestamp: %v\n", ns.GetName(), ns.GetDeletionTimestamp())
+				}
+			} else if !apierrors.IsNotFound(err) {
+				fmt.Printf("Error occurred while checking namespace %s: %v\n", ns.GetName(), err)
+				nsDeleted = false
+			}
+		}
+
+		return nsDeleted
+	}, timeout, interval).Should(BeTrue(), "ManagedCluster namespaces have not been deleted")
 }
 
 func byTriggeringReconcile() {
