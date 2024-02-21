@@ -76,4 +76,4 @@ spec:
     lastActive: 7
 ```
 
-Rebuild Image: Mon Feb  5 13:00:13 EST 2024
+Rebuild Image: 2024-02-21
