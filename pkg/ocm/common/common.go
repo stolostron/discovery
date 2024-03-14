@@ -16,37 +16,47 @@ func (c *RestClient) Get(request *http.Request) (*http.Response, error) {
 	return client.Do(request)
 }
 
-func (p *Provider) GetData(request Request, urlPattern string) (interface{}, error) {
-	getRequest, err := PrepareRequest(request, urlPattern)
+func (p *Provider) GetResources(request Request, endpointURL string) (retRes *Response, retErr *ErrorResponse) {
+	getRequest, err := PrepareRequest(request, endpointURL)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", "error forming request", err)
+		return nil, &ErrorResponse{
+			Error: fmt.Errorf("%s: %w", "error forming request", err),
+		}
 	}
 
-	response, err := p.GetInterface.Get(getRequest)
+	response, err := httpClient.Get(getRequest)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", "error during request", err)
+		return nil, &ErrorResponse{
+			Error: fmt.Errorf("%s: %w", "error during request", err),
+		}
 	}
 
 	defer func() {
-		_ = response.Body.Close()
+		err := response.Body.Close()
+		if err != nil && retErr == nil {
+			retErr = &ErrorResponse{
+				Error: fmt.Errorf("%s: %w", "error closing response body", err),
+			}
+		}
 	}()
 
-	return ParseResponse(response)
+	retRes, retErr = ParseResponse(response)
+	return
 }
 
-func ParseResponse(response *http.Response) (*SubscriptionResponse, *SubscriptionError) {
+func ParseResponse(response *http.Response) (*Response, *ErrorResponse) {
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, &SubscriptionError{
+		return nil, &ErrorResponse{
 			Error: fmt.Errorf("%s: %w", "couldn't read response body", err),
 		}
 	}
 
 	if response.StatusCode > 299 {
-		var errResponse SubscriptionError
+		var errResponse ErrorResponse
 		if err := json.Unmarshal(bytes, &errResponse); err != nil {
-			return nil, &SubscriptionError{
-				Error:    fmt.Errorf("%s: %w", "couldn't unmarshal subscription error response", err),
+			return nil, &ErrorResponse{
+				Error:    fmt.Errorf("%s: %w", "couldn't unmarshal resource error response", err),
 				Response: bytes,
 			}
 		}
@@ -58,10 +68,10 @@ func ParseResponse(response *http.Response) (*SubscriptionResponse, *Subscriptio
 		return nil, &errResponse
 	}
 
-	var result SubscriptionResponse
+	var result Response
 	if err := json.Unmarshal(bytes, &result); err != nil {
-		return nil, &SubscriptionError{
-			Error:    fmt.Errorf("%s: %w", "couldn't unmarshal subscription response", err),
+		return nil, &ErrorResponse{
+			Error:    fmt.Errorf("%s: %w", "couldn't unmarshal resource response", err),
 			Response: bytes,
 		}
 	}
@@ -69,13 +79,13 @@ func ParseResponse(response *http.Response) (*SubscriptionResponse, *Subscriptio
 	return &result, nil
 }
 
-func PrepareRequest(request Request, urlPattern string) (*http.Request, error) {
-	getURL := fmt.Sprintf(urlPattern, request.BaseURL)
+// PrepareRequest prepares the HTTP request
+func PrepareRequest(request Request, endpointURL string) (*http.Request, error) {
+	getURL := fmt.Sprintf(endpointURL, request.BaseURL)
 	query := &url.Values{}
 	query.Add("size", fmt.Sprintf("%d", request.Size))
 	query.Add("page", fmt.Sprintf("%d", request.Page))
-
-	ApplyPreFilters(query, request.Filter)
+	// applyPreFilters(query, request.Filter)
 
 	getRequest, err := http.NewRequest("GET", getURL, nil)
 	if err != nil {

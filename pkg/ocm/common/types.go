@@ -8,6 +8,11 @@ import (
 	discovery "github.com/stolostron/discovery/api/v1"
 )
 
+var (
+	httpClient HTTPRequester  = &RestClient{}
+	provider   ResourceLoader = &Provider{}
+)
+
 // APISettings represents settings related to an API.
 type APISettings struct {
 	URL       string `json:"url,omitempty"`
@@ -38,16 +43,17 @@ type Metrics struct {
 }
 
 type Provider struct {
-	GetInterface
+	ResourceLoader
 }
 
 // Response represents the common structure for API responses.
 type Response struct {
-	Kind   string `json:"kind"`
-	Page   int    `json:"page"`
-	Size   int    `json:"size"`
-	Total  int    `json:"total"`
-	Reason string `json:"reason,omitempty"` // Reason is specific to ClusterResponse.
+	Kind   string      `json:"kind"`
+	Page   int         `json:"page"`
+	Size   int         `json:"size"`
+	Total  int         `json:"total"`
+	Reason string      `json:"reason,omitempty"` // Reason is specific to ClusterResponse.
+	Items  interface{} `json:"items"`
 	// Add any other common fields here.
 }
 
@@ -70,10 +76,10 @@ type StandardKind struct {
 	Href string `href:"kind,omitempty"`
 }
 
-type GetInterface interface {
+type HTTPRequester interface {
 	Get(*http.Request) (*http.Response, error)
 }
 
-type ProviderInterface interface {
-	GetData(request Request) (interface{}, error)
+type ResourceLoader interface {
+	GetResources(request Request, endpointURL string) (*Response, *ErrorResponse)
 }

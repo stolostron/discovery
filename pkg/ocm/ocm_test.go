@@ -10,6 +10,7 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
+	"github.com/stolostron/discovery/pkg/ocm/common"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
 	sub "github.com/stolostron/discovery/pkg/ocm/subscription"
 )
@@ -248,7 +249,7 @@ func Test_computeType(t *testing.T) {
 		{
 			name: "Regular type",
 			sub: subscription.Subscription{
-				Plan: subscription.StandardKind{
+				Plan: common.StandardKind{
 					ID: "OCP",
 				},
 			},
@@ -257,7 +258,7 @@ func Test_computeType(t *testing.T) {
 		{
 			name: "Anything goes",
 			sub: subscription.Subscription{
-				Plan: subscription.StandardKind{
+				Plan: common.StandardKind{
 					ID: "ABC123",
 				},
 			},
@@ -266,7 +267,7 @@ func Test_computeType(t *testing.T) {
 		{
 			name: "ROSA transform",
 			sub: subscription.Subscription{
-				Plan: subscription.StandardKind{
+				Plan: common.StandardKind{
 					ID: "MOA",
 				},
 			},
@@ -327,7 +328,7 @@ func TestFormatCLusterError(t *testing.T) {
 			sub: sub.Subscription{
 				ExternalClusterID: "",
 				DisplayName:       "my-custom-name",
-				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
+				Metrics:           []common.Metrics{{OpenShiftVersion: "4.8.5"}},
 			},
 			dc:   discovery.DiscoveredCluster{},
 			want: false,
@@ -338,7 +339,7 @@ func TestFormatCLusterError(t *testing.T) {
 				ExternalClusterID: "exists",
 				DisplayName:       "my-custom-name",
 				Status:            "Reserved",
-				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
+				Metrics:           []common.Metrics{{OpenShiftVersion: "4.8.5"}},
 			},
 			dc:   discovery.DiscoveredCluster{},
 			want: false,
