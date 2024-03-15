@@ -10,16 +10,19 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
+	"github.com/stolostron/discovery/pkg/ocm/cluster"
 	"github.com/stolostron/discovery/pkg/ocm/common"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
 	sub "github.com/stolostron/discovery/pkg/ocm/subscription"
+	"github.com/stolostron/discovery/pkg/ocm/utils"
 )
 
 var (
 	getTokenFunc func(auth.AuthRequest) (string, error)
 
+	getClustersFunc      func() ([]cluster.Cluster, error)
 	getSubscriptionsFunc func() ([]subscription.Subscription, error)
-	subscriptionGetter   = subscriptionGetterMock{}
+	resourceGetter       = resourceGetterMock{}
 )
 
 // This mocks the authService request and returns a dummy access token
@@ -31,21 +34,35 @@ func (m *authServiceMock) GetToken(request auth.AuthRequest) (string, error) {
 
 // The mocks the GetClusters request to return a select few clusters without connection
 // to an external datasource
-type subscriptionGetterMock struct{}
+type resourceGetterMock struct{}
 
-func (m *subscriptionGetterMock) GetSubscriptions() ([]subscription.Subscription, error) {
+func (m *resourceGetterMock) GetClusters() ([]cluster.Cluster, error) {
+	return getClustersFunc()
+}
+
+func (m *resourceGetterMock) GetSubscriptions() ([]subscription.Subscription, error) {
 	return getSubscriptionsFunc()
 }
 
 // This mocks the NewClient function and returns an instance of the subscriptionGetterMock
-type subscriptionClientGeneratorMock struct{}
+type ClientGeneratorMock struct{}
 
-func (m *subscriptionClientGeneratorMock) NewClient(config subscription.SubscriptionRequest) subscription.SubscriptionGetter {
-	return &subscriptionGetter
+func (m *ClientGeneratorMock) NewClient(config common.Request) common.ResourceGetter {
+	return &resourceGetter
 }
 
 // clustersResponse takes in a file with subscription data and returns a new mock function
-func subscriptionResponse(testdata string) func() ([]subscription.Subscription, error) {
+// func clustersResponse(testdata string) func() ([]subscription.Subscription, error) {
+// 	return func() ([]subscription.Subscription, error) {
+// 		file, _ := os.ReadFile(testdata)
+// 		subscriptions := []subscription.Subscription{}
+// 		err := json.Unmarshal([]byte(file), &subscriptions)
+// 		return subscriptions, err
+// 	}
+// }
+
+// subscriptionsResponse takes in a file with subscription data and returns a new mock function
+func subscriptionsResponse(testdata string) func() ([]subscription.Subscription, error) {
 	return func() ([]subscription.Subscription, error) {
 		file, _ := os.ReadFile(testdata)
 		subscriptions := []subscription.Subscription{}
@@ -76,7 +93,7 @@ func TestDiscoverClusters(t *testing.T) {
 				return "valid_access_token", nil
 			},
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
-			subscriptionFunc: subscriptionResponse("testdata/1_mock_subscription.json"),
+			subscriptionFunc: subscriptionsResponse("testdata/1_mock_subscription.json"),
 			args: args{
 				token:       "test",
 				baseURL:     "test",
@@ -93,7 +110,7 @@ func TestDiscoverClusters(t *testing.T) {
 				return "valid_access_token", nil
 			},
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
-			subscriptionFunc: subscriptionResponse("testdata/3_mock_subscriptions.json"),
+			subscriptionFunc: subscriptionsResponse("testdata/3_mock_subscriptions.json"),
 			args: args{
 				token:       "test",
 				baseURL:     "test",
@@ -106,8 +123,8 @@ func TestDiscoverClusters(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			auth.AuthClient = &authServiceMock{}                                          // Mocks out the call to auth service
-			subscription.SubscriptionClientGenerator = &subscriptionClientGeneratorMock{} // Mocks out the subscription client creation
+			auth.AuthClient = &authServiceMock{}               // Mocks out the call to auth service
+			common.OCMClientGenerator = &ClientGeneratorMock{} // Mocks out the subscription client creation
 
 			getTokenFunc = tt.authfunc
 			// TODO: Running `getSubscriptionsFunc` should yield the subscriptions to test against, but we don't do this
@@ -249,7 +266,7 @@ func Test_computeType(t *testing.T) {
 		{
 			name: "Regular type",
 			sub: subscription.Subscription{
-				Plan: common.StandardKind{
+				Plan: utils.StandardKind{
 					ID: "OCP",
 				},
 			},
@@ -258,7 +275,7 @@ func Test_computeType(t *testing.T) {
 		{
 			name: "Anything goes",
 			sub: subscription.Subscription{
-				Plan: common.StandardKind{
+				Plan: utils.StandardKind{
 					ID: "ABC123",
 				},
 			},
@@ -267,7 +284,7 @@ func Test_computeType(t *testing.T) {
 		{
 			name: "ROSA transform",
 			sub: subscription.Subscription{
-				Plan: common.StandardKind{
+				Plan: utils.StandardKind{
 					ID: "MOA",
 				},
 			},
@@ -328,7 +345,7 @@ func TestFormatCLusterError(t *testing.T) {
 			sub: sub.Subscription{
 				ExternalClusterID: "",
 				DisplayName:       "my-custom-name",
-				Metrics:           []common.Metrics{{OpenShiftVersion: "4.8.5"}},
+				Metrics:           []utils.Metrics{{OpenShiftVersion: "4.8.5"}},
 			},
 			dc:   discovery.DiscoveredCluster{},
 			want: false,
@@ -339,7 +356,7 @@ func TestFormatCLusterError(t *testing.T) {
 				ExternalClusterID: "exists",
 				DisplayName:       "my-custom-name",
 				Status:            "Reserved",
-				Metrics:           []common.Metrics{{OpenShiftVersion: "4.8.5"}},
+				Metrics:           []utils.Metrics{{OpenShiftVersion: "4.8.5"}},
 			},
 			dc:   discovery.DiscoveredCluster{},
 			want: false,

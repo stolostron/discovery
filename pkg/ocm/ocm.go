@@ -27,21 +27,34 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 		return nil, err
 	}
 
-	// Get subscriptions from accounts_mgmt api
-	subscriptionRequestConfig := subscription.SubscriptionRequest{
-		Request: common.Request{
-			Token:   accessToken,
-			BaseURL: baseURL,
-			Filter:  filters,
-		},
+	// Get clusters from clusters_mgmt and subscriptions from accounts_mgmt api
+	requestConfig := common.Request{
+		Token:   accessToken,
+		BaseURL: baseURL,
+		Filter:  filters,
 	}
-	subscriptionClient := subscription.SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
-	subscriptions, err := subscriptionClient.GetSubscriptions()
+
+	var discoveredClusters []discovery.DiscoveredCluster
+	client := common.OCMClientGenerator.NewClient(requestConfig)
+
+	clusters, err := client.GetClusters()
 	if err != nil {
 		return nil, err
 	}
 
-	var discoveredClusters []discovery.DiscoveredCluster
+	for _, c := range clusters {
+		// Build a DiscoveredCluster object from the subscription information
+		fmt.Printf("cluster: %v", c)
+		// if dc, valid := formatCluster(c); valid {
+		// 	discoveredClusters = append(discoveredClusters, dc)
+		// }
+	}
+
+	subscriptions, err := client.GetSubscriptions()
+	if err != nil {
+		return nil, err
+	}
+
 	for _, sub := range subscriptions {
 		// Build a DiscoveredCluster object from the subscription information
 		if dc, valid := formatCluster(sub); valid {

@@ -3,7 +3,7 @@
 package cluster
 
 import (
-	"github.com/stolostron/discovery/pkg/ocm/common"
+	"github.com/stolostron/discovery/pkg/ocm/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -17,48 +17,42 @@ type Cluster struct {
 	ID                       string                 `json:"id"`
 	Href                     string                 `json:"href"`
 	Name                     string                 `json:"name"`
-	API                      common.APISettings     `json:"api,omitempty"`
+	API                      utils.APISettings      `json:"api,omitempty"`
 	ExternalID               string                 `json:"external_id"`
 	DisplayName              string                 `json:"display_name"`
 	CreationTimestamp        *metav1.Time           `json:"creation_timestamp,omitempty"`
 	ActivityTimestamp        *metav1.Time           `json:"activity_timestamp,omitempty"`
-	CloudProvider            common.StandardKind    `json:"cloud_provider,omitempty"`
+	CloudProvider            utils.StandardKind     `json:"cloud_provider,omitempty"`
 	OpenShiftVersion         string                 `json:"openshift_version"`
-	Subscription             common.StandardKind    `json:"subscription,omitempty"`
-	Region                   common.StandardKind    `json:"region,omitempty"`
-	Console                  common.Console         `json:"console,omitempty"`
+	Subscription             utils.StandardKind     `json:"subscription,omitempty"`
+	Region                   utils.StandardKind     `json:"region,omitempty"`
+	Console                  utils.Console          `json:"console,omitempty"`
 	Nodes                    map[string]interface{} `json:"nodes,omitempty"`
 	State                    string                 `json:"state"`
-	Groups                   common.StandardKind    `json:"groups,omitempty"`
+	Groups                   utils.StandardKind     `json:"groups,omitempty"`
 	Network                  interface{}            `json:"network,omitempty"`
 	ExternalConfig           map[string]interface{} `json:"external_configuration,omitempty"`
 	MultiAZ                  bool                   `json:"multi_az,omitempty"`
 	Managed                  bool                   `json:"managed,omitempty"`
 	BYOC                     bool                   `json:"byoc,omitempty"`
 	CCS                      map[string]interface{} `json:"ccs,omitempty"`
-	IdentityProviders        common.StandardKind    `json:"identity_providers,omitempty"`
+	IdentityProviders        utils.StandardKind     `json:"identity_providers,omitempty"`
 	AWSInfraAccessRoleGrants map[string]interface{} `json:"aws_infrastructure_access_role_grants,omitempty"`
 	Metrics                  map[string]interface{} `json:"metrics,omitempty"`
-	Addons                   common.StandardKind    `json:"addons,omitempty"`
-	Ingresses                common.StandardKind    `json:"ingresses,omitempty"`
+	Addons                   utils.StandardKind     `json:"addons,omitempty"`
+	Ingresses                utils.StandardKind     `json:"ingresses,omitempty"`
 	HealthState              string                 `json:"health_state,omitempty"`
-	Product                  common.StandardKind    `json:"product,omitempty"`
+	Product                  utils.StandardKind     `json:"product,omitempty"`
 	DNSReady                 bool                   `json:"dns_ready,omitempty"`
 }
 
-// ClusterResponse represents the successful response format by OCM on a cluster request
-type ClusterResponse struct {
-	common.Response
-	Items []Cluster `json:"items"`
+func GetClusterURL() string {
+	return clusterURL
 }
 
-// ClusterRequest contains the data used to customize a cluster get request
-type ClusterRequest struct {
-	common.Request
-}
-
-// ClusterError represents the error format response by OCM on a cluster request.
-// Full list of responses available at https://api.openshift.com/api/clusters_mgmt/v1/errors/
-type ClusterError struct {
-	common.ErrorResponse
+func NewCluster(name string) *Cluster {
+	return &Cluster{
+		Name:        name,
+		DisplayName: name,
+	}
 }

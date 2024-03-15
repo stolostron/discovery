@@ -8,24 +8,8 @@ import (
 	discovery "github.com/stolostron/discovery/api/v1"
 )
 
-var (
-	httpClient HTTPRequester  = &RestClient{}
-	provider   ResourceLoader = &Provider{}
-)
-
-// APISettings represents settings related to an API.
-type APISettings struct {
-	URL       string `json:"url,omitempty"`
-	Listening string `json:"listening,omitempty"`
-}
-
-// Console represents settings related to a console.
-type Console struct {
-	URL string `yaml:"url,omitempty"`
-}
-
-// ErrorResponse represents the common structure for error responses.
-type ErrorResponse struct {
+// Error represents the common structure for error responses.
+type Error struct {
 	Kind   string `json:"kind"`
 	ID     string `json:"id"`
 	Href   string `json:"href"`
@@ -37,27 +21,24 @@ type ErrorResponse struct {
 	Response []byte `json:"-"`
 }
 
-// Metrics represents metrics related to a system or application.
-type Metrics struct {
-	OpenShiftVersion string `json:"openshift_version,omitempty"`
-}
-
-type Provider struct {
-	ResourceLoader
-}
-
 // Response represents the common structure for API responses.
 type Response struct {
-	Kind   string      `json:"kind"`
-	Page   int         `json:"page"`
-	Size   int         `json:"size"`
-	Total  int         `json:"total"`
-	Reason string      `json:"reason,omitempty"` // Reason is specific to ClusterResponse.
-	Items  interface{} `json:"items"`
+	Kind   string        `json:"kind"`
+	Page   int           `json:"page"`
+	Size   int           `json:"size"`
+	Total  int           `json:"total"`
+	Reason string        `json:"reason,omitempty"` // Reason is specific to ClusterResponse.
+	Items  []interface{} `json:"items"`
 	// Add any other common fields here.
 }
 
+// RestClient represents an HTTP client for making requests
 type RestClient struct{}
+
+// RestProvider implements ResourceLoader interface
+type RestProvider struct {
+	ResourceLoader
+}
 
 // Request represents the common structure for API requests.
 type Request struct {
@@ -69,17 +50,20 @@ type Request struct {
 	// Add any other common fields here.
 }
 
-// StandardKind represents a standard kind with optional ID and Href.
-type StandardKind struct {
-	Kind string `yaml:"kind,omitempty"`
-	ID   string `yaml:"id,omitempty"`
-	Href string `href:"kind,omitempty"`
+// NewError creates a new Error object with the provided code and reason.
+func NewError(code, reason string) *Error {
+	// Implement NewError function here
+	return &Error{
+		Code:   code,
+		Reason: reason,
+	}
 }
 
+// HTTPRequester represents an interface for making HTTP requests
 type HTTPRequester interface {
 	Get(*http.Request) (*http.Response, error)
 }
 
 type ResourceLoader interface {
-	GetResources(request Request, endpointURL string) (*Response, *ErrorResponse)
+	GetResources(request Request, endpointURL string) (*Response, *Error)
 }

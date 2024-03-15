@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/stolostron/discovery/pkg/ocm/cluster"
+	"github.com/stolostron/discovery/pkg/ocm/subscription"
 )
 
 var (
@@ -14,29 +15,31 @@ var (
 )
 
 var (
-	ocmClientGenerator ClientGenerator = &clientGenerator{}
+	OCMClientGenerator ClientGenerator = &clientGenerator{}
 )
 
 type clientGenerator struct{}
 
-func (client *clientGenerator) NewClient(config ClusterRequest) ClusterGetter {
+type ClientGenerator interface {
+	NewClient(config Request) ResourceGetter
+}
+
+func (client *clientGenerator) NewClient(config Request) ResourceGetter {
 	return NewClient(config)
 }
 
-type ClientGenerator interface {
-	NewClient(config Request) ClusterGetter
-}
-
-func NewClient(config Request) ClusterGetter {
-	client := &clusterClient{
+func NewClient(config Request) ResourceGetter {
+	client := &Client{
 		Config: config,
 	}
+
 	if client.Config.BaseURL == "" {
-		client.Config.BaseURL = ocmClusterBaseURL
+		client.Config.BaseURL = ocmBaseURL
 	}
 	if client.Config.Size == 0 {
-		client.Config.Size = clusterRequestSize
+		client.Config.Size = requestSize
 	}
+
 	return client
 }
 
@@ -45,24 +48,46 @@ type Client struct {
 }
 
 type ResourceGetter interface {
-	GetResources() ([]cluster.Cluster, error)
+	GetClusters() ([]cluster.Cluster, error)
+	GetSubscriptions() ([]subscription.Subscription, error)
 }
 
-func (client *Client) GetResources() ([]Cluster, error) {
-	discovered := []Cluster{}
-	request = client.Config
+func (client *Client) GetClusters() ([]cluster.Cluster, error) {
+	discovered := []cluster.Cluster{}
+	request := client.Config
 
 	request.Page = 1
 	for {
-		discoveredList, err := provider.GetResources(request)
+		discoveredList, err := provider.GetResources(request, cluster.GetClusterURL())
 		if err != nil {
 			return nil, fmt.Errorf(err.Reason)
 		}
 
-		filteredList := Filter(discoveredList.Items, client.Config.Filter)
-		for _, fc := range filteredList {
-			discovered = append(discovered, fc)
+		filteredList := FilterResources(discoveredList.Items, client.Config.Filter)
+		discovered = append(discovered, filteredList.([]cluster.Cluster)...)
+
+		if len(discoveredList.Items) < request.Size {
+			break
 		}
+		request.Page++
+	}
+
+	return discovered, nil
+}
+
+func (client *Client) GetSubscriptions() ([]subscription.Subscription, error) {
+	discovered := []subscription.Subscription{}
+	request := client.Config
+
+	request.Page = 1
+	for {
+		discoveredList, err := provider.GetResources(request, subscription.GetSubscriptionURL())
+		if err != nil {
+			return nil, fmt.Errorf(err.Reason)
+		}
+
+		filteredList := FilterResources(discoveredList.Items, client.Config.Filter)
+		discovered = append(discovered, filteredList.([]subscription.Subscription)...)
 
 		if len(discoveredList.Items) < request.Size {
 			break
