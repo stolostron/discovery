@@ -12,10 +12,7 @@ import (
 	"github.com/stolostron/discovery/pkg/ocm/common"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
-
-var logr = log.Log.WithName("ocm_controller")
 
 // DiscoverClusters returns a list of DiscoveredClusters found in both the accounts_mgmt and
 // accounts_mgmt apis with the given filters
@@ -102,10 +99,7 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 // IsUnrecoverable returns true if the specified error is not temporary
 // and will continue to occur with the current state.
 func IsUnrecoverable(err error) bool {
-	if errors.Is(err, auth.ErrInvalidToken) {
-		return true
-	}
-	return false
+	return errors.Is(err, auth.ErrInvalidToken)
 }
 
 // computeDisplayName tries to provide a more user-friendly name if set

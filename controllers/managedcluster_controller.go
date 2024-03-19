@@ -175,7 +175,8 @@ func unsetManagedStatus(dc *discovery.DiscoveredCluster) bool {
 		delete(dc.Labels, "isManagedCluster")
 		updated = true
 	}
-	if dc.Spec.IsManagedCluster == true {
+
+	if dc.Spec.IsManagedCluster {
 		dc.Spec.IsManagedCluster = false
 		updated = true
 	}

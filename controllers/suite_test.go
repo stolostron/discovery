@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	v1 "github.com/stolostron/discovery/api/v1"
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
@@ -32,7 +31,6 @@ func TestControllers(t *testing.T) {
 	RunSpecs(t, "Controller Suite")
 }
 
-var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 var signalHandlerContext context.Context
