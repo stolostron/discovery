@@ -11,7 +11,10 @@ import (
 	"net/url"
 
 	"github.com/stolostron/discovery/pkg/ocm/cluster"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
+
+var logr = log.Log.WithName("ocm_controller")
 
 var (
 	// HTTPClient is used to make HTTP requests.

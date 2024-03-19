@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stolostron/discovery/pkg/ocm/subscription"
+	"github.com/stolostron/discovery/pkg/ocm/common"
 )
 
 type Scenario string
@@ -51,7 +51,7 @@ func GetSubscriptions(c *gin.Context) {
 	file = setTime(file, time.Now())
 
 	// Validate file can be unmarshalled into SubscriptionResponse
-	var subscriptionList subscription.SubscriptionResponse
+	var subscriptionList common.Response
 	err = json.Unmarshal(file, &subscriptionList)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -92,7 +92,7 @@ func (s Scenario) GetSubscriptions(c *gin.Context) {
 	file = setTime(file, time.Now())
 
 	// Validate file can be unmarshalled into SubscriptionResponse
-	var subscriptionList subscription.SubscriptionResponse
+	var subscriptionList common.Response
 	err = json.Unmarshal(file, &subscriptionList)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

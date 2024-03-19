@@ -63,7 +63,7 @@ func (client *Client) GetClusters() ([]cluster.Cluster, error) {
 			return nil, fmt.Errorf(err.Reason)
 		}
 
-		filteredList := FilterResources(discoveredList.Items, client.Config.Filter)
+		filteredList := FilterResources(discoveredList.Items, "cluster", client.Config.Filter)
 		discovered = append(discovered, filteredList.([]cluster.Cluster)...)
 
 		if len(discoveredList.Items) < request.Size {
@@ -86,7 +86,7 @@ func (client *Client) GetSubscriptions() ([]subscription.Subscription, error) {
 			return nil, fmt.Errorf(err.Reason)
 		}
 
-		filteredList := FilterResources(discoveredList.Items, client.Config.Filter)
+		filteredList := FilterResources(discoveredList.Items, "subscription", client.Config.Filter)
 		discovered = append(discovered, filteredList.([]subscription.Subscription)...)
 
 		if len(discoveredList.Items) < request.Size {

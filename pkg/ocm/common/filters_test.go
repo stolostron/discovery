@@ -17,14 +17,14 @@ func TestFilter(t *testing.T) {
 	tests := []struct {
 		name string
 		f    discovery.Filter
-		subs []sub.Subscription
+		subs []interface{}
 		want []sub.Subscription
 	}{
 		{
 			name: "hi",
 			f:    discovery.Filter{LastActive: 1000000000, OpenShiftVersions: []discovery.Semver{"4.8", "4.9"}},
-			subs: []sub.Subscription{
-				{
+			subs: []interface{}{
+				sub.Subscription{
 					DisplayName:       "valid-subscription",
 					ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
 					ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
@@ -32,19 +32,19 @@ func TestFilter(t *testing.T) {
 					Status:            "Active",
 					LastTelemetryDate: &day,
 				},
-				{
+				sub.Subscription{
 					DisplayName:       "filtered-by-status",
 					Metrics:           []utils.Metrics{{OpenShiftVersion: "4.8.5"}},
 					Status:            "Archived",
 					LastTelemetryDate: &day,
 				},
-				{
+				sub.Subscription{
 					DisplayName:       "filtered-by-version",
 					Metrics:           []utils.Metrics{{OpenShiftVersion: "4.6.5"}},
 					Status:            "Active",
 					LastTelemetryDate: &day,
 				},
-				{
+				sub.Subscription{
 					DisplayName: "filtered-by-date",
 					Metrics:     []utils.Metrics{{OpenShiftVersion: "4.6.5"}},
 					Status:      "Archived",
@@ -65,7 +65,7 @@ func TestFilter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FilterResources(tt.subs, tt.f).([]sub.Subscription)
+			got := FilterResources(tt.subs, "subscription", tt.f).([]sub.Subscription)
 			if len(got) != len(tt.want) {
 				t.Fatalf("Filter() did not return the desired number of subscriptions. got = %+v, want %+v", got, tt.want)
 			}

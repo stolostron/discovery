@@ -3,6 +3,7 @@
 package common
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
@@ -13,24 +14,60 @@ import (
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
 )
 
-// filterFunc returns true if the Subscription passes the filter
+// filterFunc represents a function that determines whether a resource passes a filter.
 type filterFunc func(resource interface{}) bool
 
-// FilterResources creates filter functions based on the provided filter spec and returns
-// only the list of cluster or subscriptions that pass all filters
-func FilterResources(resource interface{}, f discovery.Filter) interface{} {
-	switch rs := resource.(type) {
-	case []cluster.Cluster:
-		return filterClusters(rs, f)
+/*
+FilterResources filters resources based on the provided filter specifications and object type.
+It returns the filtered list of clusters or subscriptions.
+*/
+func FilterResources(resource []interface{}, objectType string, f discovery.Filter) interface{} {
+	var clusters []cluster.Cluster
+	var subscriptions []subscription.Subscription
 
-	case []subscription.Subscription:
-		return filterSubscriptions(rs, f)
+	for _, item := range resource {
+		switch objectType {
+		case "cluster":
+			clusterBytes, err := json.Marshal(item)
+			if err != nil {
+				logr.Error(err, "Error marshalling object type into json")
+				continue
+			}
 
-	default:
-		return nil
+			var c cluster.Cluster
+			if err := json.Unmarshal(clusterBytes, &c); err != nil {
+				logr.Error(err, "Error unmarshalling object type into json")
+				continue
+			}
+			clusters = append(clusters, c)
+
+		case "subscription":
+			subscriptionBytes, err := json.Marshal(item)
+			if err != nil {
+				logr.Error(err, "Error marshalling object type into json")
+				continue
+			}
+
+			var s subscription.Subscription
+			if err := json.Unmarshal(subscriptionBytes, &s); err != nil {
+				logr.Error(err, "Error unmarshalling object type into json")
+				continue
+			}
+			subscriptions = append(subscriptions, s)
+		}
 	}
+
+	if objectType == "cluster" {
+		return filterClusters(clusters, f)
+
+	} else if objectType == "subscription" {
+		return filterSubscriptions(subscriptions, f)
+	}
+
+	return nil
 }
 
+// filterClusters filters clusters based on the provided filter specifications.
 func filterClusters(clusters []cluster.Cluster, f discovery.Filter) []cluster.Cluster {
 	vcf := make([]cluster.Cluster, 0)
 	filters := createFilters(f)
@@ -44,7 +81,7 @@ func filterClusters(clusters []cluster.Cluster, f discovery.Filter) []cluster.Cl
 	return vcf
 }
 
-// filterSubscriptions
+// filterSubscriptions filters subscriptions based on the provided filter specifications.
 func filterSubscriptions(subs []subscription.Subscription, f discovery.Filter) []subscription.Subscription {
 	vsf := make([]subscription.Subscription, 0)
 	filters := createFilters(f)
@@ -57,18 +94,17 @@ func filterSubscriptions(subs []subscription.Subscription, f discovery.Filter) [
 	return vsf
 }
 
-// all returns true if the Subscription passes all filters
+// all checks if a resource passes all provided filter functions.
 func all(resources interface{}, fs []filterFunc) bool {
 	for _, f := range fs {
 		if !f(resources) {
 			return false
 		}
 	}
-
 	return true
 }
 
-// createFilters returns a list of filter functions generated from the Filter spec
+// createFilters creates a list of filter functions based on the given Filter specification.
 func createFilters(f discovery.Filter) []filterFunc {
 	return []filterFunc{
 		statusFilter(),
@@ -77,7 +113,7 @@ func createFilters(f discovery.Filter) []filterFunc {
 	}
 }
 
-// statusFilter filters out clusters with non-functioning status
+// statusFilter filters out clusters or subscriptions with non-operational status.
 func statusFilter() filterFunc {
 	return func(resource interface{}) bool {
 		switch obj := resource.(type) {
@@ -88,12 +124,16 @@ func statusFilter() filterFunc {
 			return obj.Status != "Archived" && obj.Status != "Deprovisioned"
 
 		default:
+			logr.Info(fmt.Sprintf("unknown object type (%T) detected: %v", obj, obj))
 			return false
 		}
 	}
 }
 
-// openshiftVersionFilter filters out clusters with versions not in the list of Major/Minor semver versions
+/*
+openshiftVersionFilter filters out clusters or subscriptions with versions not in the list of Major/Minor
+semver versions.
+*/
 func openshiftVersionFilter(versions []discovery.Semver) filterFunc {
 	if len(versions) == 0 {
 		// noop filter
@@ -118,6 +158,7 @@ func openshiftVersionFilter(versions []discovery.Semver) filterFunc {
 			if len(obj.Metrics) == 0 {
 				return false
 			}
+
 			for _, v := range sv {
 				if strings.HasPrefix(obj.Metrics[0].OpenShiftVersion, v) {
 					return true
@@ -128,7 +169,7 @@ func openshiftVersionFilter(versions []discovery.Semver) filterFunc {
 	}
 }
 
-// lastActiveFilter filters out clusters that haven't been updated in the last n days
+// lastActiveFilter filters out clusters or subscriptions that haven't been updated in the last n days.
 func lastActiveFilter(currentDate time.Time, n int) filterFunc {
 	t := lastActiveDateTime(currentDate, n)
 
@@ -145,7 +186,7 @@ func lastActiveFilter(currentDate time.Time, n int) filterFunc {
 	}
 }
 
-// lastActiveDateTime return the time that is `daysAgo` days before `currentDate`
+// lastActiveDateTime returns the time that is 'daysAgo' days before 'currentDate'.
 func lastActiveDateTime(currentDate time.Time, daysAgo int) time.Time {
 	if daysAgo < 0 {
 		daysAgo = 0
@@ -153,7 +194,7 @@ func lastActiveDateTime(currentDate time.Time, daysAgo int) time.Time {
 	return currentDate.AddDate(0, 0, -daysAgo)
 }
 
-// applyPreFilters adds fields to the http query to limit the number of items returned
+// applyPreFilters adds fields to the HTTP query to limit the number of items returned.
 func applyPreFilters(query *url.Values, filters discovery.Filter, objectType string) {
 	if filters.LastActive != 0 {
 		layoutISO := "2006-01-02T15:04:05"

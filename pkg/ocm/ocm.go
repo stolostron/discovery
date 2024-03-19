@@ -12,7 +12,10 @@ import (
 	"github.com/stolostron/discovery/pkg/ocm/common"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
+
+var logr = log.Log.WithName("ocm_controller")
 
 // DiscoverClusters returns a list of DiscoveredClusters found in both the accounts_mgmt and
 // accounts_mgmt apis with the given filters
@@ -37,17 +40,9 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 	var discoveredClusters []discovery.DiscoveredCluster
 	client := common.OCMClientGenerator.NewClient(requestConfig)
 
-	clusters, err := client.GetClusters()
+	_, err = client.GetClusters()
 	if err != nil {
 		return nil, err
-	}
-
-	for _, c := range clusters {
-		// Build a DiscoveredCluster object from the subscription information
-		fmt.Printf("cluster: %v", c)
-		// if dc, valid := formatCluster(c); valid {
-		// 	discoveredClusters = append(discoveredClusters, dc)
-		// }
 	}
 
 	subscriptions, err := client.GetSubscriptions()

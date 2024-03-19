@@ -1,0 +1,271 @@
+{
+	"kind": "ClusterList",
+	"page": 1,
+	"size": 1,
+	"total": 1,
+	"items": [
+		{
+			"kind": "Cluster",
+			"id": "1ccf4bsakl8i97eva3fqr6mdibp61ef1",
+			"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1",
+			"name": "81b4b2e9-d621-4871-9a9f-0bc94ca5cd86",
+			"domain_prefix": "81b4b2e9-d621-4871-9a9f-0bc94ca5cd86",
+			"external_id": "81b4b2e9-d621-4871-9a9f-0bc94ca5cd86",
+			"display_name": "81b4b2e9-d621-4871-9a9f-0bc94ca5cd86",
+			"creation_timestamp": "2020-04-06T14:43:58.773597Z",
+			"activity_timestamp": "2021-02-09T13:07:33.286761Z",
+			"cloud_provider": {
+				"kind": "CloudProviderLink",
+				"id": "aws",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws"
+			},
+			"openshift_version": "4.3.40",
+			"subscription": {
+				"kind": "SubscriptionLink",
+				"id": "1aAhK44xKMxSnXN3ToNjxdDYRD1",
+				"href": "/api/accounts_mgmt/v1/subscriptions/1aAhK44xKMxSnXN3ToNjxdDYRD1"
+			},
+			"region": {
+				"kind": "CloudRegionLink",
+				"id": "us-east-1",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws/regions/us-east-1"
+			},
+			"console": {
+				"url": "https://console-openshift-console.apps.rosa.81b4b2e9-d621-4871-9a9f-0bc94ca5cd86.ucpk.p3.openshiftapps.com"
+			},
+			"api": {
+				"url": "https://api.81b4b2e9-d621-4871-9a9f-0bc94ca5cd86.ucpk.p3.openshiftapps.com:443",
+				"listening": "external"
+			},
+			"nodes": {
+				"compute": 2,
+				"availability_zones": [
+					"us-east-1a"
+				],
+				"compute_machine_type": {
+					"kind": "MachineTypeLink",
+					"id": "m5.xlarge",
+					"href": "/api/clusters_mgmt/v1/machine_types/m5.xlarge"
+				}
+			},
+			"state": "ready",
+			"flavour": {
+				"kind": "FlavourLink",
+				"id": "osd-4",
+				"href": "/api/clusters_mgmt/v1/flavours/osd-4"
+			},
+			"groups": {
+				"kind": "GroupListLink",
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/groups"
+			},
+			"properties": {
+				"rosa_cli_version": "1.2.34",
+				"rosa_creator_arn": "arn:aws:iam::289161514005:user/bchandra"
+			},
+			"aws": {
+				"subnet_ids": [
+					"subnet-03787edcff62b8193",
+					"subnet-0843d1a30a4dd1576"
+				],
+				"private_link": false,
+				"private_link_configuration": {
+					"kind": "PrivateLinkConfigurationLink",
+					"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/aws/private_link_configuration"
+				},
+				"sts": {
+					"enabled": true,
+					"role_arn": "arn:aws:iam::289161514005:role/ManagedOpenShift-HCP-ROSA-Installer-Role",
+					"support_role_arn": "arn:aws:iam::289161514005:role/ManagedOpenShift-HCP-ROSA-Support-Role",
+					"oidc_endpoint_url": "https://rh-oidc.s3.us-east-1.amazonaws.com/27cr8a215d9hmmepuns0q7800jiuemvs",
+					"operator_iam_roles": [
+						{
+							"id": "",
+							"name": "cloud-credentials",
+							"namespace": "openshift-ingress-operator",
+							"role_arn": "arn:aws:iam::289161514005:role/bala-hcp-pub-pfx-openshift-ingress-operator-cloud-credentials",
+							"service_account": ""
+						},
+						{
+							"id": "",
+							"name": "ebs-cloud-credentials",
+							"namespace": "openshift-cluster-csi-drivers",
+							"role_arn": "arn:aws:iam::289161514005:role/bala-hcp-pub-pfx-openshift-cluster-csi-drivers-ebs-cloud-credent",
+							"service_account": ""
+						},
+						{
+							"id": "",
+							"name": "kms-provider",
+							"namespace": "kube-system",
+							"role_arn": "arn:aws:iam::289161514005:role/bala-hcp-pub-pfx-kube-system-kms-provider",
+							"service_account": ""
+						},
+						{
+							"id": "",
+							"name": "kube-controller-manager",
+							"namespace": "kube-system",
+							"role_arn": "arn:aws:iam::289161514005:role/bala-hcp-pub-pfx-kube-system-kube-controller-manager",
+							"service_account": ""
+						},
+						{
+							"id": "",
+							"name": "capa-controller-manager",
+							"namespace": "kube-system",
+							"role_arn": "arn:aws:iam::289161514005:role/bala-hcp-pub-pfx-kube-system-capa-controller-manager",
+							"service_account": ""
+						},
+						{
+							"id": "",
+							"name": "control-plane-operator",
+							"namespace": "kube-system",
+							"role_arn": "arn:aws:iam::289161514005:role/bala-hcp-pub-pfx-kube-system-control-plane-operator",
+							"service_account": ""
+						},
+						{
+							"id": "",
+							"name": "cloud-credentials",
+							"namespace": "openshift-cloud-network-config-controller",
+							"role_arn": "arn:aws:iam::289161514005:role/bala-hcp-pub-pfx-openshift-cloud-network-config-controller-cloud",
+							"service_account": ""
+						},
+						{
+							"id": "",
+							"name": "installer-cloud-credentials",
+							"namespace": "openshift-image-registry",
+							"role_arn": "arn:aws:iam::289161514005:role/bala-hcp-pub-pfx-openshift-image-registry-installer-cloud-creden",
+							"service_account": ""
+						}
+					],
+					"instance_iam_roles": {
+						"worker_role_arn": "arn:aws:iam::289161514005:role/ManagedOpenShift-HCP-ROSA-Worker-Role"
+					},
+					"auto_mode": false,
+					"operator_role_prefix": "bala-hcp-pub-pfx",
+					"managed_policies": true,
+					"oidc_config": {
+						"href": "/api/clusters_mgmt/v1/oidc_configs/27cr8a215d9hmmepuns0q7800jiuemvs",
+						"id": "27cr8a215d9hmmepuns0q7800jiuemvs",
+						"organization_id": "1H1PQMDtwzAUsjPxgoWRjhSpNGD",
+						"issuer_url": "https://rh-oidc.s3.us-east-1.amazonaws.com/27cr8a215d9hmmepuns0q7800jiuemvs",
+						"creation_timestamp": "2023-11-08T21:48:24.958647Z",
+						"last_used_timestamp": "2024-03-15T16:21:48.866109Z",
+						"last_update_timestamp": "2024-03-15T16:21:48.866109Z",
+						"managed": true,
+						"reusable": true
+					}
+				},
+				"tags": {
+					"red-hat-clustertype": "rosa",
+					"red-hat-managed": "true"
+				},
+				"audit_log": {
+					"role_arn": ""
+				},
+				"billing_account_id": "289161514005",
+				"ec2_metadata_http_tokens": ""
+			},
+			"dns": {
+				"base_domain": "ucpk.p3.openshiftapps.com"
+			},
+			"network": {
+				"type": "OVNKubernetes",
+				"machine_cidr": "10.0.0.0/16",
+				"service_cidr": "172.30.0.0/16",
+				"pod_cidr": "10.128.0.0/14",
+				"host_prefix": 23
+			},
+			"external_configuration": {
+				"kind": "ExternalConfiguration",
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/external_configuration",
+				"syncsets": {
+					"kind": "SyncsetListLink",
+					"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/external_configuration/syncsets"
+				},
+				"labels": {
+					"kind": "LabelListLink",
+					"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/external_configuration/labels"
+				},
+				"manifests": {
+					"kind": "ManifestListLink",
+					"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/external_configuration/manifests"
+				}
+			},
+			"multi_az": true,
+			"managed": true,
+			"ccs": {
+				"enabled": true,
+				"disable_scp_checks": false
+			},
+			"version": {
+				"kind": "Version",
+				"id": "openshift-v4.3.40",
+				"href": "/api/clusters_mgmt/v1/versions/openshift-v4.3.40",
+				"raw_id": "4.3.40",
+				"channel_group": "stable",
+				"end_of_life_timestamp": "2025-06-30T00:00:00Z"
+			},
+			"identity_providers": {
+				"kind": "IdentityProviderListLink",
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/identity_providers"
+			},
+			"aws_infrastructure_access_role_grants": {
+				"kind": "AWSInfrastructureAccessRoleGrantLink",
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/aws_infrastructure_access_role_grants"
+			},
+			"addons": {
+				"kind": "AddOnInstallationListLink",
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/addons"
+			},
+			"ingresses": {
+				"kind": "IngressListLink",
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/ingresses"
+			},
+			"node_pools": {
+				"kind": "NodePoolListLink",
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/node_pools"
+			},
+			"inflight_checks": {
+				"kind": "InflightCheckListLink",
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/inflight_checks"
+			},
+			"product": {
+				"kind": "ProductLink",
+				"id": "rosa",
+				"href": "/api/clusters_mgmt/v1/products/rosa"
+			},
+			"status": {
+				"state": "ready",
+				"dns_ready": true,
+				"oidc_ready": true,
+				"provision_error_message": "",
+				"provision_error_code": "",
+				"configuration_mode": "full",
+				"limited_support_reason_count": 0
+			},
+			"etcd_encryption": false,
+			"billing_model": "marketplace-aws",
+			"disable_user_workload_monitoring": false,
+			"managed_service": {
+				"enabled": false,
+				"managed": false
+			},
+			"hypershift": {
+				"enabled": true
+			},
+			"byo_oidc": {
+				"enabled": false
+			},
+			"delete_protection": {
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/delete_protection",
+				"enabled": false
+			},
+			"external_auth_config": {
+				"kind": "ExternalAuthConfig",
+				"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/external_auth_config",
+				"enabled": false,
+				"external_auths": {
+					"href": "/api/clusters_mgmt/v1/clusters/1ccf4bsakl8i97eva3fqr6mdibp61ef1/external_auth_config/external_auths"
+				}
+			}
+		}
+	]
+}
