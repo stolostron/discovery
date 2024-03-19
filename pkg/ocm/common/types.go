@@ -50,15 +50,6 @@ type Request struct {
 	// Add any other common fields here.
 }
 
-// NewError creates a new Error object with the provided code and reason.
-func NewError(code, reason string) *Error {
-	// Implement NewError function here
-	return &Error{
-		Code:   code,
-		Reason: reason,
-	}
-}
-
 // HTTPRequester represents an interface for making HTTP requests
 type HTTPRequester interface {
 	Get(*http.Request) (*http.Response, error)

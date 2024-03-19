@@ -124,13 +124,3 @@ func prepareRequest(request Request, endpointURL string) (*http.Request, error) 
 	getRequest = getRequest.WithContext(context.Background())
 	return getRequest, nil
 }
-
-// GetHTTPClient returns the HTTP client
-func GetHTTPClient() HTTPRequester {
-	return httpClient
-}
-
-// GetProvider returns the resource loader
-func GetProvider() ResourceLoader {
-	return provider
-}

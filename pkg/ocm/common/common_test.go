@@ -6,8 +6,10 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
+	v1 "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/cluster"
 	sub "github.com/stolostron/discovery/pkg/ocm/subscription"
 	"github.com/stretchr/testify/assert"
@@ -29,19 +31,16 @@ func TestProviderGetResourcesNoError(t *testing.T) {
 		name         string
 		endpointURL  string
 		testFilePath string
-		// want         bool
 	}{
 		{
 			name:         "Should get cluster resources with no error",
 			endpointURL:  cluster.GetClusterURL(),
 			testFilePath: "../cluster/testdata/clusters_mgmt_mock.json",
-			// want:         true,
 		},
 		{
 			name:         "Should get subscription resources with no error",
 			endpointURL:  sub.GetSubscriptionURL(),
 			testFilePath: "../subscription/testdata/accounts_mgmt_mock.json",
-			// want:         false,
 		},
 	}
 
@@ -64,6 +63,90 @@ func TestProviderGetResourcesNoError(t *testing.T) {
 			assert.NotNil(t, response)
 			assert.Nil(t, err)
 			assert.EqualValues(t, 1, len(response.Items))
+		})
+	}
+}
+
+func TestParseResponse(t *testing.T) {
+	tests := []struct {
+		name     string
+		response *http.Response
+		want     bool
+	}{
+		{
+			name: "Should parse response with no error",
+			response: &http.Response{
+				Body:       io.NopCloser(strings.NewReader(`{"kind":"example","page":1,"size":10,"total":100,"items":[{"id":1,"name":"item1"},{"id":2,"name":"item2"}]}`)),
+				StatusCode: 200,
+			},
+			want: true,
+		},
+		{
+			name: "Should parse response with error",
+			response: &http.Response{
+				Body:       io.NopCloser(strings.NewReader(`{"reason":"example reason"}`)),
+				StatusCode: 400,
+			},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseResponse(tt.response)
+
+			if tt.response.StatusCode > 299 {
+				if ok := got == nil; !ok {
+					t.Errorf("parseResponse(response) got (%v,  %v), want %v", got, err, tt.want)
+				}
+
+			} else {
+				if ok := err == nil; !ok {
+					t.Errorf("parseResponse(response) got (%v, %v), want %v", got, err, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestPrepareRequest(t *testing.T) {
+	tests := []struct {
+		name        string
+		endpointURL string
+		request     Request
+		want        bool
+	}{
+		{
+			name:        "Should prepare request for getting cluster resources",
+			endpointURL: cluster.GetClusterURL(),
+			request: Request{
+				BaseURL: ocmBaseURL,
+				Token:   "test-token",
+				Filter: v1.Filter{
+					LastActive: 2,
+				},
+			},
+			want: true,
+		},
+		{
+			name:        "Should prepare request for getting subscription resources",
+			endpointURL: sub.GetSubscriptionURL(),
+			request: Request{
+				BaseURL: ocmBaseURL,
+				Token:   "test-token",
+				Filter: v1.Filter{
+					LastActive: 2,
+				},
+			},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, err := prepareRequest(tt.request, tt.endpointURL); err != nil {
+				t.Errorf("prepareRequest(request, endpointURL), got %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
