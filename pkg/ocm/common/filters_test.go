@@ -7,12 +7,77 @@ import (
 	"time"
 
 	discovery "github.com/stolostron/discovery/api/v1"
+	"github.com/stolostron/discovery/pkg/ocm/cluster"
 	sub "github.com/stolostron/discovery/pkg/ocm/subscription"
 	"github.com/stolostron/discovery/pkg/ocm/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestFilter(t *testing.T) {
+func TestFilterResourcesClusters(t *testing.T) {
+	day := metav1.NewTime(time.Date(2020, 5, 29, 6, 0, 0, 0, time.UTC))
+	tests := []struct {
+		name string
+		f    discovery.Filter
+		subs []interface{}
+		want []cluster.Cluster
+	}{
+		{
+			name: "hi",
+			f:    discovery.Filter{LastActive: 1000000000, OpenShiftVersions: []discovery.Semver{"4.8", "4.9"}},
+			subs: []interface{}{
+				cluster.Cluster{
+					DisplayName:       "valid-cluster",
+					ExternalID:        "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+					OpenShiftVersion:  "4.8.5",
+					State:             "Ready",
+					ActivityTimestamp: &day,
+				},
+				cluster.Cluster{
+					DisplayName:       "filtered-by-status",
+					OpenShiftVersion:  "4.8.5",
+					State:             "Archived",
+					ActivityTimestamp: &day,
+				},
+				cluster.Cluster{
+					DisplayName:       "filtered-by-version",
+					OpenShiftVersion:  "4.6.5",
+					State:             "Ready",
+					ActivityTimestamp: &day,
+				},
+				cluster.Cluster{
+					DisplayName:      "filtered-by-date",
+					OpenShiftVersion: "4.6.5",
+					State:            "Archived",
+				},
+			},
+			want: []cluster.Cluster{
+				{
+					DisplayName:       "valid-cluster",
+					ExternalID:        "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+					OpenShiftVersion:  "4.8.5",
+					State:             "Active",
+					ActivityTimestamp: &day,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := FilterResources(tt.subs, "cluster", tt.f).([]cluster.Cluster)
+			if len(got) != len(tt.want) {
+				t.Fatalf("Filter() did not return the desired number of clusters. got = %+v, want %+v", got, tt.want)
+			}
+			for i := range got {
+				if got[i].DisplayName != tt.want[i].DisplayName {
+					t.Errorf("Filter() = %+v, want %+v", got, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestFilterResourcesSubscription(t *testing.T) {
 	day := metav1.NewTime(time.Date(2020, 5, 29, 6, 0, 0, 0, time.UTC))
 	tests := []struct {
 		name string

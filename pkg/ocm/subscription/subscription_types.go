@@ -7,11 +7,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// subscriptionURL is the URL format for accessing subscriptions in OCM.
 const (
 	subscriptionURL = "%s/api/accounts_mgmt/v1/subscriptions"
 )
 
-// Subscription ...
+// Subscription represents a single cluster's subscription format returned by OCM.
 type Subscription struct {
 	ID                string             `json:"id" yaml:"id"`
 	Kind              string             `json:"kind" yaml:"kind"`
@@ -36,15 +37,7 @@ type Subscription struct {
 	LastReleasedAt    *metav1.Time       `json:"last_released_at,omitempty" yaml:"last_released_at,omitempty"`
 }
 
+// GetSubscriptionURL returns the URL format for accessing cluster's subscriptions in OCM.
 func GetSubscriptionURL() string {
 	return subscriptionURL
-}
-
-// NewSubscription creates a new Subscription object with the provided ID and kind.
-func NewSubscription(id, kind, name string) *Subscription {
-	return &Subscription{
-		ID:          id,
-		Kind:        kind,
-		DisplayName: name,
-	}
 }

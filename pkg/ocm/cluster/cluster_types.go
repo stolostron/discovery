@@ -7,11 +7,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// clusterURL is the URL format for accessing clusters in OCM.
 const (
 	clusterURL = "%s/api/clusters_mgmt/v1/clusters"
 )
 
-// Cluster represents a single cluster format returned by OCM
+// Cluster represents a single cluster format returned by OCM.
 type Cluster struct {
 	Kind                     string                 `json:"kind" yaml:"kind"`
 	ID                       string                 `json:"id" yaml:"id"`
@@ -46,13 +47,7 @@ type Cluster struct {
 	DNSReady                 bool                   `json:"dns_ready,omitempty" yaml:"dns_ready,omitempty"`
 }
 
+// GetClusterURL returns the URL format for accessing clusters in OCM.
 func GetClusterURL() string {
 	return clusterURL
-}
-
-func NewCluster(name string) *Cluster {
-	return &Cluster{
-		Name:        name,
-		DisplayName: name,
-	}
 }
