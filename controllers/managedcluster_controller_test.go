@@ -267,9 +267,6 @@ func Test_setManagedStatus(t *testing.T) {
 }
 
 func Test_unsetManagedStatus(t *testing.T) {
-	type args struct {
-		dc *discovery.DiscoveredCluster
-	}
 	tests := []struct {
 		name string
 		dc   *discovery.DiscoveredCluster

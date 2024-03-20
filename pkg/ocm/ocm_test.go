@@ -10,15 +10,18 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
-	"github.com/stolostron/discovery/pkg/ocm/subscription"
+	"github.com/stolostron/discovery/pkg/ocm/cluster"
+	"github.com/stolostron/discovery/pkg/ocm/common"
 	sub "github.com/stolostron/discovery/pkg/ocm/subscription"
+	"github.com/stolostron/discovery/pkg/ocm/utils"
 )
 
 var (
 	getTokenFunc func(auth.AuthRequest) (string, error)
 
-	getSubscriptionsFunc func() ([]subscription.Subscription, error)
-	subscriptionGetter   = subscriptionGetterMock{}
+	getClustersFunc      func() ([]cluster.Cluster, error)
+	getSubscriptionsFunc func() ([]sub.Subscription, error)
+	resourceGetter       = resourceGetterMock{}
 )
 
 // This mocks the authService request and returns a dummy access token
@@ -30,24 +33,38 @@ func (m *authServiceMock) GetToken(request auth.AuthRequest) (string, error) {
 
 // The mocks the GetClusters request to return a select few clusters without connection
 // to an external datasource
-type subscriptionGetterMock struct{}
+type resourceGetterMock struct{}
 
-func (m *subscriptionGetterMock) GetSubscriptions() ([]subscription.Subscription, error) {
+func (m *resourceGetterMock) GetClusters() ([]cluster.Cluster, error) {
+	return getClustersFunc()
+}
+
+func (m *resourceGetterMock) GetSubscriptions() ([]sub.Subscription, error) {
 	return getSubscriptionsFunc()
 }
 
 // This mocks the NewClient function and returns an instance of the subscriptionGetterMock
-type subscriptionClientGeneratorMock struct{}
+type ClientGeneratorMock struct{}
 
-func (m *subscriptionClientGeneratorMock) NewClient(config subscription.SubscriptionRequest) subscription.SubscriptionGetter {
-	return &subscriptionGetter
+func (m *ClientGeneratorMock) NewClient(config common.Request) common.ResourceGetter {
+	return &resourceGetter
 }
 
 // clustersResponse takes in a file with subscription data and returns a new mock function
-func subscriptionResponse(testdata string) func() ([]subscription.Subscription, error) {
-	return func() ([]subscription.Subscription, error) {
+func clustersResponse(testdata string) func() ([]cluster.Cluster, error) {
+	return func() ([]cluster.Cluster, error) {
 		file, _ := os.ReadFile(testdata)
-		subscriptions := []subscription.Subscription{}
+		clusters := []cluster.Cluster{}
+		err := json.Unmarshal([]byte(file), &clusters)
+		return clusters, err
+	}
+}
+
+// subscriptionsResponse takes in a file with subscription data and returns a new mock function
+func subscriptionsResponse(testdata string) func() ([]sub.Subscription, error) {
+	return func() ([]sub.Subscription, error) {
+		file, _ := os.ReadFile(testdata)
+		subscriptions := []sub.Subscription{}
 		err := json.Unmarshal([]byte(file), &subscriptions)
 		return subscriptions, err
 	}
@@ -63,7 +80,8 @@ func TestDiscoverClusters(t *testing.T) {
 	tests := []struct {
 		name             string
 		authfunc         func(auth.AuthRequest) (string, error)
-		subscriptionFunc func() ([]subscription.Subscription, error)
+		clusterFunc      func() ([]cluster.Cluster, error)
+		subscriptionFunc func() ([]sub.Subscription, error)
 		args             args
 		want             int
 		wantErr          bool
@@ -75,7 +93,8 @@ func TestDiscoverClusters(t *testing.T) {
 				return "valid_access_token", nil
 			},
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
-			subscriptionFunc: subscriptionResponse("testdata/1_mock_subscription.json"),
+			clusterFunc:      clustersResponse("testdata/1_mock_cluster.json"),
+			subscriptionFunc: subscriptionsResponse("testdata/1_mock_subscription.json"),
 			args: args{
 				token:       "test",
 				baseURL:     "test",
@@ -92,7 +111,8 @@ func TestDiscoverClusters(t *testing.T) {
 				return "valid_access_token", nil
 			},
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
-			subscriptionFunc: subscriptionResponse("testdata/3_mock_subscriptions.json"),
+			clusterFunc:      clustersResponse("testdata/3_mock_cluster.json"),
+			subscriptionFunc: subscriptionsResponse("testdata/3_mock_subscriptions.json"),
 			args: args{
 				token:       "test",
 				baseURL:     "test",
@@ -103,13 +123,15 @@ func TestDiscoverClusters(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			auth.AuthClient = &authServiceMock{}                                          // Mocks out the call to auth service
-			subscription.SubscriptionClientGenerator = &subscriptionClientGeneratorMock{} // Mocks out the subscription client creation
+			auth.AuthClient = &authServiceMock{}               // Mocks out the call to auth service
+			common.OCMClientGenerator = &ClientGeneratorMock{} // Mocks out the subscription client creation
 
 			getTokenFunc = tt.authfunc
 			// TODO: Running `getSubscriptionsFunc` should yield the subscriptions to test against, but we don't do this
+			getClustersFunc = tt.clusterFunc
 			getSubscriptionsFunc = tt.subscriptionFunc
 
 			got, err := DiscoverClusters(tt.args.token, tt.args.baseURL, tt.args.baseAuthURL, tt.args.filters)
@@ -128,12 +150,12 @@ func TestDiscoverClusters(t *testing.T) {
 func Test_computeDisplayName(t *testing.T) {
 	tests := []struct {
 		name string
-		sub  subscription.Subscription
+		sub  sub.Subscription
 		want string
 	}{
 		{
 			name: "Custom displayname set",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
 				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 				DisplayName:       "my-custom-name",
@@ -142,7 +164,7 @@ func Test_computeDisplayName(t *testing.T) {
 		},
 		{
 			name: "No custom displayname - use consoleURL",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
 				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 				DisplayName:       "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
@@ -151,7 +173,7 @@ func Test_computeDisplayName(t *testing.T) {
 		},
 		{
 			name: "Displayname missing - use consoleURL",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
 				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 				DisplayName:       "",
@@ -160,7 +182,7 @@ func Test_computeDisplayName(t *testing.T) {
 		},
 		{
 			name: "Displayname and consoleURL missing - use GUID",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL:        "",
 				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 				DisplayName:       "",
@@ -169,7 +191,7 @@ func Test_computeDisplayName(t *testing.T) {
 		},
 		{
 			name: "ConsoleURL malformed - use GUID",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL:        "www.installer-pool-j88kj.dev01.red-chesterfield.com",
 				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 				DisplayName:       "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
@@ -178,7 +200,7 @@ func Test_computeDisplayName(t *testing.T) {
 		},
 		{
 			name: "Port in consoleURL - remove port",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com:6443",
 				ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
 				DisplayName:       "",
@@ -198,33 +220,33 @@ func Test_computeDisplayName(t *testing.T) {
 func Test_computeApiUrl(t *testing.T) {
 	tests := []struct {
 		name string
-		sub  subscription.Subscription
+		sub  sub.Subscription
 		want string
 	}{
 		{
 			name: "Regular consoleURL",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL: "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
 			},
 			want: "https://api.installer-pool-j88kj.dev01.red-chesterfield.com:6443",
 		},
 		{
 			name: "Irregular consoleURL",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL: "https://console.apps.ocp.mylab.int",
 			},
 			want: "",
 		},
 		{
 			name: "No consoleURL",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL: "",
 			},
 			want: "",
 		},
 		{
 			name: "Port in consoleURL",
-			sub: subscription.Subscription{
+			sub: sub.Subscription{
 				ConsoleURL: "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com:443",
 			},
 			want: "https://api.installer-pool-j88kj.dev01.red-chesterfield.com:6443",
@@ -242,13 +264,13 @@ func Test_computeApiUrl(t *testing.T) {
 func Test_computeType(t *testing.T) {
 	tests := []struct {
 		name string
-		sub  subscription.Subscription
+		sub  sub.Subscription
 		want string
 	}{
 		{
 			name: "Regular type",
-			sub: subscription.Subscription{
-				Plan: subscription.StandardKind{
+			sub: sub.Subscription{
+				Plan: utils.StandardKind{
 					ID: "OCP",
 				},
 			},
@@ -256,8 +278,8 @@ func Test_computeType(t *testing.T) {
 		},
 		{
 			name: "Anything goes",
-			sub: subscription.Subscription{
-				Plan: subscription.StandardKind{
+			sub: sub.Subscription{
+				Plan: utils.StandardKind{
 					ID: "ABC123",
 				},
 			},
@@ -265,8 +287,8 @@ func Test_computeType(t *testing.T) {
 		},
 		{
 			name: "ROSA transform",
-			sub: subscription.Subscription{
-				Plan: subscription.StandardKind{
+			sub: sub.Subscription{
+				Plan: utils.StandardKind{
 					ID: "MOA",
 				},
 			},
@@ -327,7 +349,7 @@ func TestFormatCLusterError(t *testing.T) {
 			sub: sub.Subscription{
 				ExternalClusterID: "",
 				DisplayName:       "my-custom-name",
-				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
+				Metrics:           []utils.Metrics{{OpenShiftVersion: "4.8.5"}},
 			},
 			dc:   discovery.DiscoveredCluster{},
 			want: false,
@@ -338,7 +360,7 @@ func TestFormatCLusterError(t *testing.T) {
 				ExternalClusterID: "exists",
 				DisplayName:       "my-custom-name",
 				Status:            "Reserved",
-				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
+				Metrics:           []utils.Metrics{{OpenShiftVersion: "4.8.5"}},
 			},
 			dc:   discovery.DiscoveredCluster{},
 			want: false,

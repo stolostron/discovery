@@ -1,68 +1,136 @@
 // Copyright Contributors to the Open Cluster Management project
 
-package subscription
+package common
 
 import (
 	"testing"
 	"time"
 
 	discovery "github.com/stolostron/discovery/api/v1"
+	"github.com/stolostron/discovery/pkg/ocm/cluster"
+	sub "github.com/stolostron/discovery/pkg/ocm/subscription"
+	"github.com/stolostron/discovery/pkg/ocm/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestFilter(t *testing.T) {
+func TestFilterResourcesClusters(t *testing.T) {
 	day := metav1.NewTime(time.Date(2020, 5, 29, 6, 0, 0, 0, time.UTC))
 	tests := []struct {
 		name string
 		f    discovery.Filter
-		subs []Subscription
-		want []Subscription
+		subs []interface{}
+		want []cluster.Cluster
 	}{
 		{
 			name: "hi",
 			f:    discovery.Filter{LastActive: 1000000000, OpenShiftVersions: []discovery.Semver{"4.8", "4.9"}},
-			subs: []Subscription{
+			subs: []interface{}{
+				cluster.Cluster{
+					DisplayName:       "valid-cluster",
+					ExternalID:        "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+					OpenShiftVersion:  "4.8.5",
+					State:             "Ready",
+					ActivityTimestamp: &day,
+				},
+				cluster.Cluster{
+					DisplayName:       "filtered-by-status",
+					OpenShiftVersion:  "4.8.5",
+					State:             "Archived",
+					ActivityTimestamp: &day,
+				},
+				cluster.Cluster{
+					DisplayName:       "filtered-by-version",
+					OpenShiftVersion:  "4.6.5",
+					State:             "Ready",
+					ActivityTimestamp: &day,
+				},
+				cluster.Cluster{
+					DisplayName:      "filtered-by-date",
+					OpenShiftVersion: "4.6.5",
+					State:            "Archived",
+				},
+			},
+			want: []cluster.Cluster{
 				{
+					DisplayName:       "valid-cluster",
+					ExternalID:        "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
+					OpenShiftVersion:  "4.8.5",
+					State:             "Active",
+					ActivityTimestamp: &day,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := FilterResources(tt.subs, "cluster", tt.f).([]cluster.Cluster)
+			if len(got) != len(tt.want) {
+				t.Fatalf("Filter() did not return the desired number of clusters. got = %+v, want %+v", got, tt.want)
+			}
+			for i := range got {
+				if got[i].DisplayName != tt.want[i].DisplayName {
+					t.Errorf("Filter() = %+v, want %+v", got, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestFilterResourcesSubscription(t *testing.T) {
+	day := metav1.NewTime(time.Date(2020, 5, 29, 6, 0, 0, 0, time.UTC))
+	tests := []struct {
+		name string
+		f    discovery.Filter
+		subs []interface{}
+		want []sub.Subscription
+	}{
+		{
+			name: "hi",
+			f:    discovery.Filter{LastActive: 1000000000, OpenShiftVersions: []discovery.Semver{"4.8", "4.9"}},
+			subs: []interface{}{
+				sub.Subscription{
 					DisplayName:       "valid-subscription",
 					ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
 					ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
-					Metrics:           []Metrics{{OpenShiftVersion: "4.8.5"}},
+					Metrics:           []utils.Metrics{{OpenShiftVersion: "4.8.5"}},
 					Status:            "Active",
 					LastTelemetryDate: &day,
 				},
-				{
+				sub.Subscription{
 					DisplayName:       "filtered-by-status",
-					Metrics:           []Metrics{{OpenShiftVersion: "4.8.5"}},
+					Metrics:           []utils.Metrics{{OpenShiftVersion: "4.8.5"}},
 					Status:            "Archived",
 					LastTelemetryDate: &day,
 				},
-				{
+				sub.Subscription{
 					DisplayName:       "filtered-by-version",
-					Metrics:           []Metrics{{OpenShiftVersion: "4.6.5"}},
+					Metrics:           []utils.Metrics{{OpenShiftVersion: "4.6.5"}},
 					Status:            "Active",
 					LastTelemetryDate: &day,
 				},
-				{
+				sub.Subscription{
 					DisplayName: "filtered-by-date",
-					Metrics:     []Metrics{{OpenShiftVersion: "4.6.5"}},
-					Status:      "Active",
+					Metrics:     []utils.Metrics{{OpenShiftVersion: "4.6.5"}},
+					Status:      "Archived",
 				},
 			},
-			want: []Subscription{
+			want: []sub.Subscription{
 				{
 					DisplayName:       "valid-subscription",
 					ConsoleURL:        "https://console-openshift-console.apps.installer-pool-j88kj.dev01.red-chesterfield.com",
 					ExternalClusterID: "9cf50ab1-1f8a-4205-8a84-6958d49b469b",
-					Metrics:           []Metrics{{OpenShiftVersion: "4.8.5"}},
+					Metrics:           []utils.Metrics{{OpenShiftVersion: "4.8.5"}},
 					Status:            "Active",
 					LastTelemetryDate: &day,
 				},
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Filter(tt.subs, tt.f)
+			got := FilterResources(tt.subs, "subscription", tt.f).([]sub.Subscription)
 			if len(got) != len(tt.want) {
 				t.Fatalf("Filter() did not return the desired number of subscriptions. got = %+v, want %+v", got, tt.want)
 			}
@@ -78,27 +146,27 @@ func TestFilter(t *testing.T) {
 func Test_statusFilter(t *testing.T) {
 	tests := []struct {
 		name string
-		sub  Subscription
+		sub  sub.Subscription
 		want bool
 	}{
 		{
 			name: "Archived sub",
-			sub:  Subscription{Status: "Archived"},
+			sub:  sub.Subscription{Status: "Archived"},
 			want: false,
 		},
 		{
 			name: "Deprovisioned sub",
-			sub:  Subscription{Status: "Deprovisioned"},
+			sub:  sub.Subscription{Status: "Deprovisioned"},
 			want: false,
 		},
 		{
 			name: "Non-archived sub",
-			sub:  Subscription{Status: "Active"},
+			sub:  sub.Subscription{Status: "Active"},
 			want: true,
 		},
 		{
 			name: "No status",
-			sub:  Subscription{Status: ""},
+			sub:  sub.Subscription{Status: ""},
 			want: true,
 		},
 	}
@@ -112,77 +180,40 @@ func Test_statusFilter(t *testing.T) {
 	}
 }
 
-func Test_deprovisionedFilter(t *testing.T) {
-	tests := []struct {
-		name string
-		sub  Subscription
-		want bool
-	}{
-		{
-			name: "Archived sub",
-			sub:  Subscription{Status: "Archived"},
-			want: true,
-		},
-		{
-			name: "Deprovisioned sub",
-			sub:  Subscription{Status: "Deprovisioned"},
-			want: false,
-		},
-		{
-			name: "Non-archived sub",
-			sub:  Subscription{Status: "Active"},
-			want: true,
-		},
-		{
-			name: "No status",
-			sub:  Subscription{Status: ""},
-			want: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			filter := deprovisionedFilter()
-			if got := filter(tt.sub); got != tt.want {
-				t.Errorf("archiveFilter() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_openshiftVersionFilter(t *testing.T) {
 	tests := []struct {
 		name     string
-		sub      Subscription
+		sub      sub.Subscription
 		versions []discovery.Semver
 		want     bool
 	}{
 		{
 			name:     "Matching version",
-			sub:      Subscription{Metrics: []Metrics{{OpenShiftVersion: "4.6.1"}}},
+			sub:      sub.Subscription{Metrics: []utils.Metrics{{OpenShiftVersion: "4.6.1"}}},
 			versions: []discovery.Semver{"4.5", "4.6"},
 			want:     true,
 		},
 		{
 			name:     "Old version",
-			sub:      Subscription{Metrics: []Metrics{{OpenShiftVersion: "4.6.1"}}},
+			sub:      sub.Subscription{Metrics: []utils.Metrics{{OpenShiftVersion: "4.6.1"}}},
 			versions: []discovery.Semver{"4.8", "4.9"},
 			want:     false,
 		},
 		{
 			name:     "Missing version",
-			sub:      Subscription{Metrics: []Metrics{{OpenShiftVersion: ""}}},
+			sub:      sub.Subscription{Metrics: []utils.Metrics{{OpenShiftVersion: ""}}},
 			versions: []discovery.Semver{"4.8", "4.9"},
 			want:     false,
 		},
 		{
 			name:     "Missing metrics",
-			sub:      Subscription{},
+			sub:      sub.Subscription{},
 			versions: []discovery.Semver{"4.8", "4.9"},
 			want:     false,
 		},
 		{
 			name:     "No version filter",
-			sub:      Subscription{Metrics: []Metrics{{OpenShiftVersion: ""}}},
+			sub:      sub.Subscription{Metrics: []utils.Metrics{{OpenShiftVersion: ""}}},
 			versions: []discovery.Semver{},
 			want:     true,
 		},
@@ -207,56 +238,56 @@ func Test_lastActiveFilter(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		sub     Subscription
+		sub     sub.Subscription
 		current time.Time
 		daysAgo int
 		want    bool
 	}{
 		{
 			name:    "Same day earlier",
-			sub:     Subscription{LastTelemetryDate: &earlier},
+			sub:     sub.Subscription{LastTelemetryDate: &earlier},
 			current: today.Time,
 			daysAgo: 0,
 			want:    false,
 		},
 		{
 			name:    "Same day later",
-			sub:     Subscription{LastTelemetryDate: &later},
+			sub:     sub.Subscription{LastTelemetryDate: &later},
 			current: today.Time,
 			daysAgo: 0,
 			want:    true,
 		},
 		{
 			name:    "Day before",
-			sub:     Subscription{LastTelemetryDate: &yesterday},
+			sub:     sub.Subscription{LastTelemetryDate: &yesterday},
 			current: today.Time,
 			daysAgo: 0,
 			want:    false,
 		},
 		{
 			name:    "Later yesterday",
-			sub:     Subscription{LastTelemetryDate: &yesterday},
+			sub:     sub.Subscription{LastTelemetryDate: &yesterday},
 			current: today.Time,
 			daysAgo: 1,
 			want:    true,
 		},
 		{
 			name:    "Earlier yesterday",
-			sub:     Subscription{LastTelemetryDate: &earlyYesterday},
+			sub:     sub.Subscription{LastTelemetryDate: &earlyYesterday},
 			current: today.Time,
 			daysAgo: 1,
 			want:    false,
 		},
 		{
 			name:    "Two days apart",
-			sub:     Subscription{LastTelemetryDate: &yesterday},
+			sub:     sub.Subscription{LastTelemetryDate: &yesterday},
 			current: tomorrow.Time,
 			daysAgo: 1,
 			want:    false,
 		},
 		{
 			name:    "Negative days ago",
-			sub:     Subscription{LastTelemetryDate: &later},
+			sub:     sub.Subscription{LastTelemetryDate: &later},
 			current: today.Time,
 			daysAgo: -1,
 			want:    true,

@@ -2,7 +2,7 @@
 
 .PHONY: local-server
 
-SERVER_IMG := mock-ocm-server
+SERVER_IMG := discovery-testserver
 SERVER_URL ?= $(REGISTRY)/$(SERVER_IMG):$(VERSION)
 
 ##@ Mock Server

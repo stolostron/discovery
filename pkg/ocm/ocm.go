@@ -9,6 +9,7 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
+	"github.com/stolostron/discovery/pkg/ocm/common"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -26,19 +27,26 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 		return nil, err
 	}
 
-	// Get subscriptions from accounts_mgmt api
-	subscriptionRequestConfig := subscription.SubscriptionRequest{
+	// Get clusters from clusters_mgmt and subscriptions from accounts_mgmt api
+	requestConfig := common.Request{
 		Token:   accessToken,
 		BaseURL: baseURL,
 		Filter:  filters,
 	}
-	subscriptionClient := subscription.SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
-	subscriptions, err := subscriptionClient.GetSubscriptions()
+
+	var discoveredClusters []discovery.DiscoveredCluster
+	client := common.OCMClientGenerator.NewClient(requestConfig)
+
+	_, err = client.GetClusters()
 	if err != nil {
 		return nil, err
 	}
 
-	var discoveredClusters []discovery.DiscoveredCluster
+	subscriptions, err := client.GetSubscriptions()
+	if err != nil {
+		return nil, err
+	}
+
 	for _, sub := range subscriptions {
 		// Build a DiscoveredCluster object from the subscription information
 		if dc, valid := formatCluster(sub); valid {
@@ -91,10 +99,7 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 // IsUnrecoverable returns true if the specified error is not temporary
 // and will continue to occur with the current state.
 func IsUnrecoverable(err error) bool {
-	if errors.Is(err, auth.ErrInvalidToken) {
-		return true
-	}
-	return false
+	return errors.Is(err, auth.ErrInvalidToken)
 }
 
 // computeDisplayName tries to provide a more user-friendly name if set

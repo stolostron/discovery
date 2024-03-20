@@ -360,10 +360,7 @@ var _ = Describe("[P1][Sev1][installer] Discoveryconfig controller", func() {
 			createdNS := &corev1.Namespace{}
 			Eventually(func() bool {
 				err := k8sClient.Get(ctx, types.NamespacedName{Name: secondNamespace}, createdNS)
-				if err != nil {
-					return false
-				}
-				return true
+				return err == nil
 			}, timeout, interval).Should(BeTrue())
 		})
 
@@ -542,18 +539,6 @@ func removeFinalizerFromRoleBinding(roleBinding rbacv1.RoleBinding) error {
 	return err
 }
 
-// annotate adds an annotation to modify the baseUrl used with the discoveryconfig
-func annotate(dc *discovery.DiscoveryConfig) *discovery.DiscoveryConfig {
-	if baseURL != "" {
-		dc.SetAnnotations(map[string]string{"ocmBaseURL": baseURL, "authBaseURL": baseURL})
-		return dc
-	} else {
-		dc.SetAnnotations(map[string]string{"ocmBaseURL": defaultBaseUrl(), "authBaseURL": defaultBaseUrl()})
-
-		return dc
-	}
-}
-
 // annotateWithScenario adds an annotation to modify the baseUrl with a scenario path
 func annotateWithScenario(dc *discovery.DiscoveryConfig, scenario string) *discovery.DiscoveryConfig {
 	if baseURL != "" {
@@ -576,26 +561,6 @@ func updateTestserverScenario(scenario string) {
 	Expect(k8sClient.Get(ctx, discoveryConfig, config)).To(Succeed())
 	annotateWithScenario(config, scenario)
 	Expect(k8sClient.Update(ctx, config)).Should(Succeed())
-}
-
-func listDiscoveredClusters() (*discovery.DiscoveredClusterList, error) {
-	discoveredClusters := &discovery.DiscoveredClusterList{}
-	err := k8sClient.List(ctx, discoveredClusters, client.InNamespace(discoveryNamespace))
-	return discoveredClusters, err
-}
-
-func getDiscoveredClusterByID(id string) (*discovery.DiscoveredCluster, error) {
-	discoveredClusters, err := listDiscoveredClusters()
-	if err != nil {
-		return nil, err
-	}
-	for _, dc := range discoveredClusters.Items {
-		dc := dc
-		if dc.Spec.Name == id {
-			return &dc, nil
-		}
-	}
-	return nil, fmt.Errorf("Cluster not found")
 }
 
 func countManagedDiscoveredClusters(namespace string) (int, error) {
