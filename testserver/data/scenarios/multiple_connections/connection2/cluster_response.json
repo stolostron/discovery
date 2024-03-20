@@ -1,0 +1,272 @@
+{
+	"kind": "ClusterList",
+	"page": 1,
+	"size": 4,
+	"total": 4,
+	"items": [
+		{
+			"kind": "Cluster",
+			"id": "1oLJYVMPgW338LtxovO7sGBg1w2",
+			"href": "/api/clusters_mgmt/v1/clusters/1oLJYVMPgW338LtxovO7sGBg1w2",
+			"name": "",
+			"api": {
+
+			},
+			"external_id": "844b3bf1-8d70-469c-a113-f1cd5db45c63",
+			"display_name": "844b3bf1-8d70-469c-a113-f1cd5db45c63",
+			"creation_timestamp": "--TODAY--",
+			"activity_timestamp": "--TODAY--",
+			"cloud_provider": {
+				"kind": "CloudProviderLink",
+				"id": "aws",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws"
+			},
+			"openshift_version": "4.6.9",
+			"subscription": {
+				"kind": "SubscriptionLink",
+				"id": "1aAhK44xKMxSnXN3ToNjxdDYRD1",
+				"href": "/api/accounts_mgmt/v1/subscriptions/1aAhK44xKMxSnXN3ToNjxdDYRD1"
+			},
+			"region": {
+				"kind": "CloudRegionLink",
+				"id": "us-east-1",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws/regions/us-east-1"
+			},
+			"console": {
+				"url": "https://console-openshift-console.apps.jdgray-c6mvq.dev01.red-chesterfield.com"
+			},
+			"nodes": {
+				"compute": 2,
+				"availability_zones": [
+					"us-east-1a"
+				],
+				"compute_machine_type": {
+					"kind": "MachineTypeLink",
+					"id": "m5.xlarge",
+					"href": "/api/clusters_mgmt/v1/machine_types/m5.xlarge"
+				}
+			},
+			"state": "ready",
+			"groups": null,
+			"network": null,
+			"external_configuration": null,
+			"multi_az": false,
+			"managed": false,
+			"byoc": false,
+			"ccs": null,
+			"identity_providers": null,
+			"aws_infrastructure_access_role_grants": null,
+			"metrics": {
+				"health_state": "healthy",
+				"critical_alerts_firing": 0,
+				"operators_condition_failing": 0,
+				"subscription_cpu_total": 6,
+				"subscription_socket_total": 3,
+				"subscription_obligation_exists": 2
+			},
+			"addons": null,
+			"ingresses": null,
+			"health_state": "",
+			"product": null,
+			"dns_ready": false
+		},
+		{
+			"kind": "Cluster",
+			"id": "1oOnkLowSFanCEf67QuxR1raTyt",
+			"href": "/api/clusters_mgmt/v1/clusters/1oOnkLowSFanCEf67QuxR1raTyt",
+			"name": "",
+			"api": {
+
+			},
+			"external_id": "dbcbbeeb-7a15-4c64-9975-6f6c331255c8",
+			"display_name": "dbcbbeeb-7a15-4c64-9975-6f6c331255c8",
+			"creation_timestamp": "--TODAY--",
+			"activity_timestamp": "--TODAY--",
+			"cloud_provider": {
+				"kind": "CloudProviderLink",
+				"id": "aws",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws"
+			},
+			"openshift_version": "4.6.9",
+			"subscription": {
+				"kind": "SubscriptionLink",
+				"id": "1aAhK44xKMxSnXN3ToNjxdDYRD1",
+				"href": "/api/accounts_mgmt/v1/subscriptions/1aAhK44xKMxSnXN3ToNjxdDYRD1"
+			},
+			"region": {
+				"kind": "CloudRegionLink",
+				"id": "us-east-1",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws/regions/us-east-1"
+			},
+			"console": {
+				"url": "https://console-openshift-console.apps.jdgray-94kgc.dev01.red-chesterfield.com"
+			},
+			"nodes": {
+				"compute": 2,
+				"availability_zones": [
+					"us-east-1a"
+				],
+				"compute_machine_type": {
+					"kind": "MachineTypeLink",
+					"id": "m5.xlarge",
+					"href": "/api/clusters_mgmt/v1/machine_types/m5.xlarge"
+				}
+			},
+			"state": "ready",
+			"groups": null,
+			"network": null,
+			"external_configuration": null,
+			"multi_az": false,
+			"managed": false,
+			"byoc": false,
+			"ccs": null,
+			"identity_providers": null,
+			"aws_infrastructure_access_role_grants": null,
+			"metrics": {
+				"health_state": "healthy",
+				"critical_alerts_firing": 0,
+				"operators_condition_failing": 0,
+				"subscription_cpu_total": 6,
+				"subscription_socket_total": 3,
+				"subscription_obligation_exists": 2
+			},
+			"addons": null,
+			"ingresses": null,
+			"health_state": "",
+			"product": null,
+			"dns_ready": false
+		},
+		{
+			"kind": "Cluster",
+			"id": "1j146em247ff8tnh4cuvfpnmpkf0qf8r",
+			"href": "/api/clusters_mgmt/v1/clusters/1j146em247ff8tnh4cuvfpnmpkf0qf8r",
+			"name": "",
+			"api": {
+
+			},
+			"external_id": "f1083487-e6ae-4388-9408-af09fcc9c7fc",
+			"display_name": "f1083487-e6ae-4388-9408-af09fcc9c7fc",
+			"creation_timestamp": "--TODAY--",
+			"activity_timestamp": "--TODAY--",
+			"cloud_provider": {
+				"kind": "CloudProviderLink",
+				"id": "aws",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws"
+			},
+			"openshift_version": "4.6.9",
+			"subscription": {
+				"kind": "SubscriptionLink",
+				"id": "1aAhK44xKMxSnXN3ToNjxdDYRD1",
+				"href": "/api/accounts_mgmt/v1/subscriptions/1aAhK44xKMxSnXN3ToNjxdDYRD1"
+			},
+			"region": {
+				"kind": "CloudRegionLink",
+				"id": "us-east-1",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws/regions/us-east-1"
+			},
+			"console": {
+				"url": "https://console-openshift-console.apps.jdgray-kfmxg.dev01.red-chesterfield.com"
+			},
+			"nodes": {
+				"compute": 2,
+				"availability_zones": [
+					"us-east-1a"
+				],
+				"compute_machine_type": {
+					"kind": "MachineTypeLink",
+					"id": "m5.xlarge",
+					"href": "/api/clusters_mgmt/v1/machine_types/m5.xlarge"
+				}
+			},
+			"state": "ready",
+			"groups": null,
+			"network": null,
+			"external_configuration": null,
+			"multi_az": false,
+			"managed": false,
+			"byoc": false,
+			"ccs": null,
+			"identity_providers": null,
+			"aws_infrastructure_access_role_grants": null,
+			"metrics": {
+				"health_state": "healthy",
+				"critical_alerts_firing": 0,
+				"operators_condition_failing": 0,
+				"subscription_cpu_total": 6,
+				"subscription_socket_total": 3,
+				"subscription_obligation_exists": 2
+			},
+			"addons": null,
+			"ingresses": null,
+			"health_state": "",
+			"product": null,
+			"dns_ready": false
+		},
+		{
+			"kind": "Cluster",
+			"id": "1j14qod71bgvg53ibt7p3v5aqlcsovcp",
+			"href": "/api/clusters_mgmt/v1/clusters/1j14qod71bgvg53ibt7p3v5aqlcsovcp",
+			"name": "",
+			"api": {
+
+			},
+			"external_id": "b6ec171b-d733-40ed-ba9c-78e58a9c9a8b",
+			"display_name": "b6ec171b-d733-40ed-ba9c-78e58a9c9a8b",
+			"creation_timestamp": "--TODAY--",
+			"activity_timestamp": "--TODAY--",
+			"cloud_provider": {
+				"kind": "CloudProviderLink",
+				"id": "aws",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws"
+			},
+			"openshift_version": "4.6.9",
+			"subscription": {
+				"kind": "SubscriptionLink",
+				"id": "1aAhK44xKMxSnXN3ToNjxdDYRD1",
+				"href": "/api/accounts_mgmt/v1/subscriptions/1aAhK44xKMxSnXN3ToNjxdDYRD1"
+			},
+			"region": {
+				"kind": "CloudRegionLink",
+				"id": "us-east-1",
+				"href": "/api/clusters_mgmt/v1/cloud_providers/aws/regions/us-east-1"
+			},
+			"console": {
+				"url": "https://console-openshift-console.apps.jdgray-rwnf5.dev01.red-chesterfield.com"
+			},
+			"nodes": {
+				"compute": 2,
+				"availability_zones": [
+					"us-east-1a"
+				],
+				"compute_machine_type": {
+					"kind": "MachineTypeLink",
+					"id": "m5.xlarge",
+					"href": "/api/clusters_mgmt/v1/machine_types/m5.xlarge"
+				}
+			},
+			"state": "ready",
+			"groups": null,
+			"network": null,
+			"external_configuration": null,
+			"multi_az": false,
+			"managed": false,
+			"byoc": false,
+			"ccs": null,
+			"identity_providers": null,
+			"aws_infrastructure_access_role_grants": null,
+			"metrics": {
+				"health_state": "unhealthy",
+				"critical_alerts_firing": 2,
+				"operators_condition_failing": 1,
+				"subscription_cpu_total": 6,
+				"subscription_socket_total": 3,
+				"subscription_obligation_exists": 2
+			},
+			"addons": null,
+			"ingresses": null,
+			"health_state": "",
+			"product": null,
+			"dns_ready": false
+		}
+	]
+}
