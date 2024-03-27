@@ -45,6 +45,7 @@ import (
 
 	discoveryv1 "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/controllers"
+	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -60,6 +61,8 @@ func init() {
 
 	utilruntime.Must(corev1.AddToScheme(scheme))
 	utilruntime.Must(discoveryv1.AddToScheme(scheme))
+
+	utilruntime.Must(agentv1.SchemeBuilder.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -126,6 +129,14 @@ func main() {
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
+
+	if err = (&controllers.DiscoveredClusterReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "DiscoveryCluster")
+		os.Exit(1)
+	}
 
 	if err = (&controllers.ManagedClusterReconciler{
 		Client:  mgr.GetClient(),

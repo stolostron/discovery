@@ -24,6 +24,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	ImportStrategyAnnotation = "discovery.open-cluster-management.io/import-strategy"
+	ImportCleanUpFinalizer   = "discovery.open-cluster-management.io/import-cleanup"
+)
+
 // DiscoveredClusterSpec defines the desired state of DiscoveredCluster
 type DiscoveredClusterSpec struct {
 	Name              string       `json:"name" yaml:"name"`
