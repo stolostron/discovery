@@ -24,9 +24,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// Constants for labels and annotations used in discovery and management operations.
 const (
+	// AutoDetectLabels is used to specify automatic detection.
+	AutoDetectLabels = "auto-detect"
+
+	// ClusterMonitoringLabel is the label indicating cluster monitoring.
+	ClusterMonitoringLabel = "openshift.io/cluster-monitoring"
+
+	// CreatedViaAnnotation is the annotation indicating the creation method.
+	CreatedViaAnnotation = "open-cluster-management/created-via"
+
+	// ImportStrategyAnnotation is the annotation indicating the import strategy.
 	ImportStrategyAnnotation = "discovery.open-cluster-management.io/import-strategy"
-	ImportCleanUpFinalizer   = "discovery.open-cluster-management.io/import-cleanup"
+
+	// ImportCleanUpFinalizer is a cleanup finalizer associated with resources created by the discovery operator.
+	ImportCleanUpFinalizer = "discovery.open-cluster-management.io/import-cleanup"
 )
 
 // DiscoveredClusterSpec defines the desired state of DiscoveredCluster
