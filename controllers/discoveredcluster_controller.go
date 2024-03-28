@@ -271,7 +271,9 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 		logf.Info("Creating auto-import-secret for managed cluster", "Namespace", nn.Namespace)
 
 		s := r.CreateAutoImportSecret(nn)
-		controllerutil.SetControllerReference(&dc, s, r.Scheme)
+		if err := controllerutil.SetControllerReference(&dc, s, r.Scheme); err != nil {
+			logf.Error(err, "failed to set controller reference for auto-import-secret", "Namespace", nn.Namespace)
+		}
 
 		if err := r.Create(ctx, s); err != nil {
 			logf.Error(err, "failed to create auto-import Secret for ManagedCluster", "Name", nn.Name)
@@ -285,13 +287,13 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 	return ctrl.Result{}, nil
 }
 
-// EnsureKlusterletAddonConfig ensures the existence of a KlusterletAddonConfig resource for the given DiscoveredCluster.
-// It checks if a KlusterletAddonConfig with the specified display name exists.
+// EnsureKlusterletAddonConfig ensures the existence of a KlusterletAddonConfig resource for the given
+// DiscoveredCluster. It checks if a KlusterletAddonConfig with the specified display name exists.
 // If not found, it creates a new KlusterletAddonConfig with the display name and default configurations.
 // It sets a controller reference to the DiscoveredCluster for ownership management.
 // If creation fails, it logs an error and returns with a requeue signal.
-// If the KlusterletAddonConfig already exists or if an error occurs during retrieval, it logs an error and returns with a
-// requeue signal.
+// If the KlusterletAddonConfig already exists or if an error occurs during retrieval, it logs an error and returns
+// with a requeue signal.
 func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Context, dc discovery.DiscoveredCluster) (
 	ctrl.Result, error) {
 	nn := types.NamespacedName{Name: dc.Spec.DisplayName, Namespace: dc.Spec.DisplayName}
@@ -301,7 +303,9 @@ func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Co
 		logf.Info("Creating KlusterletAddonConfig", "Name", nn.Name, "Namespace", nn.Namespace)
 
 		kca := r.CreateKlusterletAddonConfig(nn)
-		controllerutil.SetControllerReference(&dc, kca, r.Scheme)
+		if err := controllerutil.SetControllerReference(&dc, kca, r.Scheme); err != nil {
+			logf.Error(err, "failed to set controller reference for KlusterletAddonConfig", "Name", nn.Name)
+		}
 
 		if err := r.Create(ctx, kca); err != nil {
 			logf.Error(err, "failed to create KlusterAddonConfig", "Name", nn.Name, "Namespace", nn.Namespace)
@@ -332,7 +336,9 @@ func (r *DiscoveredClusterReconciler) EnsureManagedCluster(ctx context.Context, 
 		logf.Info("Creating ManagedCluster", "Name", nn.Name)
 
 		mc := r.CreateManagedCluster(nn)
-		controllerutil.SetControllerReference(&dc, mc, r.Scheme)
+		if err := controllerutil.SetControllerReference(&dc, mc, r.Scheme); err != nil {
+			logf.Error(err, "failed to set controller reference for ManagedCluster", "Name", nn.Name)
+		}
 
 		if err := r.Create(ctx, mc); err != nil {
 			logf.Error(err, "failed to create ManagedCluster", "Name", nn.Name)
@@ -362,7 +368,9 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 		logf.Info("Creating Namespace for DiscoveredCluster", "Name", nn.Name)
 
 		ns := r.CreateNamespaceForDiscoveredCluster(dc)
-		controllerutil.SetControllerReference(&dc, ns, r.Scheme)
+		if err := controllerutil.SetControllerReference(&dc, ns, r.Scheme); err != nil {
+			logf.Error(err, "failed to set controller reference for Namespace", "Name", nn.Name)
+		}
 
 		if err := r.Create(ctx, ns); err != nil {
 			logf.Error(err, "failed to create Namespace", "Name", nn.Name)

@@ -52,6 +52,8 @@ import (
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
+
+	ControllerError = "unable to create controller"
 )
 
 func init() {
@@ -125,7 +127,7 @@ func main() {
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "DiscoveryConfig")
+		setupLog.Error(err, ControllerError, "controller", "DiscoveryConfig")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
@@ -134,7 +136,7 @@ func main() {
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "DiscoveryCluster")
+		setupLog.Error(err, ControllerError, "controller", "DiscoveryCluster")
 		os.Exit(1)
 	}
 
@@ -143,7 +145,7 @@ func main() {
 		Scheme:  mgr.GetScheme(),
 		Trigger: events,
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "ManagedCluster")
+		setupLog.Error(err, ControllerError, "controller", "ManagedCluster")
 		os.Exit(1)
 	}
 
