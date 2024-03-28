@@ -89,19 +89,24 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 
 		if res, err := r.EnsureManagedCluster(ctx, *dc); err != nil {
-			logf.Error(err, "failed to ensure managed cluster created", "Name", dc.Spec.DisplayName)
+			logf.Error(err, "failed to ensure ManagedCluster created", "Name", dc.Spec.DisplayName)
 			return res, err
 		}
 
 		if res, err := r.EnsureKlusterletAddonConfig(ctx, *dc); err != nil {
-			logf.Error(err, "failed to ensure klusterlet addon config created", "Name", dc.Spec.DisplayName)
+			logf.Error(err, "failed to ensure KlusterletAddonConfig created", "Name", dc.Spec.DisplayName)
 			return res, err
 		}
 
 		if res, err := r.EnsureAutoImportSecret(ctx, *dc); err != nil {
-			logf.Error(err, "failed to ensure auto-import secret created", "Name", dc.Spec.DisplayName)
+			logf.Error(err, "failed to ensure auto import Secret created", "Name", dc.Spec.DisplayName)
 			return res, err
 		}
+	}
+
+	if res, err := r.EnsureFinalizerRemovedFromManagedCluster(ctx, *dc); err != nil {
+		logf.Error(err, "failed to ensure finalizer removed from ManagedCluster")
+		return res, err
 	}
 
 	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
@@ -271,10 +276,6 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 		logf.Info("Creating auto-import-secret for managed cluster", "Namespace", nn.Namespace)
 
 		s := r.CreateAutoImportSecret(nn)
-		if err := controllerutil.SetControllerReference(&dc, s, r.Scheme); err != nil {
-			logf.Error(err, "failed to set controller reference for auto-import-secret", "Namespace", nn.Namespace)
-		}
-
 		if err := r.Create(ctx, s); err != nil {
 			logf.Error(err, "failed to create auto-import Secret for ManagedCluster", "Name", nn.Name)
 			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
@@ -303,10 +304,6 @@ func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Co
 		logf.Info("Creating KlusterletAddonConfig", "Name", nn.Name, "Namespace", nn.Namespace)
 
 		kca := r.CreateKlusterletAddonConfig(nn)
-		if err := controllerutil.SetControllerReference(&dc, kca, r.Scheme); err != nil {
-			logf.Error(err, "failed to set controller reference for KlusterletAddonConfig", "Name", nn.Name)
-		}
-
 		if err := r.Create(ctx, kca); err != nil {
 			logf.Error(err, "failed to create KlusterAddonConfig", "Name", nn.Name, "Namespace", nn.Namespace)
 			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
@@ -336,10 +333,6 @@ func (r *DiscoveredClusterReconciler) EnsureManagedCluster(ctx context.Context, 
 		logf.Info("Creating ManagedCluster", "Name", nn.Name)
 
 		mc := r.CreateManagedCluster(nn)
-		if err := controllerutil.SetControllerReference(&dc, mc, r.Scheme); err != nil {
-			logf.Error(err, "failed to set controller reference for ManagedCluster", "Name", nn.Name)
-		}
-
 		if err := r.Create(ctx, mc); err != nil {
 			logf.Error(err, "failed to create ManagedCluster", "Name", nn.Name)
 			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
@@ -368,10 +361,6 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 		logf.Info("Creating Namespace for DiscoveredCluster", "Name", nn.Name)
 
 		ns := r.CreateNamespaceForDiscoveredCluster(dc)
-		if err := controllerutil.SetControllerReference(&dc, ns, r.Scheme); err != nil {
-			logf.Error(err, "failed to set controller reference for Namespace", "Name", nn.Name)
-		}
-
 		if err := r.Create(ctx, ns); err != nil {
 			logf.Error(err, "failed to create Namespace", "Name", nn.Name)
 			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
@@ -387,21 +376,26 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 
 // EnsureFinalizerRemovedFromManagedCluster ...
 func (r *DiscoveredClusterReconciler) EnsureFinalizerRemovedFromManagedCluster(ctx context.Context,
-	mc clusterapiv1.ManagedCluster) (ctrl.Result, error) {
-	nn := types.NamespacedName{Name: mc.GetName()}
+	dc discovery.DiscoveredCluster) (ctrl.Result, error) {
+	nn := types.NamespacedName{Name: dc.Spec.DisplayName}
+	mc := &clusterapiv1.ManagedCluster{}
 
-	if err := r.Get(ctx, nn, &mc, &client.GetOptions{}); err != nil {
-		if !apierrors.IsNotFound(err) {
-			logf.Error(err, "failed to get ManagedCluster", "Name", nn.Name)
-		}
+	if err := r.Get(ctx, nn, mc, &client.GetOptions{}); err != nil && apierrors.IsNotFound(err) {
+		// If ManagedCluster is not found, ignore removing the finalizer from the cluster.
+		return ctrl.Result{}, nil
 
-		return ctrl.Result{}, err
+	} else if err != nil {
+		logf.Info("failed to get ManagedCluster", "Name", nn.Name)
+		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
 	}
 
-	if mc.DeletionTimestamp != nil && controllerutil.ContainsFinalizer(&mc, discovery.ImportCleanUpFinalizer) {
-		controllerutil.RemoveFinalizer(&mc, discovery.ImportCleanUpFinalizer)
-		if err := r.Update(ctx, &mc); err != nil {
-			return ctrl.Result{}, err
+	if mc.GetDeletionTimestamp() != nil && controllerutil.ContainsFinalizer(mc, discovery.ImportCleanUpFinalizer) {
+		controllerutil.RemoveFinalizer(mc, discovery.ImportCleanUpFinalizer)
+		if err := r.Update(ctx, mc); err != nil {
+			logf.Error(err, "failed to remove finalizer from ManagedCluster", "Name", mc.GetName(), "Finalizer",
+				discovery.ImportCleanUpFinalizer)
+
+			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
 		}
 	}
 

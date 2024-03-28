@@ -20,6 +20,8 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
+	"github.com/stolostron/discovery/util/reconciler"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -49,22 +51,44 @@ type ManagedClusterReconciler struct {
 // +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters,verbs=get;list;watch
 
 func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	if req.Name != "" {
-		r.Trigger <- event.GenericEvent{Object: &clusterapiv1.ManagedCluster{ObjectMeta: metav1.ObjectMeta{Name: ""}}}
-		return ctrl.Result{}, nil
-	}
-
-	logf.Info("Reconciling managedcluster", "Name", req.Name)
+	logf.Info("Reconciling ManagedCluster", "Name", req.Name)
 
 	discoveredClusters := &discovery.DiscoveredClusterList{}
 	if err := r.List(ctx, discoveredClusters); err != nil {
 		return ctrl.Result{}, errors.Wrapf(err, "error listing discovered clusters")
 	}
+
 	if len(discoveredClusters.Items) == 0 {
 		return ctrl.Result{}, nil
 	}
 
-	managedMeta := &metav1.PartialObjectMetadataList{TypeMeta: metav1.TypeMeta{Kind: "ManagedClusterList", APIVersion: "cluster.open-cluster-management.io/v1"}}
+	mc := &clusterapiv1.ManagedCluster{}
+	if err := r.Get(ctx, req.NamespacedName, mc); err != nil && !apierrors.IsNotFound(err) {
+		logf.Error(err, "failed to get ManagedCluster", "Name", req.Name)
+		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+	}
+
+	if mc.GetDeletionTimestamp() != nil {
+		logf.Info("ManagedCluster is being deleted", "Name", mc.GetName(), "DeletionTimestamp",
+			mc.GetDeletionTimestamp())
+
+		for _, dc := range discoveredClusters.Items {
+			if dc.GetName() == req.Name || dc.Spec.DisplayName == req.Name {
+				modifiedDC := dc.DeepCopy()
+				delete(modifiedDC.Annotations, discovery.ImportStrategyAnnotation)
+
+				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(&dc)); err != nil {
+					logf.Error(err, "failed to patch DiscoveredCluster", "Name", dc.GetName())
+					return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+				}
+				break
+			}
+		}
+	}
+
+	managedMeta := &metav1.PartialObjectMetadataList{TypeMeta: metav1.TypeMeta{Kind: "ManagedClusterList",
+		APIVersion: "cluster.open-cluster-management.io/v1"}}
+
 	if err := r.Client.List(ctx, managedMeta); err != nil {
 		return ctrl.Result{}, errors.Wrapf(err, "error listing managed clusters")
 	}
@@ -175,7 +199,8 @@ func unsetManagedStatus(dc *discovery.DiscoveredCluster) bool {
 		delete(dc.Labels, "isManagedCluster")
 		updated = true
 	}
-	if dc.Spec.IsManagedCluster == true {
+
+	if dc.Spec.IsManagedCluster {
 		dc.Spec.IsManagedCluster = false
 		updated = true
 	}
