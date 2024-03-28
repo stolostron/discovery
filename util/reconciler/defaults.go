@@ -9,4 +9,7 @@ import (
 const (
 	// RefreshInterval is the maximum time to wait between reconciles
 	RefreshInterval = 30 * time.Minute
+
+	// ResyncPeriod ...
+	ResyncPeriod = time.Second * 20
 )
