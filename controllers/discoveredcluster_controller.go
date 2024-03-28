@@ -65,17 +65,24 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 
 	/*
+		TODO: Determine if annotation should be added to ROSA cluster by default.
 		Check to see if the discovered cluster has a import strategy defined. If it does not, then add the default
 		import strategy to the discovered cluster.
 	*/
-	if dc.Annotations[discovery.ImportStrategyAnnotation] == "" {
-		if _, err := r.ApplyDefaultImportStrategy(ctx, *dc); err != nil {
-			logf.Error(err, "failed to apply default import strategy", "Name", dc.Spec.DisplayName)
-			return ctrl.Result{Requeue: true}, err
-		}
+	// if dc.Annotations[discovery.ImportStrategyAnnotation] == "" {
+	// 	if _, err := r.ApplyDefaultImportStrategy(ctx, *dc); err != nil {
+	// 		logf.Error(err, "failed to apply default import strategy", "Name", dc.Spec.DisplayName)
+	// 		return ctrl.Result{Requeue: true}, err
+	// 	}
 
-		logf.Info("Applied default import strategy annotation for DiscoveredCluster", "Name", dc.Spec.DisplayName,
-			"Namespace", dc.GetNamespace())
+	// 	logf.Info("Applied default import strategy annotation for DiscoveredCluster", "Name", dc.Spec.DisplayName,
+	// 		"Namespace", dc.GetNamespace())
+	// }
+
+	config := &discovery.DiscoveryConfig{}
+	if err := r.Get(ctx, GetDiscoveryConfig(), config); err != nil {
+		logf.Error(err, "failed to get DiscoveryConfig", "Name", GetDiscoveryConfig().Name)
+		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
 	}
 
 	/*
@@ -98,7 +105,7 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			return res, err
 		}
 
-		if res, err := r.EnsureAutoImportSecret(ctx, *dc); err != nil {
+		if res, err := r.EnsureAutoImportSecret(ctx, *dc, *config); err != nil {
 			logf.Error(err, "failed to ensure auto import Secret created", "Name", dc.Spec.DisplayName)
 			return res, err
 		}
@@ -156,18 +163,16 @@ Other fields like api_url, token_url, and cluster_id are left empty.
 It sets the retry_times field to a default value of "2".
 The secret type is set to "auto-import/rosa".
 */
-func (r *DiscoveredClusterReconciler) CreateAutoImportSecret(nn types.NamespacedName) *corev1.Secret {
+func (r *DiscoveredClusterReconciler) CreateAutoImportSecret(nn types.NamespacedName, clusterID, apiToken string,
+) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      nn.Name,
 			Namespace: nn.Namespace,
 		},
 		StringData: map[string]string{
-			"api_url":     "",
-			"api_token":   "",
-			"token_url":   "",
-			"cluster_id":  "",
-			"retry_times": "2",
+			"api_token":  apiToken,
+			"cluster_id": clusterID,
 		},
 		Type: "auto-import/rosa",
 	}
@@ -268,21 +273,38 @@ If creation fails, it logs an error and returns with a requeue signal. If the au
 an error occurs during retrieval, it logs an error and returns with a requeue signal.
 */
 func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context, dc discovery.DiscoveredCluster,
-) (ctrl.Result, error) {
-	nn := types.NamespacedName{Name: "auto-import-secret", Namespace: dc.Spec.DisplayName}
+	config discovery.DiscoveryConfig) (ctrl.Result, error) {
+	nn := types.NamespacedName{Name: config.Spec.Credential, Namespace: config.GetNamespace()}
 	existingSecret := corev1.Secret{}
 
-	if err := r.Get(ctx, nn, &existingSecret, &client.GetOptions{}); err != nil && apierrors.IsNotFound(err) {
-		logf.Info("Creating auto-import-secret for managed cluster", "Namespace", nn.Namespace)
+	if err := r.Get(ctx, nn, &existingSecret); err != nil && apierrors.IsNotFound(err) {
+		logf.Error(err, "Secret was not found", "Name", nn.Name, "Namespace", nn.Namespace)
+		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
 
-		s := r.CreateAutoImportSecret(nn)
-		if err := r.Create(ctx, s); err != nil {
-			logf.Error(err, "failed to create auto-import Secret for ManagedCluster", "Name", nn.Name)
+	} else if err != nil {
+		logf.Error(err, "failed to get Secret", "Name", nn.Name, "Namespace", nn.Namespace)
+		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+	}
+
+	if apiToken, err := parseUserToken(&existingSecret); err == nil {
+		nn := types.NamespacedName{Name: "auto-import-secret", Namespace: dc.Spec.DisplayName}
+		existingSecret = corev1.Secret{}
+
+		if err := r.Get(ctx, nn, &existingSecret, &client.GetOptions{}); err != nil && apierrors.IsNotFound(err) {
+			logf.Info("Creating auto-import-secret for managed cluster", "Namespace", nn.Namespace)
+
+			s := r.CreateAutoImportSecret(nn, dc.Spec.RHOCMClusterID, apiToken)
+			if err := r.Create(ctx, s); err != nil {
+				logf.Error(err, "failed to create auto-import Secret for ManagedCluster", "Name", nn.Name)
+				return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+			}
+
+		} else if err != nil {
+			logf.Error(err, "failed to get auto-import Secret for ManagedCluster", "Name", nn.Name)
 			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
 		}
-	} else if err != nil {
-		logf.Error(err, "failed to get auto-import Secret for ManagedCluster", "Name", nn.Name)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+	} else {
+		logf.Error(err, "failed to parse token from Secret", "Name", nn.Name)
 	}
 
 	return ctrl.Result{}, nil
