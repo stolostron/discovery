@@ -75,6 +75,11 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		for _, dc := range discoveredClusters.Items {
 			if dc.GetName() == req.Name || dc.Spec.DisplayName == req.Name {
 				modifiedDC := dc.DeepCopy()
+
+				if modifiedDC.GetAnnotations() == nil {
+					modifiedDC.SetAnnotations(make(map[string]string))
+				}
+
 				delete(modifiedDC.Annotations, discovery.ImportStrategyAnnotation)
 
 				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(&dc)); err != nil {
