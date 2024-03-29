@@ -49,10 +49,26 @@ var (
 			ActivityTimestamp: &mockManagedTime,
 		},
 	}
+
+	mockCluster415 = discovery.DiscoveredCluster{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "c4po",
+			Namespace: TestManagedNamespace,
+			Annotations: map[string]string{
+				discovery.ImportStrategyAnnotation: "Automatic",
+			},
+		},
+		Spec: discovery.DiscoveredClusterSpec{
+			Name:              "c4po",
+			DisplayName:       "c4po",
+			OpenshiftVersion:  "4.15.0",
+			CreationTimestamp: &mockManagedTime,
+			ActivityTimestamp: &mockManagedTime,
+		},
+	}
 )
 
 var _ = Describe("ManagedCluster controller", func() {
-
 	Context("Creating a DiscoveryConfig", func() {
 		It("Should create discovered clusters", func() {
 			By("By creating a namespace", func() {
@@ -332,10 +348,10 @@ func Test_ManagedCluster_Reconciler_Reconcile(t *testing.T) {
 	}{
 		{
 			name: "should reconcile managed cluster",
-			req:  ctrl.Request{NamespacedName: types.NamespacedName{Name: mockCluster49.Spec.DisplayName}},
+			req:  ctrl.Request{NamespacedName: types.NamespacedName{Name: mockCluster415.Spec.DisplayName}},
 			mc: &clusterapiv1.ManagedCluster{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:       mockCluster49.Spec.DisplayName,
+					Name:       mockCluster415.Spec.DisplayName,
 					Finalizers: []string{discovery.ImportCleanUpFinalizer},
 				},
 			},
@@ -345,7 +361,7 @@ func Test_ManagedCluster_Reconciler_Reconcile(t *testing.T) {
 	registerScheme()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := mcr.Create(context.TODO(), &mockCluster49); err != nil {
+			if err := mcr.Create(context.TODO(), &mockCluster415); err != nil {
 				t.Errorf("failed to create DiscoveredCluster: %v", err)
 			}
 
@@ -367,7 +383,7 @@ func Test_ManagedCluster_Reconciler_Reconcile(t *testing.T) {
 
 			dc := &discovery.DiscoveredCluster{}
 			if err := mcr.Get(context.TODO(), types.NamespacedName{
-				Name: mockCluster49.GetName(), Namespace: mockCluster49.GetNamespace()}, dc); err != nil {
+				Name: mockCluster415.GetName(), Namespace: mockCluster415.GetNamespace()}, dc); err != nil {
 				t.Errorf("failed to get DiscoveredCluster: %v", err)
 			}
 
