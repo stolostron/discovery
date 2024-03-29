@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -34,10 +35,11 @@ var r = &DiscoveredClusterReconciler{
 
 func registerScheme() {
 	clusterapiv1.AddToScheme(scheme.Scheme)
+	discovery.AddToScheme(scheme.Scheme)
 	agentv1.SchemeBuilder.AddToScheme(scheme.Scheme)
 }
 
-func Test_CreateAutoImportSecret(t *testing.T) {
+func Test_Reconciler_CreateAutoImportSecret(t *testing.T) {
 	tests := []struct {
 		name      string
 		clusterID string
@@ -68,7 +70,7 @@ func Test_CreateAutoImportSecret(t *testing.T) {
 	}
 }
 
-func Test_CreateKlusterletAddonConfig(t *testing.T) {
+func Test_Reconciler_CreateKlusterletAddonConfig(t *testing.T) {
 	tests := []struct {
 		name string
 		nn   types.NamespacedName
@@ -128,7 +130,7 @@ func Test_CreateKlusterletAddonConfig(t *testing.T) {
 	}
 }
 
-func Test_CreateManagedCluster(t *testing.T) {
+func Test_Reconciler_CreateManagedCluster(t *testing.T) {
 	tests := []struct {
 		name string
 		nn   types.NamespacedName
@@ -155,7 +157,7 @@ func Test_CreateManagedCluster(t *testing.T) {
 	}
 }
 
-func Test_CreateNamespaceForDiscoveredCluster(t *testing.T) {
+func Test_Reconciler_CreateNamespaceForDiscoveredCluster(t *testing.T) {
 	tests := []struct {
 		name string
 		dc   *discovery.DiscoveredCluster
@@ -187,7 +189,7 @@ func Test_CreateNamespaceForDiscoveredCluster(t *testing.T) {
 	}
 }
 
-func Test_EnsureAutoImportSecret(t *testing.T) {
+func Test_Reconciler_EnsureAutoImportSecret(t *testing.T) {
 	tests := []struct {
 		name   string
 		config *discovery.DiscoveryConfig
@@ -261,7 +263,7 @@ func Test_EnsureAutoImportSecret(t *testing.T) {
 	}
 }
 
-func Test_EnsureKlusterletAddonConfig(t *testing.T) {
+func Test_Reconciler_EnsureKlusterletAddonConfig(t *testing.T) {
 	tests := []struct {
 		name string
 		dc   *discovery.DiscoveredCluster
@@ -315,7 +317,7 @@ func Test_EnsureKlusterletAddonConfig(t *testing.T) {
 	}
 }
 
-func Test_EnsureManagedCluster(t *testing.T) {
+func Test_Reconciler_EnsureManagedCluster(t *testing.T) {
 	tests := []struct {
 		name string
 		dc   *discovery.DiscoveredCluster
@@ -376,7 +378,7 @@ func Test_EnsureManagedCluster(t *testing.T) {
 	}
 }
 
-func Test_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
+func Test_Reconciler_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
 	tests := []struct {
 		name string
 		dc   *discovery.DiscoveredCluster
@@ -415,6 +417,32 @@ func Test_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
 
 			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, ns); err != nil {
 				t.Errorf("failed to get Namespace for DiscoveredCluster: %v", err)
+			}
+		})
+	}
+}
+
+func Test_Reconciler_SetupWithManager(t *testing.T) {
+	tests := []struct {
+		name string
+		want bool
+	}{
+		{
+			name: "should setup reconciler with manager",
+			want: true,
+		},
+	}
+
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{Scheme: scheme.Scheme})
+	if err != nil {
+		t.Errorf("failed to create manager: %v", err)
+	}
+
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := r.SetupWithManager(mgr); err != nil {
+				t.Errorf("failed to setup manager: %v", err)
 			}
 		})
 	}
