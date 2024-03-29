@@ -64,21 +64,6 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		dc.Annotations = make(map[string]string)
 	}
 
-	/*
-		TODO: Determine if annotation should be added to ROSA cluster by default.
-		Check to see if the discovered cluster has a import strategy defined. If it does not, then add the default
-		import strategy to the discovered cluster.
-	*/
-	// if dc.Annotations[discovery.ImportStrategyAnnotation] == "" {
-	// 	if _, err := r.ApplyDefaultImportStrategy(ctx, *dc); err != nil {
-	// 		logf.Error(err, "failed to apply default import strategy", "Name", dc.Spec.DisplayName)
-	// 		return ctrl.Result{Requeue: true}, err
-	// 	}
-
-	// 	logf.Info("Applied default import strategy annotation for DiscoveredCluster", "Name", dc.Spec.DisplayName,
-	// 		"Namespace", dc.GetNamespace())
-	// }
-
 	config := &discovery.DiscoveryConfig{}
 	if err := r.Get(ctx, GetDiscoveryConfig(), config); err != nil {
 		logf.Error(err, "failed to get DiscoveryConfig", "Name", GetDiscoveryConfig().Name)
@@ -117,43 +102,6 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 
 	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
-}
-
-/*
-ApplyDefaultImportStrategy applies the default import strategy to the discovered cluster.
-It sets the import strategy annotation to "Manual" for the specified DiscoveredCluster object.
-If the cluster is not found, it returns an error wrapped with a message indicating the absence of the cluster.
-If any other error occurs during fetching or patching, it returns an error wrapped with a corresponding message.
-*/
-func (r *DiscoveredClusterReconciler) ApplyDefaultImportStrategy(ctx context.Context, dc discovery.DiscoveredCluster) (
-	ctrl.Result, error) {
-	nn := types.NamespacedName{Name: dc.GetName(), Namespace: dc.GetNamespace()}
-
-	if err := r.Get(ctx, nn, &dc); err != nil {
-		if apierrors.IsNotFound(err) {
-			return ctrl.Result{}, errors.Wrapf(err, "DiscoveredCluster %s/%s was not found", dc.GetNamespace(),
-				dc.GetName())
-		}
-
-		return ctrl.Result{}, errors.Wrapf(err, "error fetching DiscoveredCluster %s/%s", dc.GetNamespace(),
-			dc.GetName())
-	}
-
-	// Create a copy of the DiscoveredCluster object to only modify the annotations field.
-	modifiedDC := dc.DeepCopy()
-
-	if modifiedDC.GetAnnotations() == nil {
-		modifiedDC.SetAnnotations(make(map[string]string))
-	}
-	modifiedDC.GetAnnotations()[discovery.ImportStrategyAnnotation] = "Manual"
-
-	if err := r.Patch(ctx, modifiedDC, client.MergeFrom(&dc),
-		&client.PatchOptions{FieldManager: "discovery-operator"}); err != nil {
-
-		return ctrl.Result{Requeue: true}, errors.Wrapf(err, "error patching DiscoveredCluster %s/%s", dc.GetNamespace(),
-			dc.GetName())
-	}
-	return ctrl.Result{}, nil
 }
 
 /*

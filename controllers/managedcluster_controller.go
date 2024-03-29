@@ -72,7 +72,9 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		logf.Info("ManagedCluster is being deleted", "Name", mc.GetName(), "DeletionTimestamp",
 			mc.GetDeletionTimestamp())
 
-		for _, dc := range discoveredClusters.Items {
+		for i := range discoveredClusters.Items {
+			dc := &discoveredClusters.Items[i]
+
 			if dc.GetName() == req.Name || dc.Spec.DisplayName == req.Name {
 				modifiedDC := dc.DeepCopy()
 
@@ -81,8 +83,7 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 				}
 
 				delete(modifiedDC.Annotations, discovery.ImportStrategyAnnotation)
-
-				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(&dc)); err != nil {
+				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(dc)); err != nil {
 					logf.Error(err, "failed to patch DiscoveredCluster", "Name", dc.GetName())
 					return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
 				}

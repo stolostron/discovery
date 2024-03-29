@@ -15,11 +15,16 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
 	"testing"
 
 	discovery "github.com/stolostron/discovery/api/v1"
+	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
+	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -27,45 +32,9 @@ var r = &DiscoveredClusterReconciler{
 	Client: fake.NewClientBuilder().Build(),
 }
 
-func Test_ApplyDefaultImportStrategy(t *testing.T) {
-	tests := []struct {
-		name string
-		obj  metav1.Object
-		want bool
-	}{
-		{
-			name: "should reconcile ROSA cluster",
-			obj: &discovery.DiscoveredCluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "bar",
-				},
-				Spec: discovery.DiscoveredClusterSpec{
-					Type: "ROSA",
-				},
-			},
-			want: true,
-		},
-		{
-			name: "should reconcile OCP cluster",
-			obj: &discovery.DiscoveredCluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "bar",
-				},
-				Spec: discovery.DiscoveredClusterSpec{
-					Type: "OCP",
-				},
-			},
-			want: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r.ShouldReconcile(tt.obj)
-		})
-	}
+func registerScheme() {
+	clusterapiv1.AddToScheme(scheme.Scheme)
+	agentv1.SchemeBuilder.AddToScheme(scheme.Scheme)
 }
 
 func Test_CreateAutoImportSecret(t *testing.T) {
@@ -218,153 +187,238 @@ func Test_CreateNamespaceForDiscoveredCluster(t *testing.T) {
 	}
 }
 
-// func Test_EnsureAutoImportSecret(t *testing.T) {
-// 	tests := []struct {
-// 		name   string
-// 		config *discovery.DiscoveryConfig
-// 		dc     *discovery.DiscoveredCluster
-// 		want   bool
-// 	}{
-// 		{
-// 			name:   "should ensure auto-import Secret is created",
-// 			config: &discovery.DiscoveryConfig{},
-// 			dc: &discovery.DiscoveredCluster{
-// 				ObjectMeta: metav1.ObjectMeta{
-// 					Name:      "foo",
-// 					Namespace: "bar",
-// 				},
-// 				Spec: discovery.DiscoveredClusterSpec{
-// 					Type: "ROSA",
-// 				},
-// 			},
-// 			want: true,
-// 		},
-// 	}
+func Test_EnsureAutoImportSecret(t *testing.T) {
+	tests := []struct {
+		name   string
+		config *discovery.DiscoveryConfig
+		dc     *discovery.DiscoveredCluster
+		want   bool
+	}{
+		{
+			name: "should ensure auto-import Secret is created",
+			config: &discovery.DiscoveryConfig{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "discovery",
+					Namespace: "discovery",
+				},
+				Spec: discovery.DiscoveryConfigSpec{
+					Credential: "admin",
+				},
+			},
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					DisplayName: "foo",
+					Type:        "ROSA",
+				},
+			},
+			want: true,
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			r.EnsureAutoImportSecret(context.TODO(), *tt.dc, *tt.config)
-// 		})
-// 	}
-// }
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ns := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: tt.dc.Spec.DisplayName}}
+			s1 := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: tt.config.Spec.Credential,
+				Namespace: tt.config.GetNamespace()}, Data: map[string][]byte{"ocmAPIToken": []byte("fake-token")}}
+			s2 := &corev1.Secret{}
 
-// func Test_EnsureKlusterletAddonConfig(t *testing.T) {
-// 	r := DiscoveredClusterReconciler{}
+			defer func() {
+				if err := r.Delete(context.TODO(), s1); err != nil {
+					t.Errorf("failed to delete Secret: %v", err)
+				}
 
-// 	tests := []struct {
-// 		name string
-// 		dc   *discovery.DiscoveredCluster
-// 		want bool
-// 	}{
-// 		{
-// 			name: "should ensure KlusterletAddonConfig created",
-// 			dc: &discovery.DiscoveredCluster{
-// 				ObjectMeta: metav1.ObjectMeta{
-// 					Name:      "foo",
-// 					Namespace: "bar",
-// 				},
-// 				Spec: discovery.DiscoveredClusterSpec{
-// 					DisplayName: "foo",
-// 					Type:        "ROSA",
-// 				},
-// 			},
-// 			want: true,
-// 		},
-// 	}
+				if err := r.Delete(context.TODO(), s2); err != nil {
+					t.Errorf("failed to delete Secret: %v", err)
+				}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			r.EnsureKlusterletAddonConfig(context.TODO(), *tt.dc)
-// 		})
-// 	}
-// }
+				if err := r.Delete(context.TODO(), ns); err != nil {
+					t.Errorf("failed to delete Namespace: %v", err)
+				}
+			}()
 
-// func Test_EnsureManagedCluster(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		dc   *discovery.DiscoveredCluster
-// 		want bool
-// 	}{
-// 		{
-// 			name: "should ensure ManagedCluster created",
-// 			dc: &discovery.DiscoveredCluster{
-// 				ObjectMeta: metav1.ObjectMeta{
-// 					Name:      "foo",
-// 					Namespace: "bar",
-// 				},
-// 				Spec: discovery.DiscoveredClusterSpec{
-// 					DisplayName: "foo",
-// 					Type:        "ROSA",
-// 				},
-// 			},
-// 			want: true,
-// 		},
-// 	}
+			if err := r.Create(context.TODO(), ns); err != nil {
+				t.Errorf("failed to create namespace: %v", err)
+			}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			r.EnsureManagedCluster(context.TODO(), *tt.dc)
-// 		})
-// 	}
-// }
+			if err := r.Create(context.TODO(), s1); err != nil {
+				t.Errorf("failed to create Secret: %v", err)
+			}
 
-// func Test_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		dc   *discovery.DiscoveredCluster
-// 		want bool
-// 	}{
-// 		{
-// 			name: "should ensure namespace created for DiscoveredCluster",
-// 			dc: &discovery.DiscoveredCluster{
-// 				ObjectMeta: metav1.ObjectMeta{
-// 					Name:      "foo",
-// 					Namespace: "bar",
-// 				},
-// 				Spec: discovery.DiscoveredClusterSpec{
-// 					DisplayName: "foo",
-// 					Type:        "ROSA",
-// 				},
-// 			},
-// 			want: true,
-// 		},
-// 	}
+			if _, err := r.EnsureAutoImportSecret(context.TODO(), *tt.dc, *tt.config); err != nil {
+				t.Errorf("failed to ensure auto import Secret created: %v", err)
+			}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			r.EnsureNamespaceForDiscoveredCluster(context.TODO(), *tt.dc)
-// 		})
-// 	}
-// }
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: "auto-import-secret",
+				Namespace: tt.dc.Spec.DisplayName}, s2); err != nil {
+				t.Errorf("failed to get auto import secret: %v", err)
+			}
+		})
+	}
+}
 
-// func Test_EnsureFinalizerRemovedFromManagedCluster(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		dc   *discovery.DiscoveredCluster
-// 		want bool
-// 	}{
-// 		{
-// 			name: "should ensure finalizers are removed from ManagedCluster",
-// 			dc: &discovery.DiscoveredCluster{
-// 				ObjectMeta: metav1.ObjectMeta{
-// 					Name:        "foo",
-// 					Namespace:   "bar",
-// 					Annotations: map[string]string{},
-// 				},
-// 				Spec: discovery.DiscoveredClusterSpec{
-// 					Type: "OCP",
-// 				},
-// 			},
-// 			want: false,
-// 		},
-// 	}
+func Test_EnsureKlusterletAddonConfig(t *testing.T) {
+	tests := []struct {
+		name string
+		dc   *discovery.DiscoveredCluster
+		want bool
+	}{
+		{
+			name: "should ensure KlusterletAddonConfig created",
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					DisplayName: "foo",
+					Type:        "ROSA",
+				},
+			},
+			want: true,
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			r.EnsureFinalizerRemovedFromManagedCluster(context.TODO(), *tt.dc)
-// 		})
-// 	}
-// }
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ns := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: tt.dc.Spec.DisplayName}}
+			kca := &agentv1.KlusterletAddonConfig{}
+
+			defer func() {
+				if err := r.Delete(context.TODO(), kca); err != nil {
+					t.Errorf("failed to delete KlusterletAddonConfig: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), ns); err != nil {
+					t.Errorf("failed to delete Namespace: %v", err)
+				}
+			}()
+
+			if err := r.Create(context.TODO(), ns); err != nil {
+				t.Errorf("failed to create Namespace: %v, err: %v", ns.GetName(), err)
+			}
+
+			if _, err := r.EnsureKlusterletAddonConfig(context.TODO(), *tt.dc); err != nil {
+				t.Errorf("failed to create ManagedCluster resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName,
+				Namespace: tt.dc.Spec.DisplayName}, kca); err != nil {
+				t.Errorf("failed to get KlusterletAddonConfig resource: %v", err)
+			}
+		})
+	}
+}
+
+func Test_EnsureManagedCluster(t *testing.T) {
+	tests := []struct {
+		name string
+		dc   *discovery.DiscoveredCluster
+		want bool
+	}{
+		{
+			name: "should ensure ManagedCluster created",
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					DisplayName: "foo",
+					Type:        "ROSA",
+				},
+			},
+			want: true,
+		},
+	}
+
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ns := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: tt.dc.Spec.DisplayName}}
+			mc := &clusterapiv1.ManagedCluster{}
+
+			defer func() {
+				if err := r.Delete(context.TODO(), mc); err != nil {
+					t.Errorf("failed to delete ManagedCluster: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), ns); err != nil {
+					t.Errorf("failed to delete Namespace: %v", err)
+				}
+
+				if _, err := r.EnsureFinalizerRemovedFromManagedCluster(context.TODO(), *tt.dc); err != nil {
+					t.Errorf("failed to ensure finalizer removed from ManagedCluster: %v", err)
+				}
+
+				if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, mc); err == nil {
+					t.Errorf("ManagedCluster still exist: %v", err)
+				}
+			}()
+
+			if err := r.Create(context.TODO(), ns); err != nil {
+				t.Errorf("failed to create namespace: %v", ns.GetName())
+			}
+
+			if _, err := r.EnsureManagedCluster(context.TODO(), *tt.dc); err != nil {
+				t.Errorf("failed to create ManagedCluster resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, mc); err != nil {
+				t.Errorf("failed to get ManagedCluster resource: %v", err)
+			}
+		})
+	}
+}
+
+func Test_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
+	tests := []struct {
+		name string
+		dc   *discovery.DiscoveredCluster
+		want bool
+	}{
+		{
+			name: "should ensure namespace created for DiscoveredCluster",
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					DisplayName: "foo",
+					Type:        "ROSA",
+				},
+			},
+			want: true,
+		},
+	}
+
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ns := &corev1.Namespace{}
+
+			defer func() {
+				if err := r.Delete(context.TODO(), ns); err != nil {
+					t.Errorf("failed to delete Namespace: %v", err)
+				}
+			}()
+
+			if _, err := r.EnsureNamespaceForDiscoveredCluster(context.TODO(), *tt.dc); err != nil {
+				t.Errorf("failed to create Namespace for DiscoveredCluster: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, ns); err != nil {
+				t.Errorf("failed to get Namespace for DiscoveredCluster: %v", err)
+			}
+		})
+	}
+}
 
 func Test_Reconciler_ShouldReconcile(t *testing.T) {
 	tests := []struct {
@@ -386,7 +440,7 @@ func Test_Reconciler_ShouldReconcile(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "should reconcile OCP cluster",
+			name: "should not reconcile OCP cluster",
 			obj: &discovery.DiscoveredCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
