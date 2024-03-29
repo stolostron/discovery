@@ -39,6 +39,126 @@ func registerScheme() {
 	agentv1.SchemeBuilder.AddToScheme(scheme.Scheme)
 }
 
+func Test_Reconciler_Reconcile(t *testing.T) {
+	tests := []struct {
+		name   string
+		config *discovery.DiscoveryConfig
+		dc     *discovery.DiscoveredCluster
+		ns     *corev1.Namespace
+		s      *corev1.Secret
+		req    ctrl.Request
+	}{
+		{
+			name: "should create auto import Secret object",
+			config: &discovery.DiscoveryConfig{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "discovery",
+					Namespace: "discovery",
+				},
+				Spec: discovery.DiscoveryConfigSpec{
+					Credential: "fake-admin",
+				},
+			},
+			ns: &corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "discovery",
+				},
+			},
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        "310ac28e-b69b-447b-a51f-08e967cff1ee",
+					Namespace:   "discovery",
+					Annotations: map[string]string{discovery.ImportStrategyAnnotation: "Automatic"},
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					DisplayName:    "fake-cluster",
+					RHOCMClusterID: "349bcdc1dd6a44f3a1a136b2f98a69ca",
+					Type:           "ROSA",
+				},
+			},
+			req: ctrl.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "310ac28e-b69b-447b-a51f-08e967cff1ee",
+					Namespace: "discovery",
+				},
+			},
+			s: &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "fake-admin",
+					Namespace: "discovery",
+				},
+				Data: map[string][]byte{
+					"ocmAPIToken": []byte("fake-token"),
+				},
+			},
+		},
+	}
+
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			DiscoveryConfig = types.NamespacedName{
+				Name: tt.config.Name, Namespace: tt.config.Namespace,
+			}
+
+			ns := &corev1.Namespace{}
+			mc := &clusterapiv1.ManagedCluster{}
+			kac := &agentv1.KlusterletAddonConfig{}
+			s := &corev1.Secret{}
+
+			defer func() {
+				r.Delete(context.TODO(), kac)
+				r.Delete(context.TODO(), s)
+				r.Delete(context.TODO(), mc)
+				r.EnsureFinalizerRemovedFromManagedCluster(context.TODO(), *tt.dc)
+				r.Delete(context.TODO(), ns)
+
+				r.Delete(context.TODO(), tt.dc)
+				r.Delete(context.TODO(), tt.config)
+				r.Delete(context.TODO(), tt.s)
+				r.Delete(context.TODO(), tt.ns)
+			}()
+
+			if err := r.Create(context.TODO(), tt.ns); err != nil {
+				t.Errorf("failed to create Namespace: %v", err)
+			}
+
+			if err := r.Create(context.TODO(), tt.config); err != nil {
+				t.Errorf("failed to create DiscoveryConfig: %v", err)
+			}
+
+			if err := r.Create(context.TODO(), tt.s); err != nil {
+				t.Errorf("failed to create Secret: %v", err)
+			}
+
+			if err := r.Create(context.TODO(), tt.dc); err != nil {
+				t.Errorf("failed to create DiscoveredCluster: %v", err)
+			}
+
+			if _, err := r.Reconcile(context.TODO(), tt.req); err != nil {
+				t.Errorf("error: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, ns); err != nil {
+				t.Errorf("failed to get Namespace: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, mc); err != nil {
+				t.Errorf("failed to get ManagedCluster: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName,
+				Namespace: tt.dc.Spec.DisplayName}, kac); err != nil {
+				t.Errorf("failed to get KlusterletAddonConfig: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: "auto-import-secret",
+				Namespace: tt.dc.Spec.DisplayName}, s); err != nil {
+				t.Errorf("failed to get auto-import Secret: %v", err)
+			}
+		})
+	}
+}
 func Test_Reconciler_CreateAutoImportSecret(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -88,41 +208,41 @@ func Test_Reconciler_CreateKlusterletAddonConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kca := r.CreateKlusterletAddonConfig(tt.nn)
+			kac := r.CreateKlusterletAddonConfig(tt.nn)
 
-			if got := kca.GetName() != tt.nn.Name; got {
+			if got := kac.GetName() != tt.nn.Name; got {
 				t.Errorf("CreateKlusterletAddonConfig(tt.nn) = want %v, got %v", got, tt.want)
 			}
 
-			if got := kca.GetNamespace() != tt.nn.Namespace; got {
+			if got := kac.GetNamespace() != tt.nn.Namespace; got {
 				t.Errorf("CreateKlusterletAddonConfig(tt.nn) = want %v, got %v", got, tt.want)
 			}
 
-			if got := kca.Spec.ClusterLabels == nil; got {
+			if got := kac.Spec.ClusterLabels == nil; got {
 				t.Errorf("CreateKlusterletAddonConfig(tt.nn).SearchCollectorConfig.Enabled = want %v, got %v", got,
 					tt.want)
 			}
 
-			if got := kca.Spec.ApplicationManagerConfig.Enabled; !got {
+			if got := kac.Spec.ApplicationManagerConfig.Enabled; !got {
 				t.Errorf("CreateKlusterletAddonConfig(tt.nn).ApplicationManagerConfig.Enabled = want %v, got %v", got,
 					tt.want)
 			}
 
-			if got := kca.Spec.CertPolicyControllerConfig.Enabled; !got {
+			if got := kac.Spec.CertPolicyControllerConfig.Enabled; !got {
 				t.Errorf("CreateKlusterletAddonConfig(tt.nn).CertPolicyControllerConfig.Enabled = want %v, got %v", got,
 					tt.want)
 			}
 
-			if got := kca.Spec.IAMPolicyControllerConfig.Enabled; !got {
+			if got := kac.Spec.IAMPolicyControllerConfig.Enabled; !got {
 				t.Errorf("CreateKlusterletAddonConfig(tt.nn).IAMPolicyControllerConfig.Enabled = want %v, got %v", got,
 					tt.want)
 			}
 
-			if got := kca.Spec.PolicyController.Enabled; !got {
+			if got := kac.Spec.PolicyController.Enabled; !got {
 				t.Errorf("CreateKlusterletAddonConfig(tt.nn).PolicyController.Enabled = want %v, got %v", got, tt.want)
 			}
 
-			if got := kca.Spec.SearchCollectorConfig.Enabled; !got {
+			if got := kac.Spec.SearchCollectorConfig.Enabled; !got {
 				t.Errorf("CreateKlusterletAddonConfig(tt.nn).SearchCollectorConfig.Enabled = want %v, got %v", got,
 					tt.want)
 			}
@@ -289,10 +409,10 @@ func Test_Reconciler_EnsureKlusterletAddonConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ns := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: tt.dc.Spec.DisplayName}}
-			kca := &agentv1.KlusterletAddonConfig{}
+			kac := &agentv1.KlusterletAddonConfig{}
 
 			defer func() {
-				if err := r.Delete(context.TODO(), kca); err != nil {
+				if err := r.Delete(context.TODO(), kac); err != nil {
 					t.Errorf("failed to delete KlusterletAddonConfig: %v", err)
 				}
 
@@ -310,7 +430,7 @@ func Test_Reconciler_EnsureKlusterletAddonConfig(t *testing.T) {
 			}
 
 			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName,
-				Namespace: tt.dc.Spec.DisplayName}, kca); err != nil {
+				Namespace: tt.dc.Spec.DisplayName}, kac); err != nil {
 				t.Errorf("failed to get KlusterletAddonConfig resource: %v", err)
 			}
 		})

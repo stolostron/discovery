@@ -16,6 +16,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
@@ -252,6 +253,7 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
 		}
 	} else {
+		fmt.Printf("here: %v", err)
 		logf.Error(err, "failed to parse token from Secret", "Name", nn.Name)
 	}
 
@@ -268,13 +270,13 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Context, dc discovery.DiscoveredCluster) (
 	ctrl.Result, error) {
 	nn := types.NamespacedName{Name: dc.Spec.DisplayName, Namespace: dc.Spec.DisplayName}
-	existingKCA := agentv1.KlusterletAddonConfig{}
+	existingKAC := agentv1.KlusterletAddonConfig{}
 
-	if err := r.Get(ctx, nn, &existingKCA); err != nil && apierrors.IsNotFound(err) {
+	if err := r.Get(ctx, nn, &existingKAC); err != nil && apierrors.IsNotFound(err) {
 		logf.Info("Creating KlusterletAddonConfig", "Name", nn.Name, "Namespace", nn.Namespace)
 
-		kca := r.CreateKlusterletAddonConfig(nn)
-		if err := r.Create(ctx, kca); err != nil {
+		kac := r.CreateKlusterletAddonConfig(nn)
+		if err := r.Create(ctx, kac); err != nil {
 			logf.Error(err, "failed to create KlusterAddonConfig", "Name", nn.Name, "Namespace", nn.Namespace)
 			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
 		}
