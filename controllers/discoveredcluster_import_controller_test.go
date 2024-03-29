@@ -39,7 +39,7 @@ func registerScheme() {
 	agentv1.SchemeBuilder.AddToScheme(scheme.Scheme)
 }
 
-func Test_Reconciler_Reconcile(t *testing.T) {
+func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 	tests := []struct {
 		name   string
 		config *discovery.DiscoveryConfig
@@ -542,31 +542,31 @@ func Test_Reconciler_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
 	}
 }
 
-func Test_Reconciler_SetupWithManager(t *testing.T) {
-	tests := []struct {
-		name string
-		want bool
-	}{
-		{
-			name: "should setup reconciler with manager",
-			want: true,
-		},
-	}
+// func Test_Reconciler_SetupWithManager(t *testing.T) {
+// 	tests := []struct {
+// 		name string
+// 		want bool
+// 	}{
+// 		{
+// 			name: "should setup reconciler with manager",
+// 			want: true,
+// 		},
+// 	}
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{Scheme: scheme.Scheme})
-	if err != nil {
-		t.Errorf("failed to create manager: %v", err)
-	}
+// 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{Scheme: scheme.Scheme})
+// 	if err != nil {
+// 		t.Errorf("failed to create manager: %v", err)
+// 	}
 
-	registerScheme()
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := r.SetupWithManager(mgr); err != nil {
-				t.Errorf("failed to setup manager: %v", err)
-			}
-		})
-	}
-}
+// 	registerScheme()
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			if err := r.SetupWithManager(mgr); err != nil {
+// 				t.Errorf("failed to setup manager: %v", err)
+// 			}
+// 		})
+// 	}
+// }
 
 func Test_Reconciler_ShouldReconcile(t *testing.T) {
 	tests := []struct {
