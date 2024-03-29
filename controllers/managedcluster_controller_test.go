@@ -3,17 +3,22 @@
 package controllers
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
@@ -22,12 +27,19 @@ const (
 	TestManagedSecretName = "test-connection-secret"
 )
 
+var mcr = &ManagedClusterReconciler{
+	Client: fake.NewClientBuilder().Build(),
+}
+
 var (
 	mockManagedTime = metav1.NewTime(time.Date(2020, 5, 29, 6, 0, 0, 0, time.UTC))
 	mockCluster49   = discovery.DiscoveredCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "c3po",
 			Namespace: TestManagedNamespace,
+			Annotations: map[string]string{
+				discovery.ImportStrategyAnnotation: "Automatic",
+			},
 		},
 		Spec: discovery.DiscoveredClusterSpec{
 			Name:              "c3po",
@@ -37,10 +49,26 @@ var (
 			ActivityTimestamp: &mockManagedTime,
 		},
 	}
+
+	mockCluster415 = discovery.DiscoveredCluster{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "c4po",
+			Namespace: TestManagedNamespace,
+			Annotations: map[string]string{
+				discovery.ImportStrategyAnnotation: "Automatic",
+			},
+		},
+		Spec: discovery.DiscoveredClusterSpec{
+			Name:              "c4po",
+			DisplayName:       "c4po",
+			OpenshiftVersion:  "4.15.0",
+			CreationTimestamp: &mockManagedTime,
+			ActivityTimestamp: &mockManagedTime,
+		},
+	}
 )
 
 var _ = Describe("ManagedCluster controller", func() {
-
 	Context("Creating a DiscoveryConfig", func() {
 		It("Should create discovered clusters", func() {
 			By("By creating a namespace", func() {
@@ -307,6 +335,60 @@ func Test_unsetManagedStatus(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := unsetManagedStatus(tt.dc); got != tt.want {
 				t.Errorf("unsetManagedStatus() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_ManagedCluster_Reconciler_Reconcile(t *testing.T) {
+	tests := []struct {
+		name string
+		req  ctrl.Request
+		mc   *clusterapiv1.ManagedCluster
+	}{
+		{
+			name: "should reconcile managed cluster",
+			req:  ctrl.Request{NamespacedName: types.NamespacedName{Name: mockCluster415.Spec.DisplayName}},
+			mc: &clusterapiv1.ManagedCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:       mockCluster415.Spec.DisplayName,
+					Finalizers: []string{discovery.ImportCleanUpFinalizer},
+				},
+			},
+		},
+	}
+
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := mcr.Create(context.TODO(), &mockCluster415); err != nil {
+				t.Errorf("failed to create DiscoveredCluster: %v", err)
+			}
+
+			if err := mcr.Create(context.TODO(), tt.mc); err != nil {
+				t.Errorf("failed to create ManagedCluster: %v", err)
+			}
+
+			if _, err := mcr.Reconcile(context.TODO(), tt.req); err != nil {
+				t.Errorf("failed to reconcile ManagedCluster: %v", err)
+			}
+
+			if err := mcr.Delete(context.TODO(), tt.mc); err != nil {
+				t.Errorf("failed to delete ManagedCluster: %v", err)
+			}
+
+			if _, err := mcr.Reconcile(context.TODO(), tt.req); err != nil {
+				t.Errorf("failed to reconcile ManagedCluster: %v", err)
+			}
+
+			dc := &discovery.DiscoveredCluster{}
+			if err := mcr.Get(context.TODO(), types.NamespacedName{
+				Name: mockCluster415.GetName(), Namespace: mockCluster415.GetNamespace()}, dc); err != nil {
+				t.Errorf("failed to get DiscoveredCluster: %v", err)
+			}
+
+			if dc.Annotations[discovery.ImportStrategyAnnotation] != "" {
+				t.Errorf("failed to remove import strategy annotation from DiscoveredCluster: %v", dc)
 			}
 		})
 	}
