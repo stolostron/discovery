@@ -52,6 +52,9 @@ type ManagedClusterReconciler struct {
 
 func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logf.Info("Reconciling ManagedCluster", "Name", req.Name)
+	if req.Name == "" {
+		return ctrl.Result{}, nil
+	}
 
 	discoveredClusters := &discovery.DiscoveredClusterList{}
 	if err := r.List(ctx, discoveredClusters); err != nil {

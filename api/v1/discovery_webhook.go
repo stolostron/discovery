@@ -117,12 +117,13 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 		)
 	}
 
-	if r.Spec.Type == "ROSA" && r.Annotations[ImportStrategyAnnotation] != "Manual" &&
-		r.Annotations[ImportStrategyAnnotation] != "Automatic" {
-		return nil, fmt.Errorf(
-			"cannot create (%s) DiscoveredCluster '%s': import strategy annotation is not allowed for ROSA clusters without a valid import strategy ('Manual' or 'Automatic')",
-			r.Spec.Type, r.Name,
-		)
+	if r.Spec.Type == "ROSA" && r.Annotations[ImportStrategyAnnotation] != "" {
+		if r.Annotations[ImportStrategyAnnotation] != "Manual" && r.Annotations[ImportStrategyAnnotation] != "Automatic" {
+			return nil, fmt.Errorf(
+				"cannot create (%s) DiscoveredCluster '%s': import strategy annotation is not allowed for ROSA clusters without a valid import strategy ('Manual' or 'Automatic')",
+				r.Spec.Type, r.Name,
+			)
+		}
 	}
 
 	return nil, nil
@@ -144,12 +145,13 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 		)
 	}
 
-	if r.Spec.Type == "ROSA" && r.Annotations[ImportStrategyAnnotation] != "Manual" &&
-		r.Annotations[ImportStrategyAnnotation] != "Automatic" {
-		return nil, fmt.Errorf(
-			"cannot update (%s) DiscoveredCluster '%s': import strategy annotation is not allowed without a valid import strategy ('Manual' or 'Automatic')",
-			r.Spec.Type, r.Name,
-		)
+	if r.Spec.Type == "ROSA" && r.Annotations[ImportStrategyAnnotation] != "" {
+		if r.Annotations[ImportStrategyAnnotation] != "Manual" && r.Annotations[ImportStrategyAnnotation] != "Automatic" {
+			return nil, fmt.Errorf(
+				"cannot update (%s) DiscoveredCluster '%s': import strategy annotation is not allowed without a valid import strategy ('Manual' or 'Automatic')",
+				r.Spec.Type, r.Name,
+			)
+		}
 	}
 
 	return nil, nil

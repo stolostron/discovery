@@ -77,6 +77,10 @@ type DiscoveryConfigReconciler struct {
 func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logf.Info("Reconciling DiscoveryConfig")
 
+	if req.Name == "" {
+		return ctrl.Result{}, nil
+	}
+
 	// Update custom metric based on the number of items in the DiscoveryConfigList.
 	if err := r.updateCustomMetrics(ctx); err != nil {
 		return ctrl.Result{}, err
