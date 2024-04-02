@@ -5,37 +5,49 @@ metadata:
   creationTimestamp: null
   name: discovery-role
 rules:
-- apiGroups:
-  - cluster.open-cluster-management.io
-  resources:
-  - managedclusters
-  - managedclusters/accept
-  - managedclusters/finalizers
-  - managedclustersets
-  - managedclustersets/bind
-  - managedclustersets/finalizers
-  - managedclustersets/join
-  - managedclustersetbindings
-  - managedclustersetbindings/finalizers
-  - placements
-  - placements/finalizers
-  - managedclusters/status
-  verbs:
-  - create
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
+- resources:
   - namespaces
   - secrets
   verbs:
   - create
   - get
   - list
+  - update
+  - watch
+- apiGroups:
+  - agent.open-cluster-management.io
+  resources:
+  - klusterletaddonconfigs
+  - klusterletaddonconfigs/finalizers
+  - klusterletaddonconfigs/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cluster.open-cluster-management.io
+  resources:
+  - managedclusters
+  - managedclusters/accept
+  - managedclusters/finalizers
+  - managedclusters/status
+  - managedclustersetbindings
+  - managedclustersetbindings/finalizers
+  - managedclustersets
+  - managedclustersets/bind
+  - managedclustersets/finalizers
+  - managedclustersets/join
+  - placements
+  - placements/finalizers
+  verbs:
+  - create
+  - get
+  - list
+  - patch
   - update
   - watch
 - apiGroups:
@@ -95,20 +107,6 @@ rules:
   - get
   - patch
   - update
-- apiGroups:
-  - agent.open-cluster-management.io
-  resources:
-    - klusterletaddonconfigs
-    - klusterletaddonconfigs/finalizers
-    - klusterletaddonconfigs/status
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
 - apiGroups:
   - register.open-cluster-management.io
   resources:

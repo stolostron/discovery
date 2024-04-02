@@ -48,7 +48,9 @@ type ManagedClusterReconciler struct {
 	Log     logr.Logger
 }
 
-// +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters,verbs=get;list;watch
+// +kubebuilder:rbac:groups=agent.open-cluster-management.io,resources=klusterletaddonconfigs;klusterletaddonconfigs/finalizers;klusterletaddonconfigs/status,verbs=create;delete;get;list;patch;update;watch
+// +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters;managedclusters/accept;managedclusters/finalizers;managedclustersets;managedclustersets/bind;managedclustersets/finalizers;managedclustersets/join;managedclustersetbindings;managedclustersetbindings/finalizers;placements;placements/finalizers;managedclusters/status,verbs=create;get;list;patch;update;watch
+// +kubebuilder:rbac:groups=register.open-cluster-management.io,resources=managedclusters/accept,verbs=update
 
 func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logf.Info("Reconciling ManagedCluster", "Name", req.Name)

@@ -42,9 +42,10 @@ type DiscoveredClusterReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=discovery.open-cluster-management.io.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=discovery.open-cluster-management.io.open-cluster-management.io,resources=discoveredclusters/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=discovery.open-cluster-management.io.open-cluster-management.io,resources=discoveredclusters/finalizers,verbs=update
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=create;delete;deletecollection;get;list;patch;update;watch
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/finalizers,verbs=update
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/status,verbs=get;patch;update
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/finalizers,verbs=get;patch;update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

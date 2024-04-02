@@ -21,10 +21,11 @@ metadata:
       ]
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
+    createdAt: "2024-04-02T18:56:50Z"
     description: This operator discovers OpenShift Conatiner Platform clusters which
       are not yet under management by Open Cluster Management.
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.22.2
+    operators.operatorframework.io/builder: operator-sdk-v1.34.1
     operators.operatorframework.io/internal-objects: '["discoveredclusters.discovery.open-cluster-management.io"]'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     support: Red Hat
@@ -64,37 +65,49 @@ spec:
     spec:
       clusterPermissions:
       - rules:
-        - apiGroups:
-          - cluster.open-cluster-management.io
-          resources:
-          - managedclusters
-          - managedclusters/accept
-          - managedclusters/finalizers
-          - managedclustersets
-          - managedclustersets/bind
-          - managedclustersets/finalizers
-          - managedclustersets/join
-          - managedclustersetbindings
-          - managedclustersetbindings/finalizers
-          - placements
-          - placements/finalizers
-          - managedclusters/status
-          verbs:
-          - create
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
+        - resources:
           - namespaces
           - secrets
           verbs:
           - create
           - get
           - list
+          - update
+          - watch
+        - apiGroups:
+          - agent.open-cluster-management.io
+          resources:
+          - klusterletaddonconfigs
+          - klusterletaddonconfigs/finalizers
+          - klusterletaddonconfigs/status
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - cluster.open-cluster-management.io
+          resources:
+          - managedclusters
+          - managedclusters/accept
+          - managedclusters/finalizers
+          - managedclusters/status
+          - managedclustersetbindings
+          - managedclustersetbindings/finalizers
+          - managedclustersets
+          - managedclustersets/bind
+          - managedclustersets/finalizers
+          - managedclustersets/join
+          - placements
+          - placements/finalizers
+          verbs:
+          - create
+          - get
+          - list
+          - patch
           - update
           - watch
         - apiGroups:
@@ -155,20 +168,6 @@ spec:
           - patch
           - update
         - apiGroups:
-          - agent.open-cluster-management.io
-          resources:
-            - klusterletaddonconfigs
-            - klusterletaddonconfigs/finalizers
-            - klusterletaddonconfigs/status
-          verbs:
-            - create
-            - delete
-            - get
-            - list
-            - patch
-            - update
-            - watch
-        - apiGroups:
           - register.open-cluster-management.io
           resources:
           - managedclusters/accept
@@ -195,6 +194,11 @@ spec:
                 - --leader-elect
                 command:
                 - /manager
+                env:
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
                 image: discovery-operator:latest
                 imagePullPolicy: Always
                 livenessProbe:
@@ -223,6 +227,9 @@ spec:
                 securityContext:
                   allowPrivilegeEscalation: false
                 volumeMounts:
+                - mountPath: /tmp/k8s-webhook-server/serving-certs
+                  name: cert
+                  readOnly: true
                 - mountPath: /etc/pki/ca-trust/extracted/pem/
                   name: trusted-ca-bundle
               imagePullSecrets:
@@ -230,6 +237,10 @@ spec:
               serviceAccountName: discovery-operator
               terminationGracePeriodSeconds: 10
               volumes:
+              - name: cert
+                secret:
+                  defaultMode: 420
+                  secretName: discovery-operator-webhook-service
               - configMap:
                   defaultMode: 440
                   items:
