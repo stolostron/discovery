@@ -5,7 +5,9 @@ metadata:
   creationTimestamp: null
   name: discovery-role
 rules:
-- resources:
+- apiGroups:
+  - ""
+  resources:
   - namespaces
   - secrets
   verbs:

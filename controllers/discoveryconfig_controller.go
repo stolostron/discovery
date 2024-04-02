@@ -64,7 +64,7 @@ type DiscoveryConfigReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=,resources=namespaces;secrets,verbs=create;get;list;update;watch
+// +kubebuilder:rbac:groups="",resources=namespaces;secrets,verbs=create;get;list;update;watch
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs,verbs=create;delete;get;list;patch;update;watch
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/finalizers,verbs=get;patch;update
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/status,verbs=get;patch;update

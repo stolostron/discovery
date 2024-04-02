@@ -21,7 +21,7 @@ metadata:
       ]
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
-    createdAt: "2024-04-02T18:56:50Z"
+    createdAt: "2024-04-02T19:48:37Z"
     description: This operator discovers OpenShift Conatiner Platform clusters which
       are not yet under management by Open Cluster Management.
     operatorframework.io/suggested-namespace: open-cluster-management
@@ -65,7 +65,9 @@ spec:
     spec:
       clusterPermissions:
       - rules:
-        - resources:
+        - apiGroups:
+          - ""
+          resources:
           - namespaces
           - secrets
           verbs:
