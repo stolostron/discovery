@@ -37,7 +37,7 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm"
-	"github.com/stolostron/discovery/util/reconciler"
+	recon "github.com/stolostron/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -75,9 +75,8 @@ type DiscoveryConfigReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
 func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	logf.Info("Reconciling DiscoveryConfig")
-
-	if req.Name == "" {
+	logf.Info("Reconciling DiscoveryConfig", "Name", req.Name, "Namespace", req.Namespace)
+	if req.Name == "" || req.Namespace == "" {
 		return ctrl.Result{}, nil
 	}
 
@@ -112,8 +111,8 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	logf.Info("Reconciliation complete. Scheduling next reconcilation for", "next_time", reconciler.RefreshInterval)
-	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
+	logf.Info("Reconciliation complete. Scheduling next reconcilation for", "next_time", recon.DefaultRefreshInterval)
+	return ctrl.Result{RequeueAfter: recon.DefaultRefreshInterval}, nil
 }
 
 // SetupWithManager ...

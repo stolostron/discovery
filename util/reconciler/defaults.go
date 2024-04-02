@@ -7,9 +7,21 @@ import (
 )
 
 const (
-	// RefreshInterval is the maximum time to wait between reconciles
-	RefreshInterval = 30 * time.Minute
+	// ShortRefreshInterval is ideal for frequently changing or moderately critical state requiring timely updates.
+	ShortRefreshInterval = 5 * time.Minute
 
-	// ResyncPeriod ...
-	ResyncPeriod = time.Second * 20
+	// ErrorRefreshInterval is used for handling critical errors that require immediate attention.
+	ErrorRefreshInterval = 30 * time.Second
+
+	/*
+		WarningRefreshInterval is suitable for addressing warnings or non-critical issues that should still be addressed
+		relatively promptly.
+	*/
+	WarningRefreshInterval = 1 * time.Minute
+
+	/*
+		DefaultRefreshInterval serves as a fallback for any other conditions not explicitly covered by the above
+		intervals.
+	*/
+	DefaultRefreshInterval = 20 * time.Minute
 )

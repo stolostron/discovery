@@ -16,11 +16,10 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
-	"github.com/stolostron/discovery/util/reconciler"
+	recon "github.com/stolostron/discovery/util/reconciler"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -68,7 +67,7 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	config := &discovery.DiscoveryConfig{}
 	if err := r.Get(ctx, GetDiscoveryConfig(), config); err != nil {
 		logf.Error(err, "failed to get DiscoveryConfig", "Name", GetDiscoveryConfig().Name)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
 	/*
@@ -102,7 +101,7 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		return res, err
 	}
 
-	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
+	return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, nil
 }
 
 /*
@@ -228,11 +227,11 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 
 	if err := r.Get(ctx, nn, &existingSecret); err != nil && apierrors.IsNotFound(err) {
 		logf.Error(err, "Secret was not found", "Name", nn.Name, "Namespace", nn.Namespace)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, err
 
 	} else if err != nil {
 		logf.Error(err, "failed to get Secret", "Name", nn.Name, "Namespace", nn.Namespace)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
 	if apiToken, err := parseUserToken(&existingSecret); err == nil {
@@ -245,16 +244,16 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 			s := r.CreateAutoImportSecret(nn, dc.Spec.RHOCMClusterID, apiToken)
 			if err := r.Create(ctx, s); err != nil {
 				logf.Error(err, "failed to create auto-import Secret for ManagedCluster", "Name", nn.Name)
-				return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+				return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
 			}
 
 		} else if err != nil {
 			logf.Error(err, "failed to get auto-import Secret for ManagedCluster", "Name", nn.Name)
-			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+			return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 		}
 	} else {
-		fmt.Printf("here: %v", err)
 		logf.Error(err, "failed to parse token from Secret", "Name", nn.Name)
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -278,12 +277,12 @@ func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Co
 		kac := r.CreateKlusterletAddonConfig(nn)
 		if err := r.Create(ctx, kac); err != nil {
 			logf.Error(err, "failed to create KlusterAddonConfig", "Name", nn.Name, "Namespace", nn.Namespace)
-			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
 		}
 
 	} else if err != nil {
 		logf.Error(err, "failed to get KlusterAddonConfig", "Name", nn.Name)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -307,12 +306,12 @@ func (r *DiscoveredClusterReconciler) EnsureManagedCluster(ctx context.Context, 
 		mc := r.CreateManagedCluster(nn)
 		if err := r.Create(ctx, mc); err != nil {
 			logf.Error(err, "failed to create ManagedCluster", "Name", nn.Name)
-			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
 		}
 
 	} else if err != nil {
 		logf.Error(err, "failed to get ManagedCluster", "Name", nn.Name)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -335,12 +334,12 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 		ns := r.CreateNamespaceForDiscoveredCluster(dc)
 		if err := r.Create(ctx, ns); err != nil {
 			logf.Error(err, "failed to create Namespace", "Name", nn.Name)
-			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
 		}
 
 	} else if err != nil {
-		logf.Error(err, "Failed to get Namespace", "Name", nn.Name)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		logf.Error(err, "failed to get Namespace", "Name", nn.Name)
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -358,7 +357,7 @@ func (r *DiscoveredClusterReconciler) EnsureFinalizerRemovedFromManagedCluster(c
 
 	} else if err != nil {
 		logf.Info("failed to get ManagedCluster", "Name", nn.Name)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
 	if mc.GetDeletionTimestamp() != nil && controllerutil.ContainsFinalizer(mc, discovery.ImportCleanUpFinalizer) {
@@ -367,7 +366,7 @@ func (r *DiscoveredClusterReconciler) EnsureFinalizerRemovedFromManagedCluster(c
 			logf.Error(err, "failed to remove finalizer from ManagedCluster", "Name", mc.GetName(), "Finalizer",
 				discovery.ImportCleanUpFinalizer)
 
-			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
 		}
 	}
 

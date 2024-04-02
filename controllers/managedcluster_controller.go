@@ -20,7 +20,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
-	"github.com/stolostron/discovery/util/reconciler"
+	recon "github.com/stolostron/discovery/util/reconciler"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -68,7 +68,7 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	mc := &clusterapiv1.ManagedCluster{}
 	if err := r.Get(ctx, req.NamespacedName, mc); err != nil && !apierrors.IsNotFound(err) {
 		logf.Error(err, "failed to get ManagedCluster", "Name", req.Name)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
 	if mc.GetDeletionTimestamp() != nil {
@@ -88,7 +88,7 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 				delete(modifiedDC.Annotations, discovery.ImportStrategyAnnotation)
 				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(dc)); err != nil {
 					logf.Error(err, "failed to patch DiscoveredCluster", "Name", dc.GetName())
-					return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+					return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
 				}
 				break
 			}
@@ -99,7 +99,8 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		APIVersion: "cluster.open-cluster-management.io/v1"}}
 
 	if err := r.Client.List(ctx, managedMeta); err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "error listing managed clusters")
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval},
+			errors.Wrapf(err, "error listing managed clusters")
 	}
 
 	if err := r.updateManagedLabels(ctx, managedMeta, discoveredClusters); err != nil {
