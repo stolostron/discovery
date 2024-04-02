@@ -151,13 +151,12 @@ func main() {
 		setupLog.Error(err, ControllerError, "controller", "DiscoveryConfig")
 		os.Exit(1)
 	}
-	// +kubebuilder:scaffold:builder
 
 	if err = (&controllers.DiscoveredClusterReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, ControllerError, "controller", "DiscoveryCluster")
+		setupLog.Error(err, ControllerError, "controller", "DiscoveredCluster")
 		os.Exit(1)
 	}
 
@@ -169,6 +168,7 @@ func main() {
 		setupLog.Error(err, ControllerError, "controller", "ManagedCluster")
 		os.Exit(1)
 	}
+	// +kubebuilder:scaffold:builder
 
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		// https://book.kubebuilder.io/cronjob-tutorial/running.html#running-webhooks-locally
