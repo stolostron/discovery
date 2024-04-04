@@ -16,6 +16,7 @@ package controllers
 
 import (
 	"context"
+	"io/ioutil"
 	"testing"
 
 	discovery "github.com/stolostron/discovery/api/v1"
@@ -23,7 +24,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes/scheme"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -96,6 +99,16 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 		},
 	}
 
+	crdFile, err := ioutil.ReadFile("../test/resources/klusterletaddonconfig-crd.yml")
+	if err != nil {
+		t.Errorf("failed to read CRD YAML file: %v", err)
+	}
+
+	crd := unstructured.Unstructured{}
+	if err := yaml.Unmarshal(crdFile, &crd); err != nil {
+		t.Errorf("failed to unmarshal CRD YAML file: %v", err)
+	}
+
 	registerScheme()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -135,6 +148,10 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 
 			if err := r.Create(context.TODO(), tt.dc); err != nil {
 				t.Errorf("failed to create DiscoveredCluster: %v", err)
+			}
+
+			if err := r.Create(context.TODO(), &crd); err != nil {
+				t.Errorf("failed to create KlusterletAddonConfig: %v", err)
 			}
 
 			if _, err := r.Reconcile(context.TODO(), tt.req); err != nil {
