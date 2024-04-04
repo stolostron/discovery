@@ -37,13 +37,11 @@ var (
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "c3po",
 			Namespace: TestManagedNamespace,
-			Annotations: map[string]string{
-				discovery.ImportStrategyAnnotation: "Automatic",
-			},
 		},
 		Spec: discovery.DiscoveredClusterSpec{
 			Name:              "c3po",
 			DisplayName:       "c3po",
+			EnableAutoImport:  true,
 			OpenshiftVersion:  "4.9.0",
 			CreationTimestamp: &mockManagedTime,
 			ActivityTimestamp: &mockManagedTime,
@@ -54,13 +52,11 @@ var (
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "c4po",
 			Namespace: TestManagedNamespace,
-			Annotations: map[string]string{
-				discovery.ImportStrategyAnnotation: "Automatic",
-			},
 		},
 		Spec: discovery.DiscoveredClusterSpec{
 			Name:              "c4po",
 			DisplayName:       "c4po",
+			EnableAutoImport:  true,
 			OpenshiftVersion:  "4.15.0",
 			CreationTimestamp: &mockManagedTime,
 			ActivityTimestamp: &mockManagedTime,
@@ -385,10 +381,6 @@ func Test_ManagedCluster_Reconciler_Reconcile(t *testing.T) {
 			if err := mcr.Get(context.TODO(), types.NamespacedName{
 				Name: mockCluster415.GetName(), Namespace: mockCluster415.GetNamespace()}, dc); err != nil {
 				t.Errorf("failed to get DiscoveredCluster: %v", err)
-			}
-
-			if dc.Annotations[discovery.ImportStrategyAnnotation] != "" {
-				t.Errorf("failed to remove import strategy annotation from DiscoveredCluster: %v", dc)
 			}
 		})
 	}

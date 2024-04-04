@@ -78,11 +78,10 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			if dc.GetName() == req.Name || dc.Spec.DisplayName == req.Name {
 				modifiedDC := dc.DeepCopy()
 
-				if modifiedDC.GetAnnotations() == nil {
-					modifiedDC.SetAnnotations(make(map[string]string))
+				if modifiedDC.Spec.EnableAutoImport {
+					modifiedDC.Spec.EnableAutoImport = false
 				}
 
-				delete(modifiedDC.Annotations, discovery.ImportStrategyAnnotation)
 				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(dc)); err != nil {
 					logf.Error(err, "failed to patch DiscoveredCluster", "Name", dc.GetName())
 					return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
@@ -149,6 +148,7 @@ func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, mana
 				}
 				log.Info("Updated cluster, adding managed status", "discoveredcluster", dc.Name, "discoveredcluster namespace", dc.Namespace)
 			}
+
 		} else {
 			if updateRequired := unsetManagedStatus(&dc); updateRequired {
 				// Update with managed labels removed

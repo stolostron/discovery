@@ -52,7 +52,7 @@ func TestGetSubscriptionsNoError(t *testing.T) {
 					Kind:    "Subscription",
 					ID:      "123abc",
 					Href:    "/api/accounts_mgmt/v1/subscriptions/123abc",
-					Creator: StandardKind{},
+					Creator: Creator{},
 					Status:  "Active",
 				},
 			},
