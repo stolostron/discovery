@@ -95,7 +95,7 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		crdName := "klusterletaddonconfigs.agent.open-cluster-management.io"
 
 		if res, err := r.EnsureCRDExist(ctx, crdName); err != nil && apierrors.IsNotFound(err) {
-			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, nil
+			return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, nil
 
 		} else if err != nil {
 			logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
@@ -328,7 +328,7 @@ func (r *DiscoveredClusterReconciler) EnsureCRDExist(ctx context.Context, crdNam
 
 	} else if err != nil {
 		logf.Error(err, "failed to get CRD", "Name", crdName)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, err
 	}
 
 	return ctrl.Result{}, nil
