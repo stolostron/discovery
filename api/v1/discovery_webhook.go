@@ -110,20 +110,12 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 	discoveredclusterLog.Info("validate create", "Name", r.Name)
 
 	// Validate resource
-	if r.Spec.Type != "ROSA" && r.Annotations[ImportStrategyAnnotation] != "" {
+	if r.Spec.Type != "ROSA" && r.Spec.EnableAutoImport {
 		return nil, fmt.Errorf(
-			"cannot create (%s) DiscoveredCluster '%s': import strategy annotation is not allowed for clusters of type other than ROSA",
+			"cannot create DiscoveredCluster '%s': enableAutoImport is not allowed for clusters of type '%s'. "+
+				"Only ROSA type clusters support auto import",
 			r.Spec.Type, r.Name,
 		)
-	}
-
-	if r.Spec.Type == "ROSA" && r.Annotations[ImportStrategyAnnotation] != "" {
-		if r.Annotations[ImportStrategyAnnotation] != "Manual" && r.Annotations[ImportStrategyAnnotation] != "Automatic" {
-			return nil, fmt.Errorf(
-				"cannot create (%s) DiscoveredCluster '%s': import strategy annotation is not allowed for ROSA clusters without a valid import strategy ('Manual' or 'Automatic')",
-				r.Spec.Type, r.Name,
-			)
-		}
 	}
 
 	return nil, nil
@@ -138,20 +130,12 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 	}
 
 	oldDiscoveredCluster := old.(*DiscoveredCluster)
-	if oldDiscoveredCluster.Spec.Type != "ROSA" && r.Annotations[ImportStrategyAnnotation] != "" {
+	if oldDiscoveredCluster.Spec.Type != "ROSA" && r.Spec.EnableAutoImport {
 		return nil, fmt.Errorf(
-			"cannot update (%s) DiscoveredCluster '%s': import strategy annotation is not allowed for clusters of type other than ROSA",
+			"cannot update DiscoveredCluster '%s': enableAutoImport is not allowed for clusters of type '%s'."+
+				"Only ROSA type clusters support auto import",
 			r.Spec.Type, r.Name,
 		)
-	}
-
-	if r.Spec.Type == "ROSA" && r.Annotations[ImportStrategyAnnotation] != "" {
-		if r.Annotations[ImportStrategyAnnotation] != "Manual" && r.Annotations[ImportStrategyAnnotation] != "Automatic" {
-			return nil, fmt.Errorf(
-				"cannot update (%s) DiscoveredCluster '%s': import strategy annotation is not allowed without a valid import strategy ('Manual' or 'Automatic')",
-				r.Spec.Type, r.Name,
-			)
-		}
 	}
 
 	return nil, nil
