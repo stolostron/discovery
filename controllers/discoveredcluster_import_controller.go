@@ -75,7 +75,7 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		If the discovered cluster has an Automatic import strategy, we need to ensure that the required resources
 		are available. Otherwise, we will ignore that cluster.
 	*/
-	if !dc.Spec.IsManagedCluster && dc.Annotations[discovery.ImportStrategyAnnotation] == "Automatic" {
+	if !dc.Spec.IsManagedCluster && dc.Spec.EnableAutoImport {
 		if res, err := r.EnsureNamespaceForDiscoveredCluster(ctx, *dc); err != nil {
 			logf.Error(err, "failed to ensure namespace for DiscoveredCluster", "Name", dc.Spec.DisplayName)
 			return res, err
@@ -97,10 +97,10 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 	}
 
-	if res, err := r.EnsureFinalizerRemovedFromManagedCluster(ctx, *dc); err != nil {
-		logf.Error(err, "failed to ensure finalizer removed from ManagedCluster")
-		return res, err
-	}
+	// if res, err := r.EnsureFinalizerRemovedFromManagedCluster(ctx, *dc); err != nil {
+	// 	logf.Error(err, "failed to ensure finalizer removed from ManagedCluster")
+	// 	return res, err
+	// }
 
 	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
 }
@@ -182,9 +182,9 @@ func (r *DiscoveredClusterReconciler) CreateManagedCluster(nn types.NamespacedNa
 			Annotations: map[string]string{
 				discovery.CreatedViaAnnotation: "discovery",
 			},
-			Finalizers: []string{
-				discovery.ImportCleanUpFinalizer,
-			},
+			// Finalizers: []string{
+			// 	discovery.ImportCleanUpFinalizer,
+			// },
 		},
 		Spec: clusterapiv1.ManagedClusterSpec{
 			HubAcceptsClient: true,

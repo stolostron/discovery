@@ -44,21 +44,23 @@ const (
 
 // DiscoveredClusterSpec defines the desired state of DiscoveredCluster
 type DiscoveredClusterSpec struct {
-	Name              string       `json:"name" yaml:"name"`
-	DisplayName       string       `json:"displayName" yaml:"displayName"`
-	OCPClusterID      string       `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
-	RHOCMClusterID    string       `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
-	Console           string       `json:"console,omitempty" yaml:"console,omitempty"`
-	APIURL            string       `json:"apiUrl" yaml:"apiUrl"`
-	CreationTimestamp *metav1.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
-	ActivityTimestamp *metav1.Time `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
-	Type              string       `json:"type" yaml:"type"`
-	OpenshiftVersion  string       `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
-	CloudProvider     string       `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
-	Status            string       `json:"status,omitempty" yaml:"status,omitempty"`
-	IsManagedCluster  bool         `json:"isManagedCluster" yaml:"isManagedCluster"`
-
-	Credential corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
+	ActivityTimestamp *metav1.Time           `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
+	APIURL            string                 `json:"apiUrl" yaml:"apiUrl"`
+	CloudProvider     string                 `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
+	Console           string                 `json:"console,omitempty" yaml:"console,omitempty"`
+	CreationTimestamp *metav1.Time           `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
+	Credential        corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
+	DisplayName       string                 `json:"displayName" yaml:"displayName"`
+	EnableAutoImport  bool                   `json:"enableAutoImport,omitempty" yaml:"enableAutoImport,omitempty"`
+	IsManagedCluster  bool                   `json:"isManagedCluster" yaml:"isManagedCluster"`
+	Name              string                 `json:"name" yaml:"name"`
+	OCPClusterID      string                 `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
+	OpenshiftVersion  string                 `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
+	Owner             string                 `json:"owner,omitempty" yaml:"owner,omitempty"`
+	RHOCMClusterID    string                 `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
+	Region            string                 `json:"region,omitempty" yaml:"region,omitempty"`
+	Status            string                 `json:"status,omitempty" yaml:"status,omitempty"`
+	Type              string                 `json:"type" yaml:"type"`
 }
 
 // DiscoveredClusterStatus defines the observed state of DiscoveredCluster
@@ -95,18 +97,21 @@ func init() {
 
 // Equal reports whether the spec of a is equal to b.
 func (a DiscoveredCluster) Equal(b DiscoveredCluster) bool {
-	if a.Spec.Name != b.Spec.Name ||
-		a.Spec.DisplayName != b.Spec.DisplayName ||
-		a.Spec.Console != b.Spec.Console ||
-		a.Spec.APIURL != b.Spec.APIURL ||
-		a.Spec.CreationTimestamp.Truncate(time.Second) != b.Spec.CreationTimestamp.Truncate(time.Second) ||
+	if a.Spec.APIURL != b.Spec.APIURL ||
 		a.Spec.ActivityTimestamp.Truncate(time.Second) != b.Spec.ActivityTimestamp.Truncate(time.Second) ||
-		a.Spec.Type != b.Spec.Type ||
-		a.Spec.OpenshiftVersion != b.Spec.OpenshiftVersion ||
 		a.Spec.CloudProvider != b.Spec.CloudProvider ||
-		a.Spec.Status != b.Spec.Status ||
+		a.Spec.Console != b.Spec.Console ||
+		a.Spec.CreationTimestamp.Truncate(time.Second) != b.Spec.CreationTimestamp.Truncate(time.Second) ||
+		a.Spec.Credential != b.Spec.Credential ||
+		a.Spec.DisplayName != b.Spec.DisplayName ||
+		a.Spec.EnableAutoImport != b.Spec.EnableAutoImport ||
 		a.Spec.IsManagedCluster != b.Spec.IsManagedCluster ||
-		a.Spec.Credential != b.Spec.Credential {
+		a.Spec.Name != b.Spec.Name ||
+		a.Spec.OpenshiftVersion != b.Spec.OpenshiftVersion ||
+		a.Spec.Owner != b.Spec.Owner ||
+		a.Spec.Region != b.Spec.Region ||
+		a.Spec.Status != b.Spec.Status ||
+		a.Spec.Type != b.Spec.Type {
 		return false
 	}
 	return true

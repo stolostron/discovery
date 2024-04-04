@@ -66,14 +66,14 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 			},
 			dc: &discovery.DiscoveredCluster{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:        "310ac28e-b69b-447b-a51f-08e967cff1ee",
-					Namespace:   "discovery",
-					Annotations: map[string]string{discovery.ImportStrategyAnnotation: "Automatic"},
+					Name:      "310ac28e-b69b-447b-a51f-08e967cff1ee",
+					Namespace: "discovery",
 				},
 				Spec: discovery.DiscoveredClusterSpec{
-					DisplayName:    "fake-cluster",
-					RHOCMClusterID: "349bcdc1dd6a44f3a1a136b2f98a69ca",
-					Type:           "ROSA",
+					DisplayName:      "fake-cluster",
+					EnableAutoImport: true,
+					RHOCMClusterID:   "349bcdc1dd6a44f3a1a136b2f98a69ca",
+					Type:             "ROSA",
 				},
 			},
 			req: ctrl.Request{
