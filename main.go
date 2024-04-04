@@ -49,6 +49,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
+	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+
 	corev1 "k8s.io/api/core/v1"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
 
@@ -77,6 +79,8 @@ func init() {
 	utilruntime.Must(corev1.AddToScheme(scheme))
 	utilruntime.Must(discoveryv1.AddToScheme(scheme))
 	utilruntime.Must(agentv1.SchemeBuilder.AddToScheme(scheme))
+
+	utilruntime.Must(apiextv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 

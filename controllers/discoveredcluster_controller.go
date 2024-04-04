@@ -24,6 +24,7 @@ import (
 	recon "github.com/stolostron/discovery/util/reconciler"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
+	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -90,7 +91,17 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		If the discovered cluster has an Automatic import strategy, we need to ensure that the required resources
 		are available. Otherwise, we will ignore that cluster.
 	*/
-	if !dc.Spec.IsManagedCluster && dc.Annotations[discovery.ImportStrategyAnnotation] == "Automatic" {
+	if !dc.Spec.IsManagedCluster && dc.Spec.EnableAutoImport {
+		crdName := "klusterletaddonconfigs.agent.open-cluster-management.io"
+
+		if res, err := r.EnsureCRDExist(ctx, crdName); err != nil && apierrors.IsNotFound(err) {
+			return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, nil
+
+		} else if err != nil {
+			logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
+			return res, err
+		}
+
 		if res, err := r.EnsureNamespaceForDiscoveredCluster(ctx, *dc); err != nil {
 			logf.Error(err, "failed to ensure namespace for DiscoveredCluster", "Name", dc.Spec.DisplayName)
 			return res, err
@@ -112,10 +123,10 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 	}
 
-	if res, err := r.EnsureFinalizerRemovedFromManagedCluster(ctx, *dc); err != nil {
-		logf.Error(err, "failed to ensure finalizer removed from ManagedCluster")
-		return res, err
-	}
+	// if res, err := r.EnsureFinalizerRemovedFromManagedCluster(ctx, *dc); err != nil {
+	// 	logf.Error(err, "failed to ensure finalizer removed from ManagedCluster")
+	// 	return res, err
+	// }
 
 	return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, nil
 }
@@ -197,9 +208,9 @@ func (r *DiscoveredClusterReconciler) CreateManagedCluster(nn types.NamespacedNa
 			Annotations: map[string]string{
 				discovery.CreatedViaAnnotation: "discovery",
 			},
-			Finalizers: []string{
-				discovery.ImportCleanUpFinalizer,
-			},
+			// Finalizers: []string{
+			// 	discovery.ImportCleanUpFinalizer,
+			// },
 		},
 		Spec: clusterapiv1.ManagedClusterSpec{
 			HubAcceptsClient: true,
@@ -299,6 +310,25 @@ func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Co
 	} else if err != nil {
 		logf.Error(err, "failed to get KlusterAddonConfig", "Name", nn.Name)
 		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+// EnsureCRDExist checks if a Custom Resource Definition (CRD) with the specified name exists in the cluster.
+// If the CRD exists, it returns indicating that the reconciliation should continue without requeueing.
+// If the CRD doesn't exist, it logs a message indicating that the CRD was not found and returns.
+// If an error occurs while getting the CRD (other than IsNotFound), it logs an error message and returns an error.
+func (r *DiscoveredClusterReconciler) EnsureCRDExist(ctx context.Context, crdName string) (ctrl.Result, error) {
+	crd := &apiextv1.CustomResourceDefinition{}
+
+	if err := r.Get(ctx, types.NamespacedName{Name: crdName}, crd); err != nil && apierrors.IsNotFound(err) {
+		logf.Info("CRD not found. Ignoring since object must be deleted", "Name", crdName)
+		return ctrl.Result{}, err
+
+	} else if err != nil {
+		logf.Error(err, "failed to get CRD", "Name", crdName)
+		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
 	}
 
 	return ctrl.Result{}, nil

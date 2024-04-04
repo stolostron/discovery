@@ -71,18 +71,20 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 			Name: sub.ExternalClusterID,
 		},
 		Spec: discovery.DiscoveredClusterSpec{
-			Name:              sub.ExternalClusterID,
-			DisplayName:       computeDisplayName(sub),
-			Console:           sub.ConsoleURL,
-			OCPClusterID:      sub.ExternalClusterID,
-			RHOCMClusterID:    sub.ClusterID,
 			APIURL:            computeApiUrl(sub),
-			CreationTimestamp: sub.CreatedAt,
 			ActivityTimestamp: sub.LastTelemetryDate,
-			Type:              computeType(sub),
-			OpenshiftVersion:  sub.Metrics[0].OpenShiftVersion,
 			CloudProvider:     sub.CloudProviderID,
+			Console:           sub.ConsoleURL,
+			CreationTimestamp: sub.CreatedAt,
+			DisplayName:       computeDisplayName(sub),
+			Name:              sub.ExternalClusterID,
+			OCPClusterID:      sub.ExternalClusterID,
+			OpenshiftVersion:  sub.Metrics[0].OpenShiftVersion,
+			Owner:             sub.Creator.UserName,
+			Region:            sub.RegionID,
+			RHOCMClusterID:    sub.ClusterID,
 			Status:            sub.Status,
+			Type:              computeType(sub),
 		},
 	}
 	return discoveredCluster, true
@@ -91,10 +93,7 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 // IsUnrecoverable returns true if the specified error is not temporary
 // and will continue to occur with the current state.
 func IsUnrecoverable(err error) bool {
-	if errors.Is(err, auth.ErrInvalidToken) {
-		return true
-	}
-	return false
+	return errors.Is(err, auth.ErrInvalidToken)
 }
 
 // computeDisplayName tries to provide a more user-friendly name if set

@@ -16,13 +16,17 @@ package controllers
 
 import (
 	"context"
+	"io/ioutil"
 	"testing"
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
+	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes/scheme"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -37,6 +41,7 @@ func registerScheme() {
 	clusterapiv1.AddToScheme(scheme.Scheme)
 	discovery.AddToScheme(scheme.Scheme)
 	agentv1.SchemeBuilder.AddToScheme(scheme.Scheme)
+	apiextv1.AddToScheme(scheme.Scheme)
 }
 
 func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
@@ -66,14 +71,14 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 			},
 			dc: &discovery.DiscoveredCluster{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:        "310ac28e-b69b-447b-a51f-08e967cff1ee",
-					Namespace:   "discovery",
-					Annotations: map[string]string{discovery.ImportStrategyAnnotation: "Automatic"},
+					Name:      "310ac28e-b69b-447b-a51f-08e967cff1ee",
+					Namespace: "discovery",
 				},
 				Spec: discovery.DiscoveredClusterSpec{
-					DisplayName:    "fake-cluster",
-					RHOCMClusterID: "349bcdc1dd6a44f3a1a136b2f98a69ca",
-					Type:           "ROSA",
+					DisplayName:      "fake-cluster",
+					EnableAutoImport: true,
+					RHOCMClusterID:   "349bcdc1dd6a44f3a1a136b2f98a69ca",
+					Type:             "ROSA",
 				},
 			},
 			req: ctrl.Request{
@@ -92,6 +97,16 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	crdFile, err := ioutil.ReadFile("../test/resources/klusterletaddonconfig-crd.yml")
+	if err != nil {
+		t.Errorf("failed to read CRD YAML file: %v", err)
+	}
+
+	crd := unstructured.Unstructured{}
+	if err := yaml.Unmarshal(crdFile, &crd); err != nil {
+		t.Errorf("failed to unmarshal CRD YAML file: %v", err)
 	}
 
 	registerScheme()
@@ -133,6 +148,10 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 
 			if err := r.Create(context.TODO(), tt.dc); err != nil {
 				t.Errorf("failed to create DiscoveredCluster: %v", err)
+			}
+
+			if err := r.Create(context.TODO(), &crd); err != nil {
+				t.Errorf("failed to create KlusterletAddonConfig: %v", err)
 			}
 
 			if _, err := r.Reconcile(context.TODO(), tt.req); err != nil {

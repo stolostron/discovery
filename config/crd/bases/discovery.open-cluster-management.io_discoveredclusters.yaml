@@ -109,6 +109,9 @@ spec:
                 x-kubernetes-map-type: atomic
               displayName:
                 type: string
+              enableAutoImport:
+                default: false
+                type: boolean
               isManagedCluster:
                 type: boolean
               name:
@@ -116,6 +119,10 @@ spec:
               ocpClusterId:
                 type: string
               openshiftVersion:
+                type: string
+              owner:
+                type: string
+              region:
                 type: string
               rhocmClusterId:
                 type: string
@@ -236,7 +243,11 @@ spec:
                 type: boolean
               name:
                 type: string
+              ocpClusterId:
+                type: string
               openshiftVersion:
+                type: string
+              rhocmClusterId:
                 type: string
               status:
                 type: string
