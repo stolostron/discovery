@@ -133,7 +133,6 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "744aebb6.open-cluster-management.io",
-		WebhookServer:          webhook.NewServer(webhook.Options{TLSMinVersion: "1.2"}),
 		LeaseDuration:          &leaseDuration,
 		RenewDeadline:          &renewDeadline,
 		RetryPeriod:            &retryPeriod,
