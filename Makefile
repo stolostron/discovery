@@ -118,6 +118,12 @@ docker-build: ## Build docker image with the manager.
 docker-push: ## Push docker image with the manager.
 	docker push "${URL}"
 
+podman-build: ## Build podman image with the manager.
+	podman build -t "${URL}" .
+
+podman-push: ## Push podman image with the manager.
+	podman push "${URL}"
+
 ##@ Deployment
 
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
@@ -152,6 +158,14 @@ bundle-build: ## Build the bundle image.
 .PHONY: bundle-push
 bundle-push: ## Push the bundle image.
 	$(MAKE) docker-push IMG=$(BUNDLE_IMG)
+
+.PHONY: podman-bundle-build
+podman-bundle-build: ## Build the bundle image.
+	podman build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
+
+.PHONY: podman-bundle-push
+podman-bundle-push: ## Push the bundle image.
+	$(MAKE) podman-push IMG=$(BUNDLE_IMG)
 
 .PHONY: opm
 OPM = ./bin/opm
@@ -194,6 +208,18 @@ catalog-build: opm ## Build a catalog image.
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
 
+# Build a catalog image by adding bundle images to an empty catalog using the operator package manager tool, 'opm'.
+# This recipe invokes 'opm' in 'semver' bundle add mode. For more information on add modes, see:
+# https://github.com/operator-framework/community-operators/blob/7f1438c/docs/packaging-operator.md#updating-your-existing-operator
+.PHONY: podman-catalog-build
+podman-catalog-build: opm ## Build a catalog image.
+	$(OPM) index add --container-tool podman --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT)
+
+# Push the catalog image.
+.PHONY: podman-catalog-push
+podman-catalog-push: ## Push a catalog image.
+	$(MAKE) podman-push IMG=$(CATALOG_IMG)
+
 ##@ Testing
 
 .PHONY: test
@@ -222,6 +248,16 @@ docker-build-tests: ## Build the functional test image
 
 docker-run-tests: ## Run the containerized functional tests
 	docker run --network host \
+		--volume ~/.kube/config:/opt/.kube/config \
+		--volume $(shell pwd)/test/e2e/results:/results \
+		$(REGISTRY)/$(IMG)-tests:$(VERSION)
+
+podman-build-tests: ## Build the functional test image
+	@echo "Building $(REGISTRY)/$(IMG)-tests:$(VERSION)"
+	podman build . -f test/e2e/build/Dockerfile -t $(REGISTRY)/$(IMG)-tests:$(VERSION)
+
+podman-run-tests: ## Run the containerized functional tests
+	podman run --network host \
 		--volume ~/.kube/config:/opt/.kube/config \
 		--volume $(shell pwd)/test/e2e/results:/results \
 		$(REGISTRY)/$(IMG)-tests:$(VERSION)

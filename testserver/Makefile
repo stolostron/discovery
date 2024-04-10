@@ -22,6 +22,15 @@ server-docker-push: ## Push Mock OCM Server Image.
 server-docker-run: ## Run Mock OCM Server Image Locally.
 	docker run -p 3000:3000 "${SERVER_URL}"
 
+podman-server-docker-build: ## Build Mock OCM Server Image.
+	podman build . -f ./testserver/build/Dockerfile -t "${SERVER_URL}"
+
+podman-server-docker-push: ## Push Mock OCM Server Image.
+	podman push "${SERVER_URL}"
+
+podman-server-docker-run: ## Run Mock OCM Server Image Locally.
+	podman run -p 3000:3000 "${SERVER_URL}"
+
 DUMMY_ENCRYPTION = $(shell echo "dummytoken" | base64)
 server-secret:
 	cat config/samples/ocm-api-secret.yaml | sed -e "s/ENCRYPTED_TOKEN/$(DUMMY_ENCRYPTION)/g" |  sed -e "s/NAMESPACE/$(NAMESPACE)/g" | kubectl apply -f - || true

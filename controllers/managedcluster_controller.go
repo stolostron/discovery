@@ -20,7 +20,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
-	"github.com/stolostron/discovery/util/reconciler"
+	recon "github.com/stolostron/discovery/util/reconciler"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -48,10 +48,15 @@ type ManagedClusterReconciler struct {
 	Log     logr.Logger
 }
 
-// +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters,verbs=get;list;watch
+// +kubebuilder:rbac:groups=agent.open-cluster-management.io,resources=klusterletaddonconfigs;klusterletaddonconfigs/finalizers;klusterletaddonconfigs/status,verbs=create;delete;get;list;patch;update;watch
+// +kubebuilder:rbac:groups=cluster.open-cluster-management.io,resources=managedclusters;managedclusters/accept;managedclusters/finalizers;managedclustersets;managedclustersets/bind;managedclustersets/finalizers;managedclustersets/join;managedclustersetbindings;managedclustersetbindings/finalizers;placements;placements/finalizers;managedclusters/status,verbs=create;get;list;patch;update;watch
+// +kubebuilder:rbac:groups=register.open-cluster-management.io,resources=managedclusters/accept,verbs=update
 
 func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logf.Info("Reconciling ManagedCluster", "Name", req.Name)
+	if req.Name == "" {
+		return ctrl.Result{}, nil
+	}
 
 	discoveredClusters := &discovery.DiscoveredClusterList{}
 	if err := r.List(ctx, discoveredClusters); err != nil {
@@ -65,7 +70,7 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	mc := &clusterapiv1.ManagedCluster{}
 	if err := r.Get(ctx, req.NamespacedName, mc); err != nil && !apierrors.IsNotFound(err) {
 		logf.Error(err, "failed to get ManagedCluster", "Name", req.Name)
-		return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
 	if mc.GetDeletionTimestamp() != nil {
@@ -84,7 +89,7 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(dc)); err != nil {
 					logf.Error(err, "failed to patch DiscoveredCluster", "Name", dc.GetName())
-					return ctrl.Result{RequeueAfter: reconciler.ResyncPeriod}, err
+					return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
 				}
 				break
 			}
@@ -95,7 +100,8 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		APIVersion: "cluster.open-cluster-management.io/v1"}}
 
 	if err := r.Client.List(ctx, managedMeta); err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "error listing managed clusters")
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval},
+			errors.Wrapf(err, "error listing managed clusters")
 	}
 
 	if err := r.updateManagedLabels(ctx, managedMeta, discoveredClusters); err != nil {

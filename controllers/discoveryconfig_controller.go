@@ -1,8 +1,6 @@
 // Copyright Contributors to the Open Cluster Management project
 
 /*
-
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -37,7 +35,7 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm"
-	"github.com/stolostron/discovery/util/reconciler"
+	recon "github.com/stolostron/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -66,16 +64,16 @@ type DiscoveryConfigReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=get;list;watch;create;update;patch;delete;deletecollection
-// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/finalizers,verbs=get;update;patch
-// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/finalizers,verbs=get;update;patch
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=namespaces;secrets,verbs=create;get;list;update;watch
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs,verbs=create;delete;get;list;patch;update;watch
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/finalizers,verbs=get;patch;update
+// +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveryconfigs/status,verbs=get;patch;update
 
 func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	logf.Info("Reconciling DiscoveryConfig")
+	logf.Info("Reconciling DiscoveryConfig", "Name", req.Name, "Namespace", req.Namespace)
+	if req.Name == "" || req.Namespace == "" {
+		return ctrl.Result{}, nil
+	}
 
 	// Update custom metric based on the number of items in the DiscoveryConfigList.
 	if err := r.updateCustomMetrics(ctx); err != nil {
@@ -108,8 +106,8 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	logf.Info("Reconciliation complete. Scheduling next reconcilation for", "next_time", reconciler.RefreshInterval)
-	return ctrl.Result{RequeueAfter: reconciler.RefreshInterval}, nil
+	logf.Info("Reconciliation complete. Scheduling next reconcilation for", "next_time", recon.DefaultRefreshInterval)
+	return ctrl.Result{RequeueAfter: recon.DefaultRefreshInterval}, nil
 }
 
 // SetupWithManager ...

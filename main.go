@@ -19,6 +19,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -31,11 +32,18 @@ import (
 	goruntime "runtime"
 
 	"go.uber.org/zap/zapcore"
+	admissionregistration "k8s.io/api/admissionregistration/v1"
+	apixv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -53,6 +61,10 @@ import (
 	// +kubebuilder:scaffold:imports
 )
 
+const (
+	crdName = "discoveredclusters.discovery.open-cluster-management.io"
+)
+
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
@@ -63,11 +75,10 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
+	utilruntime.Must(apixv1.AddToScheme(scheme))
 	utilruntime.Must(clusterapiv1.AddToScheme(scheme))
-
 	utilruntime.Must(corev1.AddToScheme(scheme))
 	utilruntime.Must(discoveryv1.AddToScheme(scheme))
-
 	utilruntime.Must(agentv1.SchemeBuilder.AddToScheme(scheme))
 
 	utilruntime.Must(apiextv1.AddToScheme(scheme))
@@ -131,6 +142,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	uncachedClient, err := client.New(ctrl.GetConfigOrDie(), client.Options{
+		Scheme: scheme,
+	})
+	if err != nil {
+		setupLog.Error(err, "unable to create uncached client")
+		os.Exit(1)
+	}
+
 	events := make(chan event.GenericEvent)
 
 	if err = (&controllers.DiscoveryConfigReconciler{
@@ -140,13 +159,12 @@ func main() {
 		setupLog.Error(err, ControllerError, "controller", "DiscoveryConfig")
 		os.Exit(1)
 	}
-	// +kubebuilder:scaffold:builder
 
 	if err = (&controllers.DiscoveredClusterReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, ControllerError, "controller", "DiscoveryCluster")
+		setupLog.Error(err, ControllerError, "controller", "DiscoveredCluster")
 		os.Exit(1)
 	}
 
@@ -157,6 +175,21 @@ func main() {
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, ControllerError, "controller", "ManagedCluster")
 		os.Exit(1)
+	}
+	// +kubebuilder:scaffold:builder
+
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		// https://book.kubebuilder.io/cronjob-tutorial/running.html#running-webhooks-locally
+		// https://book.kubebuilder.io/multiversion-tutorial/webhooks.html#and-maingo
+		if err = ensureWebhooks(uncachedClient); err != nil {
+			setupLog.Error(err, "unable to ensure webhook", "webhook", "DiscoveredCluster")
+			os.Exit(1)
+		}
+
+		if err = (&discoveryv1.DiscoveredCluster{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DiscoveredCluster")
+			os.Exit(1)
+		}
 	}
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
@@ -173,4 +206,74 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+}
+
+func ensureWebhooks(k8sClient client.Client) error {
+	ctx := context.Background()
+
+	deploymentNamespace, ok := os.LookupEnv("POD_NAMESPACE")
+	if !ok {
+		setupLog.Info("Failing due to being unable to locate webhook service namespace")
+		os.Exit(1)
+	}
+	validatingWebhook := discoveryv1.ValidatingWebhook(deploymentNamespace)
+
+	maxAttempts := 10
+	for i := 0; i < maxAttempts; i++ {
+		setupLog.Info("Applying ValidatingWebhookConfiguration")
+
+		// Get reference to DiscoveredCluster CRD to set as owner of the webhook
+		// This way if the CRD is deleted the webhook will be removed with it
+		crdKey := types.NamespacedName{Name: crdName}
+		owner := &apixv1.CustomResourceDefinition{}
+		if err := k8sClient.Get(context.TODO(), crdKey, owner); err != nil {
+			setupLog.Error(err, "Failed to get DiscoveredCluster CRD")
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		validatingWebhook.SetOwnerReferences([]metav1.OwnerReference{
+			{
+				APIVersion: "apiextensions.k8s.io/v1",
+				Kind:       "CustomResourceDefinition",
+				Name:       owner.Name,
+				UID:        owner.UID,
+			},
+		})
+
+		existingWebhook := &admissionregistration.ValidatingWebhookConfiguration{}
+		existingWebhook.SetGroupVersionKind(schema.GroupVersionKind{
+			Group:   "admissionregistration.k8s.io",
+			Version: "v1",
+			Kind:    "ValidatingWebhookConfiguration",
+		})
+		err := k8sClient.Get(ctx, types.NamespacedName{Name: validatingWebhook.GetName()}, existingWebhook)
+		if err != nil && errors.IsNotFound(err) {
+			// Webhook not found. Create and return
+			err = k8sClient.Create(ctx, validatingWebhook)
+			if err != nil {
+				setupLog.Error(err, "Error creating validatingwebhookconfiguration")
+				time.Sleep(5 * time.Second)
+				continue
+			}
+			return nil
+
+		} else if err != nil {
+			setupLog.Error(err, "Error getting validatingwebhookconfiguration")
+			time.Sleep(5 * time.Second)
+			continue
+
+		} else if err == nil {
+			// Webhook already exists. Update and return
+			setupLog.Info("Updating existing validatingwebhookconfiguration")
+			existingWebhook.Webhooks = validatingWebhook.Webhooks
+			err = k8sClient.Update(ctx, existingWebhook)
+			if err != nil {
+				setupLog.Error(err, "Error updating validatingwebhookconfiguration")
+				time.Sleep(5 * time.Second)
+				continue
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("unable to ensure validatingwebhook exists in allotted time")
 }
