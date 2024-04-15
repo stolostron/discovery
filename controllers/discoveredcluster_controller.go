@@ -93,7 +93,7 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		If the discovered cluster has an Automatic import strategy, we need to ensure that the required resources
 		are available. Otherwise, we will ignore that cluster.
 	*/
-	if !dc.Spec.IsManagedCluster && dc.Spec.EnableAutoImport {
+	if !dc.Spec.IsManagedCluster && dc.Spec.ImportAsManagedCluster {
 		crdName := "klusterletaddonconfigs.agent.open-cluster-management.io"
 
 		if res, err := r.EnsureCRDExist(ctx, crdName); err != nil && apierrors.IsNotFound(err) {

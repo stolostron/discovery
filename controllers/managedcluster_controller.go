@@ -83,8 +83,8 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			if dc.GetName() == req.Name || dc.Spec.DisplayName == req.Name {
 				modifiedDC := dc.DeepCopy()
 
-				if modifiedDC.Spec.EnableAutoImport {
-					modifiedDC.Spec.EnableAutoImport = false
+				if modifiedDC.Spec.ImportAsManagedCluster {
+					modifiedDC.Spec.ImportAsManagedCluster = false
 				}
 
 				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(dc)); err != nil {

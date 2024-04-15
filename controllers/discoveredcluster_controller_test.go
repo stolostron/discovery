@@ -75,10 +75,10 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 					Namespace: "discovery",
 				},
 				Spec: discovery.DiscoveredClusterSpec{
-					DisplayName:      "fake-cluster",
-					EnableAutoImport: true,
-					RHOCMClusterID:   "349bcdc1dd6a44f3a1a136b2f98a69ca",
-					Type:             "ROSA",
+					DisplayName:            "fake-cluster",
+					ImportAsManagedCluster: true,
+					RHOCMClusterID:         "349bcdc1dd6a44f3a1a136b2f98a69ca",
+					Type:                   "ROSA",
 				},
 			},
 			req: ctrl.Request{

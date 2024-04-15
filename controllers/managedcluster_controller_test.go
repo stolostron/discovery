@@ -39,12 +39,12 @@ var (
 			Namespace: TestManagedNamespace,
 		},
 		Spec: discovery.DiscoveredClusterSpec{
-			Name:              "c3po",
-			DisplayName:       "c3po",
-			EnableAutoImport:  true,
-			OpenshiftVersion:  "4.9.0",
-			CreationTimestamp: &mockManagedTime,
-			ActivityTimestamp: &mockManagedTime,
+			Name:                   "c3po",
+			DisplayName:            "c3po",
+			ImportAsManagedCluster: true,
+			OpenshiftVersion:       "4.9.0",
+			CreationTimestamp:      &mockManagedTime,
+			ActivityTimestamp:      &mockManagedTime,
 		},
 	}
 
@@ -54,12 +54,12 @@ var (
 			Namespace: TestManagedNamespace,
 		},
 		Spec: discovery.DiscoveredClusterSpec{
-			Name:              "c4po",
-			DisplayName:       "c4po",
-			EnableAutoImport:  true,
-			OpenshiftVersion:  "4.15.0",
-			CreationTimestamp: &mockManagedTime,
-			ActivityTimestamp: &mockManagedTime,
+			Name:                   "c4po",
+			DisplayName:            "c4po",
+			ImportAsManagedCluster: true,
+			OpenshiftVersion:       "4.15.0",
+			CreationTimestamp:      &mockManagedTime,
+			ActivityTimestamp:      &mockManagedTime,
 		},
 	}
 )

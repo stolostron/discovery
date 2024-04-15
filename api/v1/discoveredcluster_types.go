@@ -44,23 +44,23 @@ const (
 
 // DiscoveredClusterSpec defines the desired state of DiscoveredCluster
 type DiscoveredClusterSpec struct {
-	ActivityTimestamp *metav1.Time           `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
-	APIURL            string                 `json:"apiUrl" yaml:"apiUrl"`
-	CloudProvider     string                 `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
-	Console           string                 `json:"console,omitempty" yaml:"console,omitempty"`
-	CreationTimestamp *metav1.Time           `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
-	Credential        corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
-	DisplayName       string                 `json:"displayName" yaml:"displayName"`
-	EnableAutoImport  bool                   `json:"enableAutoImport,omitempty" yaml:"enableAutoImport,omitempty"`
-	IsManagedCluster  bool                   `json:"isManagedCluster" yaml:"isManagedCluster"`
-	Name              string                 `json:"name" yaml:"name"`
-	OCPClusterID      string                 `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
-	OpenshiftVersion  string                 `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
-	Owner             string                 `json:"owner,omitempty" yaml:"owner,omitempty"`
-	RHOCMClusterID    string                 `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
-	Region            string                 `json:"region,omitempty" yaml:"region,omitempty"`
-	Status            string                 `json:"status,omitempty" yaml:"status,omitempty"`
-	Type              string                 `json:"type" yaml:"type"`
+	ActivityTimestamp      *metav1.Time           `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
+	APIURL                 string                 `json:"apiUrl" yaml:"apiUrl"`
+	CloudProvider          string                 `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
+	Console                string                 `json:"console,omitempty" yaml:"console,omitempty"`
+	CreationTimestamp      *metav1.Time           `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
+	Credential             corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
+	DisplayName            string                 `json:"displayName" yaml:"displayName"`
+	ImportAsManagedCluster bool                   `json:"importAsManagedCluster,omitempty" yaml:"importAsManagedCluster,omitempty"`
+	IsManagedCluster       bool                   `json:"isManagedCluster" yaml:"isManagedCluster"`
+	Name                   string                 `json:"name" yaml:"name"`
+	OCPClusterID           string                 `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
+	OpenshiftVersion       string                 `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
+	Owner                  string                 `json:"owner,omitempty" yaml:"owner,omitempty"`
+	RHOCMClusterID         string                 `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
+	Region                 string                 `json:"region,omitempty" yaml:"region,omitempty"`
+	Status                 string                 `json:"status,omitempty" yaml:"status,omitempty"`
+	Type                   string                 `json:"type" yaml:"type"`
 }
 
 // DiscoveredClusterStatus defines the observed state of DiscoveredCluster
@@ -104,7 +104,7 @@ func (a DiscoveredCluster) Equal(b DiscoveredCluster) bool {
 		a.Spec.CreationTimestamp.Truncate(time.Second) != b.Spec.CreationTimestamp.Truncate(time.Second) ||
 		a.Spec.Credential != b.Spec.Credential ||
 		a.Spec.DisplayName != b.Spec.DisplayName ||
-		a.Spec.EnableAutoImport != b.Spec.EnableAutoImport ||
+		a.Spec.ImportAsManagedCluster != b.Spec.ImportAsManagedCluster ||
 		a.Spec.IsManagedCluster != b.Spec.IsManagedCluster ||
 		a.Spec.Name != b.Spec.Name ||
 		a.Spec.OpenshiftVersion != b.Spec.OpenshiftVersion ||
