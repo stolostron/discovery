@@ -110,9 +110,9 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 	discoveredclusterLog.Info("validate create", "Name", r.Name)
 
 	// Validate resource
-	if r.Spec.Type != "ROSA" && r.Spec.EnableAutoImport {
+	if r.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
 		return nil, fmt.Errorf(
-			"cannot create DiscoveredCluster '%s': enableAutoImport is not allowed for clusters of type '%s'. "+
+			"cannot create DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
 				"Only ROSA type clusters support auto import",
 			r.Spec.Type, r.Name,
 		)
@@ -130,9 +130,9 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 	}
 
 	oldDiscoveredCluster := old.(*DiscoveredCluster)
-	if oldDiscoveredCluster.Spec.Type != "ROSA" && r.Spec.EnableAutoImport {
+	if oldDiscoveredCluster.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
 		return nil, fmt.Errorf(
-			"cannot update DiscoveredCluster '%s': enableAutoImport is not allowed for clusters of type '%s'."+
+			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'."+
 				"Only ROSA type clusters support auto import",
 			r.Spec.Type, r.Name,
 		)
