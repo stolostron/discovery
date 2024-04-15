@@ -149,8 +149,10 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	discovered, err := []discovery.DiscoveredCluster{}, nil
 	if val, ok := os.LookupEnv("UNIT_TEST"); ok && val == "true" {
 		discovered, err = mockDiscoveredCluster()
+
 	} else {
-		discovered, err = ocm.DiscoverClusters(userToken, baseURL, baseAuthURL, filters)
+		discovered, err = ocm.DiscoverClusters(userToken, baseURL, baseAuthURL, filters,
+			config.Spec.ImportAllRosaAsManaged)
 	}
 
 	if err != nil {

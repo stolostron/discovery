@@ -57,6 +57,12 @@ spec:
                       type: string
                     type: array
                 type: object
+              importAllRosaAsManaged:
+                default: false
+                description: |
+                  'ImportAllRosaAsManaged when enabled, this setting allows automatic import of all
+                  Red Hat Openshift Service on AWS (ROSA) clusters within the specified context.'
+                type: boolean      
             required:
             - credential
             type: object

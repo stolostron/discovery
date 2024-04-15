@@ -61,7 +61,8 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 					Namespace: "discovery",
 				},
 				Spec: discovery.DiscoveryConfigSpec{
-					Credential: "fake-admin",
+					Credential:             "fake-admin",
+					ImportAllRosaAsManaged: false,
 				},
 			},
 			ns: &corev1.Namespace{
@@ -343,7 +344,8 @@ func Test_Reconciler_EnsureAutoImportSecret(t *testing.T) {
 					Namespace: "discovery",
 				},
 				Spec: discovery.DiscoveryConfigSpec{
-					Credential: "admin",
+					Credential:             "admin",
+					ImportAllRosaAsManaged: false,
 				},
 			},
 			dc: &discovery.DiscoveredCluster{

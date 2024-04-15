@@ -99,8 +99,9 @@ var _ = Describe("ManagedCluster controller", func() {
 						Namespace: TestManagedNamespace,
 					},
 					Spec: discovery.DiscoveryConfigSpec{
-						Credential: TestManagedSecretName,
-						Filters:    discovery.Filter{LastActive: 7},
+						Credential:             TestManagedSecretName,
+						Filters:                discovery.Filter{LastActive: 7},
+						ImportAllRosaAsManaged: false,
 					},
 				})).Should(Succeed())
 			})

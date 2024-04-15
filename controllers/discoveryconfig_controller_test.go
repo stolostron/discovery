@@ -105,8 +105,9 @@ var _ = Describe("Discoveryconfig controller", func() {
 						Namespace: TestDiscoveryNamespace,
 					},
 					Spec: discovery.DiscoveryConfigSpec{
-						Credential: TestSecretName,
-						Filters:    discovery.Filter{LastActive: 7},
+						Credential:             TestSecretName,
+						Filters:                discovery.Filter{LastActive: 7},
+						ImportAllRosaAsManaged: false,
 					},
 				})).Should(Succeed())
 			})
@@ -194,8 +195,9 @@ var _ = Describe("Discoveryconfig controller", func() {
 						Namespace: "invalid",
 					},
 					Spec: discovery.DiscoveryConfigSpec{
-						Credential: TestSecretName,
-						Filters:    discovery.Filter{LastActive: 7},
+						Credential:             TestSecretName,
+						Filters:                discovery.Filter{LastActive: 7},
+						ImportAllRosaAsManaged: false,
 					},
 				})).Should(Succeed())
 			})

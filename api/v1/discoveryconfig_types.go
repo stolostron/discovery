@@ -46,6 +46,8 @@ type DiscoveryConfigSpec struct {
 	// Sets restrictions on what kind of clusters to discover
 	// +optional
 	Filters Filter `json:"filters,omitempty"`
+
+	ImportAllRosaAsManaged bool `json:"importAllRosaAsManaged"`
 }
 
 // DiscoveryConfigStatus defines the observed state of DiscoveryConfig

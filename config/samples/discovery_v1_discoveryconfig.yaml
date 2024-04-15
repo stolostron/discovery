@@ -6,3 +6,4 @@ spec:
   credential: ocm-api-token
   filters:
     lastActive: 7
+  importAllRosaAsManaged: false

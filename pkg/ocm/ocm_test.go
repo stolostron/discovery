@@ -112,7 +112,7 @@ func TestDiscoverClusters(t *testing.T) {
 			// TODO: Running `getSubscriptionsFunc` should yield the subscriptions to test against, but we don't do this
 			getSubscriptionsFunc = tt.subscriptionFunc
 
-			got, err := DiscoverClusters(tt.args.token, tt.args.baseURL, tt.args.baseAuthURL, tt.args.filters)
+			got, err := DiscoverClusters(tt.args.token, tt.args.baseURL, tt.args.baseAuthURL, tt.args.filters, false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DiscoverClusters() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -346,7 +346,7 @@ func TestFormatCLusterError(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if _, got := formatCluster(tt.sub); got != tt.want {
+			if _, got := formatCluster(tt.sub, false); got != tt.want {
 				t.Errorf("formatCluster() = %v, want %v", got, tt.want)
 			}
 		})

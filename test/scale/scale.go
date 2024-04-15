@@ -142,8 +142,9 @@ func createConfig(ns string) error {
 			Namespace: ns,
 		},
 		Spec: discovery.DiscoveryConfigSpec{
-			Credential: SecretName,
-			Filters:    discovery.Filter{LastActive: 7},
+			Credential:             SecretName,
+			Filters:                discovery.Filter{LastActive: 7},
+			ImportAllRosaAsManaged: false,
 		},
 	}
 

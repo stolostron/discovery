@@ -15,7 +15,8 @@ import (
 
 // DiscoverClusters returns a list of DiscoveredClusters found in both the accounts_mgmt and
 // accounts_mgmt apis with the given filters
-func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters discovery.Filter) ([]discovery.DiscoveredCluster, error) {
+func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters discovery.Filter, importAllRosa bool) (
+	[]discovery.DiscoveredCluster, error) {
 	// Request ephemeral access token with user token. This will be used for OCM requests
 	authRequest := auth.AuthRequest{
 		Token:   token,
@@ -41,7 +42,7 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 	var discoveredClusters []discovery.DiscoveredCluster
 	for _, sub := range subscriptions {
 		// Build a DiscoveredCluster object from the subscription information
-		if dc, valid := formatCluster(sub); valid {
+		if dc, valid := formatCluster(sub, importAllRosa); valid {
 			discoveredClusters = append(discoveredClusters, dc)
 		}
 	}
@@ -50,7 +51,7 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 }
 
 // formatCluster converts a cluster from OCM form to DiscoveredCluster form, or returns false if it is not valid
-func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, bool) {
+func formatCluster(sub subscription.Subscription, importAllRosa bool) (discovery.DiscoveredCluster, bool) {
 	discoveredCluster := discovery.DiscoveredCluster{}
 	// TODO: consider refactoring to "filter" clusters ouside this function to retain function clarity
 	if len(sub.Metrics) == 0 {
@@ -62,6 +63,12 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 	if sub.Status == "Reserved" {
 		return discoveredCluster, false
 	}
+
+	shouldAutoImport := false
+	if computeType(sub) == "ROSA" && importAllRosa {
+		shouldAutoImport = true
+	}
+
 	discoveredCluster = discovery.DiscoveredCluster{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "operator.open-cluster-management.io/v1",
@@ -77,6 +84,7 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 			Console:           sub.ConsoleURL,
 			CreationTimestamp: sub.CreatedAt,
 			DisplayName:       computeDisplayName(sub),
+			EnableAutoImport:  shouldAutoImport,
 			Name:              sub.ExternalClusterID,
 			OCPClusterID:      sub.ExternalClusterID,
 			OpenshiftVersion:  sub.Metrics[0].OpenShiftVersion,
