@@ -82,10 +82,7 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 			if dc.GetName() == req.Name || dc.Spec.DisplayName == req.Name {
 				modifiedDC := dc.DeepCopy()
-
-				if modifiedDC.Spec.ImportAsManagedCluster {
-					modifiedDC.Spec.ImportAsManagedCluster = false
-				}
+				modifiedDC.Spec.ImportAsManagedCluster = false
 
 				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(dc)); err != nil {
 					logf.Error(err, "failed to patch DiscoveredCluster", "Name", dc.GetName())
