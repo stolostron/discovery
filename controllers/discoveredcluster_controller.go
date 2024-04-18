@@ -32,7 +32,6 @@ import (
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
@@ -94,16 +93,6 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		are available. Otherwise, we will ignore that cluster.
 	*/
 	if !dc.Spec.IsManagedCluster && dc.Spec.ImportAsManagedCluster {
-		crdName := "klusterletaddonconfigs.agent.open-cluster-management.io"
-
-		if res, err := r.EnsureCRDExist(ctx, crdName); err != nil && apierrors.IsNotFound(err) {
-			return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, nil
-
-		} else if err != nil {
-			logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
-			return res, err
-		}
-
 		if res, err := r.EnsureNamespaceForDiscoveredCluster(ctx, *dc); err != nil {
 			logf.Error(err, "failed to ensure namespace for DiscoveredCluster", "Name", dc.Spec.DisplayName)
 			return res, err
@@ -114,9 +103,19 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			return res, err
 		}
 
-		if res, err := r.EnsureKlusterletAddonConfig(ctx, *dc); err != nil {
-			logf.Error(err, "failed to ensure KlusterletAddonConfig created", "Name", dc.Spec.DisplayName)
-			return res, err
+		// Ensure that the KlusterletAddOnConfig CRD exists. In standalone MCE mode, the CRD is not deployed.
+		crdName := "klusterletaddonconfigs.agent.open-cluster-management.io"
+
+		if res, err := r.EnsureCRDExist(ctx, crdName); err != nil {
+			if !apierrors.IsNotFound(err) {
+				logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
+				return res, err
+			}
+		} else {
+			if res, err := r.EnsureKlusterletAddonConfig(ctx, *dc); err != nil {
+				logf.Error(err, "failed to ensure KlusterletAddonConfig created", "Name", dc.Spec.DisplayName)
+				return res, err
+			}
 		}
 
 		if res, err := r.EnsureAutoImportSecret(ctx, *dc, *config); err != nil {
@@ -124,11 +123,6 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			return res, err
 		}
 	}
-
-	// if res, err := r.EnsureFinalizerRemovedFromManagedCluster(ctx, *dc); err != nil {
-	// 	logf.Error(err, "failed to ensure finalizer removed from ManagedCluster")
-	// 	return res, err
-	// }
 
 	return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, nil
 }
@@ -254,7 +248,7 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 	nn := types.NamespacedName{Name: config.Spec.Credential, Namespace: config.GetNamespace()}
 	existingSecret := corev1.Secret{}
 
-	if err := r.Get(ctx, nn, &existingSecret); err != nil && apierrors.IsNotFound(err) {
+	if err := r.Get(ctx, nn, &existingSecret); apierrors.IsNotFound(err) {
 		logf.Error(err, "Secret was not found", "Name", nn.Name, "Namespace", nn.Namespace)
 		return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, err
 
@@ -267,7 +261,7 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 		nn := types.NamespacedName{Name: "auto-import-secret", Namespace: dc.Spec.DisplayName}
 		existingSecret = corev1.Secret{}
 
-		if err := r.Get(ctx, nn, &existingSecret, &client.GetOptions{}); err != nil && apierrors.IsNotFound(err) {
+		if err := r.Get(ctx, nn, &existingSecret, &client.GetOptions{}); apierrors.IsNotFound(err) {
 			logf.Info("Creating auto-import-secret for managed cluster", "Namespace", nn.Namespace)
 
 			s := r.CreateAutoImportSecret(nn, dc.Spec.RHOCMClusterID, apiToken)
@@ -300,7 +294,7 @@ func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Co
 	nn := types.NamespacedName{Name: dc.Spec.DisplayName, Namespace: dc.Spec.DisplayName}
 	existingKAC := agentv1.KlusterletAddonConfig{}
 
-	if err := r.Get(ctx, nn, &existingKAC); err != nil && apierrors.IsNotFound(err) {
+	if err := r.Get(ctx, nn, &existingKAC); apierrors.IsNotFound(err) {
 		logf.Info("Creating KlusterletAddonConfig", "Name", nn.Name, "Namespace", nn.Namespace)
 
 		kac := r.CreateKlusterletAddonConfig(nn)
@@ -323,8 +317,9 @@ func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Co
 // If an error occurs while getting the CRD (other than IsNotFound), it logs an error message and returns an error.
 func (r *DiscoveredClusterReconciler) EnsureCRDExist(ctx context.Context, crdName string) (ctrl.Result, error) {
 	crd := &apiextv1.CustomResourceDefinition{}
+	nn := types.NamespacedName{Name: crdName}
 
-	if err := r.Get(ctx, types.NamespacedName{Name: crdName}, crd); err != nil && apierrors.IsNotFound(err) {
+	if err := r.Get(ctx, nn, crd); apierrors.IsNotFound(err) {
 		logf.Info("CRD not found. Ignoring since object must be deleted", "Name", crdName)
 		return ctrl.Result{}, err
 
@@ -348,7 +343,7 @@ func (r *DiscoveredClusterReconciler) EnsureManagedCluster(ctx context.Context, 
 	nn := types.NamespacedName{Name: dc.Spec.DisplayName}
 	existingMC := &clusterapiv1.ManagedCluster{}
 
-	if err := r.Get(ctx, nn, existingMC); err != nil && apierrors.IsNotFound(err) {
+	if err := r.Get(ctx, nn, existingMC); apierrors.IsNotFound(err) {
 		logf.Info("Creating ManagedCluster", "Name", nn.Name)
 
 		mc := r.CreateManagedCluster(nn)
@@ -376,7 +371,7 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 	nn := types.NamespacedName{Name: dc.Spec.DisplayName}
 	existingNs := &corev1.Namespace{}
 
-	if err := r.Get(ctx, nn, existingNs); err != nil && apierrors.IsNotFound(err) {
+	if err := r.Get(ctx, nn, existingNs); apierrors.IsNotFound(err) {
 		logf.Info("Creating Namespace for DiscoveredCluster", "Name", nn.Name)
 
 		ns := r.CreateNamespaceForDiscoveredCluster(dc)
@@ -388,34 +383,6 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 	} else if err != nil {
 		logf.Error(err, "failed to get Namespace", "Name", nn.Name)
 		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
-	}
-
-	return ctrl.Result{}, nil
-}
-
-// EnsureFinalizerRemovedFromManagedCluster ...
-func (r *DiscoveredClusterReconciler) EnsureFinalizerRemovedFromManagedCluster(ctx context.Context,
-	dc discovery.DiscoveredCluster) (ctrl.Result, error) {
-	nn := types.NamespacedName{Name: dc.Spec.DisplayName}
-	mc := &clusterapiv1.ManagedCluster{}
-
-	if err := r.Get(ctx, nn, mc, &client.GetOptions{}); err != nil && apierrors.IsNotFound(err) {
-		// If ManagedCluster is not found, ignore removing the finalizer from the cluster.
-		return ctrl.Result{}, nil
-
-	} else if err != nil {
-		logf.Info("failed to get ManagedCluster", "Name", nn.Name)
-		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
-	}
-
-	if mc.GetDeletionTimestamp() != nil && controllerutil.ContainsFinalizer(mc, discovery.ImportCleanUpFinalizer) {
-		controllerutil.RemoveFinalizer(mc, discovery.ImportCleanUpFinalizer)
-		if err := r.Update(ctx, mc); err != nil {
-			logf.Error(err, "failed to remove finalizer from ManagedCluster", "Name", mc.GetName(), "Finalizer",
-				discovery.ImportCleanUpFinalizer)
-
-			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
-		}
 	}
 
 	return ctrl.Result{}, nil

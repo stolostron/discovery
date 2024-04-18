@@ -125,7 +125,6 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 				r.Delete(context.TODO(), kac)
 				r.Delete(context.TODO(), s)
 				r.Delete(context.TODO(), mc)
-				r.EnsureFinalizerRemovedFromManagedCluster(context.TODO(), *tt.dc)
 				r.Delete(context.TODO(), ns)
 
 				r.Delete(context.TODO(), tt.dc)
@@ -491,10 +490,6 @@ func Test_Reconciler_EnsureManagedCluster(t *testing.T) {
 
 				if err := r.Delete(context.TODO(), ns); err != nil {
 					t.Errorf("failed to delete Namespace: %v", err)
-				}
-
-				if _, err := r.EnsureFinalizerRemovedFromManagedCluster(context.TODO(), *tt.dc); err != nil {
-					t.Errorf("failed to ensure finalizer removed from ManagedCluster: %v", err)
 				}
 
 				if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, mc); err == nil {
