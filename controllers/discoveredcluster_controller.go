@@ -21,6 +21,7 @@ import (
 
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
+	utils "github.com/stolostron/discovery/util"
 	recon "github.com/stolostron/discovery/util/reconciler"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -92,7 +93,8 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		If the discovered cluster has an Automatic import strategy, we need to ensure that the required resources
 		are available. Otherwise, we will ignore that cluster.
 	*/
-	if !dc.Spec.IsManagedCluster && dc.Spec.ImportAsManagedCluster {
+	if !dc.Spec.IsManagedCluster && dc.Spec.ImportAsManagedCluster && !utils.IsAnnotationTrue(dc,
+		utils.AnnotationPreviouslyAutoImported) {
 		if res, err := r.EnsureNamespaceForDiscoveredCluster(ctx, *dc); err != nil {
 			logf.Error(err, "failed to ensure namespace for DiscoveredCluster", "Name", dc.Spec.DisplayName)
 			return res, err

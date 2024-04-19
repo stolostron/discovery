@@ -20,6 +20,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
+	utils "github.com/stolostron/discovery/util"
 	recon "github.com/stolostron/discovery/util/reconciler"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -82,6 +83,17 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 			if dc.GetName() == req.Name || dc.Spec.DisplayName == req.Name {
 				modifiedDC := dc.DeepCopy()
+
+				/*
+					Set annotation to true on DiscoveredCluster resource to prevent automatic import.
+					The user will need to manually remove the annotation if they want the cluster to be reimported
+					automatically.
+				*/
+				if modifiedDC.Spec.ImportAsManagedCluster {
+					modifiedDC.SetAnnotations(map[string]string{
+						utils.AnnotationPreviouslyAutoImported: "true",
+					})
+				}
 				modifiedDC.Spec.ImportAsManagedCluster = false
 
 				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(dc)); err != nil {
