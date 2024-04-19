@@ -84,12 +84,6 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		dc.Annotations = make(map[string]string)
 	}
 
-	config := &discovery.DiscoveryConfig{}
-	if err := r.Get(ctx, GetDiscoveryConfig(), config); err != nil {
-		logf.Error(err, "failed to get DiscoveryConfig", "Name", GetDiscoveryConfig().Name)
-		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
-	}
-
 	/*
 		If the discovered cluster has an Automatic import strategy, we need to ensure that the required resources
 		are available. Otherwise, we will ignore that cluster.
@@ -121,7 +115,14 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 				}
 			}
 
-			if res, err := r.EnsureAutoImportSecret(ctx, *dc, *config); err != nil {
+			// Ensure that the DiscoveredCluster credentials are available on the cluster.
+			if res, err := r.EnsureDiscoveredClusterCredentialExists(ctx, *dc); err != nil {
+				logf.Error(err, "failed to ensure DiscoveredCluster credential Secret exist", "Name",
+					dc.Spec.DisplayName)
+				return res, err
+			}
+
+			if res, err := r.EnsureAutoImportSecret(ctx, *dc); err != nil {
 				logf.Error(err, "failed to ensure auto import Secret created", "Name", dc.Spec.DisplayName)
 				return res, err
 			}
@@ -252,9 +253,9 @@ namespace. It sets a controller reference to the DiscoveredCluster for ownership
 If creation fails, it logs an error and returns with a requeue signal. If the auto-import secret already exists or if
 an error occurs during retrieval, it logs an error and returns with a requeue signal.
 */
-func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context, dc discovery.DiscoveredCluster,
-	config discovery.DiscoveryConfig) (ctrl.Result, error) {
-	nn := types.NamespacedName{Name: config.Spec.Credential, Namespace: config.GetNamespace()}
+func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context, dc discovery.DiscoveredCluster) (
+	ctrl.Result, error) {
+	nn := types.NamespacedName{Name: dc.Spec.Credential.Name, Namespace: dc.Spec.Credential.Namespace}
 	existingSecret := corev1.Secret{}
 
 	if err := r.Get(ctx, nn, &existingSecret); apierrors.IsNotFound(err) {
@@ -285,6 +286,24 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 		}
 	} else {
 		logf.Error(err, "failed to parse token from Secret", "Name", nn.Name)
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+// EnsureDiscoveredClusterCredentialExists ...
+func (r *DiscoveredClusterReconciler) EnsureDiscoveredClusterCredentialExists(
+	ctx context.Context, dc discovery.DiscoveredCluster) (ctrl.Result, error) {
+	nn := types.NamespacedName{Name: dc.Spec.Credential.Name, Namespace: dc.Spec.Credential.Namespace}
+	secret := corev1.Secret{}
+
+	if err := r.Get(ctx, nn, &secret); apierrors.IsNotFound(err) {
+		logf.Error(err, "Secret was not found", "Name", nn.Name, "Namespace", nn.Namespace)
+		return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, err
+
+	} else if err != nil {
+		logf.Error(err, "failed to get Secret", "Name", nn.Name, "Namespace", nn.Namespace)
 		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 

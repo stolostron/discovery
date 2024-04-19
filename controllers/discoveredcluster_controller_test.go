@@ -75,6 +75,10 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 					Namespace: "discovery",
 				},
 				Spec: discovery.DiscoveredClusterSpec{
+					Credential: corev1.ObjectReference{
+						Name:      "fake-admin",
+						Namespace: "discovery",
+					},
 					DisplayName:            "fake-cluster",
 					ImportAsManagedCluster: true,
 					RHOCMClusterID:         "349bcdc1dd6a44f3a1a136b2f98a69ca",
@@ -113,7 +117,8 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			DiscoveryConfig = types.NamespacedName{
-				Name: tt.config.Name, Namespace: tt.config.Namespace,
+				Name:      tt.config.Name,
+				Namespace: tt.config.Namespace,
 			}
 
 			ns := &corev1.Namespace{}
@@ -352,7 +357,11 @@ func Test_Reconciler_EnsureAutoImportSecret(t *testing.T) {
 				},
 				Spec: discovery.DiscoveredClusterSpec{
 					DisplayName: "foo",
-					Type:        "ROSA",
+					Credential: corev1.ObjectReference{
+						Name:      "admin",
+						Namespace: "discovery",
+					},
+					Type: "ROSA",
 				},
 			},
 			want: true,
@@ -389,7 +398,7 @@ func Test_Reconciler_EnsureAutoImportSecret(t *testing.T) {
 				t.Errorf("failed to create Secret: %v", err)
 			}
 
-			if _, err := r.EnsureAutoImportSecret(context.TODO(), *tt.dc, *tt.config); err != nil {
+			if _, err := r.EnsureAutoImportSecret(context.TODO(), *tt.dc); err != nil {
 				t.Errorf("failed to ensure auto import Secret created: %v", err)
 			}
 
