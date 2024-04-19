@@ -16,10 +16,12 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
+	utils "github.com/stolostron/discovery/util"
 	recon "github.com/stolostron/discovery/util/reconciler"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -82,6 +84,20 @@ func (r *ManagedClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 			if dc.GetName() == req.Name || dc.Spec.DisplayName == req.Name {
 				modifiedDC := dc.DeepCopy()
+
+				/*
+					Set annotation to true on DiscoveredCluster resource to prevent automatic import.
+					The user will need to manually remove the annotation if they want the cluster to be reimported
+					automatically.
+				*/
+				if modifiedDC.Spec.ImportAsManagedCluster {
+					modifiedDC.SetAnnotations(map[string]string{
+						utils.AnnotationPreviouslyAutoImported: "true",
+					})
+
+					logf.Info(fmt.Sprintf("Added '%v' annotation to DiscoveredCluster",
+						utils.AnnotationPreviouslyAutoImported), "Name", dc.GetName())
+				}
 				modifiedDC.Spec.ImportAsManagedCluster = false
 
 				if err := r.Patch(ctx, modifiedDC, client.MergeFrom(dc)); err != nil {
@@ -127,11 +143,12 @@ func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return nil
 }
 
-// updateManagedLabels adds managed labels to discovered clusters that need them and removes the labels if the discoveredclusters
-// have the label but should not, based on the list of managedclusters.
-func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, managedClusters *metav1.PartialObjectMetadataList, discoveredClusters *discovery.DiscoveredClusterList) error {
-	log, _ := logr.FromContext(ctx)
-
+/*
+updateManagedLabels adds managed labels to discovered clusters that need them and removes the labels if the
+discoveredclusters have the label but should not, based on the list of managedclusters.
+*/
+func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context,
+	managedClusters *metav1.PartialObjectMetadataList, discoveredClusters *discovery.DiscoveredClusterList) error {
 	isManaged := map[string]bool{}
 	for _, m := range managedClusters.Items {
 		if id := getClusterID(m); id != "" {
@@ -149,7 +166,8 @@ func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, mana
 				if err := r.Update(ctx, &dc); err != nil {
 					return errors.Wrapf(err, "error setting managed status `%s`", dc.Name)
 				}
-				log.Info("Updated cluster, adding managed status", "discoveredcluster", dc.Name, "discoveredcluster namespace", dc.Namespace)
+				logf.Info("Updated cluster, adding managed status", "discoveredcluster", dc.Name,
+					"discoveredcluster namespace", dc.Namespace)
 			}
 
 		} else {
@@ -158,7 +176,8 @@ func (r *ManagedClusterReconciler) updateManagedLabels(ctx context.Context, mana
 				if err := r.Update(ctx, &dc); err != nil {
 					return errors.Wrapf(err, "error unsetting managed status `%s`", dc.Name)
 				}
-				log.Info("Updated cluster, removing managed status", "discoveredcluster", dc.Name, "discoveredcluster namespace", dc.Namespace)
+				logf.Info("Updated cluster, removing managed status", "discoveredcluster", dc.Name,
+					"discoveredcluster namespace", dc.Namespace)
 			}
 		}
 	}

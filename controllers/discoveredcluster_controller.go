@@ -18,9 +18,11 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
+	utils "github.com/stolostron/discovery/util"
 	recon "github.com/stolostron/discovery/util/reconciler"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -93,34 +95,41 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		are available. Otherwise, we will ignore that cluster.
 	*/
 	if !dc.Spec.IsManagedCluster && dc.Spec.ImportAsManagedCluster {
-		if res, err := r.EnsureNamespaceForDiscoveredCluster(ctx, *dc); err != nil {
-			logf.Error(err, "failed to ensure namespace for DiscoveredCluster", "Name", dc.Spec.DisplayName)
-			return res, err
-		}
-
-		if res, err := r.EnsureManagedCluster(ctx, *dc); err != nil {
-			logf.Error(err, "failed to ensure ManagedCluster created", "Name", dc.Spec.DisplayName)
-			return res, err
-		}
-
-		// Ensure that the KlusterletAddOnConfig CRD exists. In standalone MCE mode, the CRD is not deployed.
-		crdName := "klusterletaddonconfigs.agent.open-cluster-management.io"
-
-		if res, err := r.EnsureCRDExist(ctx, crdName); err != nil {
-			if !apierrors.IsNotFound(err) {
-				logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
+		if !utils.IsAnnotationTrue(dc, utils.AnnotationPreviouslyAutoImported) {
+			if res, err := r.EnsureNamespaceForDiscoveredCluster(ctx, *dc); err != nil {
+				logf.Error(err, "failed to ensure namespace for DiscoveredCluster", "Name", dc.Spec.DisplayName)
 				return res, err
 			}
+
+			if res, err := r.EnsureManagedCluster(ctx, *dc); err != nil {
+				logf.Error(err, "failed to ensure ManagedCluster created", "Name", dc.Spec.DisplayName)
+				return res, err
+			}
+
+			// Ensure that the KlusterletAddOnConfig CRD exists. In standalone MCE mode, the CRD is not deployed.
+			crdName := "klusterletaddonconfigs.agent.open-cluster-management.io"
+
+			if res, err := r.EnsureCRDExist(ctx, crdName); err != nil {
+				if !apierrors.IsNotFound(err) {
+					logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
+					return res, err
+				}
+			} else {
+				if res, err := r.EnsureKlusterletAddonConfig(ctx, *dc); err != nil {
+					logf.Error(err, "failed to ensure KlusterletAddonConfig created", "Name", dc.Spec.DisplayName)
+					return res, err
+				}
+			}
+
+			if res, err := r.EnsureAutoImportSecret(ctx, *dc, *config); err != nil {
+				logf.Error(err, "failed to ensure auto import Secret created", "Name", dc.Spec.DisplayName)
+				return res, err
+			}
+
 		} else {
-			if res, err := r.EnsureKlusterletAddonConfig(ctx, *dc); err != nil {
-				logf.Error(err, "failed to ensure KlusterletAddonConfig created", "Name", dc.Spec.DisplayName)
-				return res, err
-			}
-		}
-
-		if res, err := r.EnsureAutoImportSecret(ctx, *dc, *config); err != nil {
-			logf.Error(err, "failed to ensure auto import Secret created", "Name", dc.Spec.DisplayName)
-			return res, err
+			logf.Info(
+				fmt.Sprintf("Skipped automatic import for DiscoveredCluster due to existing '%v' annotation",
+					utils.AnnotationPreviouslyAutoImported), "Name", dc.Spec.DisplayName)
 		}
 	}
 
