@@ -104,7 +104,7 @@ var _ webhook.Validator = &DiscoveredCluster{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
-	discoveredclusterLog.Info("validate create", "Name", r.Name)
+	discoveredclusterLog.Info("validate create", "Name", r.Name, "Type", r.Spec.Type)
 
 	// Validate resource
 	if r.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
@@ -121,7 +121,7 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	discoveredclusterLog.Info("validate update", "Name", r.Name)
+	discoveredclusterLog.Info("validate update", "Name", r.Name, "Type", r.Spec.Type)
 
 	// Validate resource
 	oldDiscoveredCluster := old.(*DiscoveredCluster)
@@ -139,6 +139,6 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
 func (r *DiscoveredCluster) ValidateDelete() (admission.Warnings, error) {
-	discoveredclusterLog.Info("validate delete", "Name", r.Name, "DisplayName", r.Spec.DisplayName, "Type", r.Spec.Type)
+	discoveredclusterLog.Info("validate delete", "Name", r.Name, "Type", r.Spec.Type)
 	return nil, nil
 }
