@@ -127,7 +127,7 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 	oldDiscoveredCluster := old.(*DiscoveredCluster)
 	if oldDiscoveredCluster.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
-			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'."+
+			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
 				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
 
 		discoveredclusterLog.Error(err, "validation failed")
