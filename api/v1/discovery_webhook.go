@@ -18,7 +18,6 @@ limitations under the License.
 package v1
 
 import (
-	"errors"
 	"fmt"
 
 	admissionregistration "k8s.io/api/admissionregistration/v1"
@@ -35,8 +34,6 @@ import (
 var (
 	discoveredclusterLog = logf.Log.WithName("discoveredcluster-resource")
 	Client               cl.Client
-
-	ErrInvalidImportStrategy = errors.New("invalid import-strategy")
 )
 
 // ValidatingWebhook returns the ValidatingWebhookConfiguration used for the discoveredcluster
@@ -111,11 +108,12 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 
 	// Validate resource
 	if r.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
-		return nil, fmt.Errorf(
+		err := fmt.Errorf(
 			"cannot create DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
-				"Only ROSA type clusters support auto import",
-			r.Spec.Type, r.Name,
-		)
+				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
+
+		discoveredclusterLog.Error(err, "validation failed")
+		return nil, err
 	}
 
 	return nil, nil
@@ -125,17 +123,15 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	discoveredclusterLog.Info("validate update", "Name", r.Name)
 
-	if r.Annotations == nil {
-		r.Annotations = make(map[string]string)
-	}
-
+	// Validate resource
 	oldDiscoveredCluster := old.(*DiscoveredCluster)
 	if oldDiscoveredCluster.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
-		return nil, fmt.Errorf(
+		err := fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'."+
-				"Only ROSA type clusters support auto import",
-			r.Spec.Type, r.Name,
-		)
+				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
+
+		discoveredclusterLog.Error(err, "validation failed")
+		return nil, err
 	}
 
 	return nil, nil
@@ -143,6 +139,6 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
 func (r *DiscoveredCluster) ValidateDelete() (admission.Warnings, error) {
-	discoveredclusterLog.Info("validate delete", "Name", r.Name)
+	discoveredclusterLog.Info("validate delete", "Name", r.Name, "DisplayName", r.Spec.DisplayName, "Type", r.Spec.Type)
 	return nil, nil
 }
