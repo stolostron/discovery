@@ -116,11 +116,6 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 	registerScheme()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			DiscoveryConfig = types.NamespacedName{
-				Name:      tt.config.Name,
-				Namespace: tt.config.Namespace,
-			}
-
 			ns := &corev1.Namespace{}
 			mc := &clusterapiv1.ManagedCluster{}
 			kac := &agentv1.KlusterletAddonConfig{}
