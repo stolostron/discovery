@@ -49,7 +49,6 @@ var (
 	// baseURLAnnotation is the annotation set in a DiscoveryConfig that overrides the URL base used to find clusters
 	baseURLAnnotation     = "ocmBaseURL"
 	baseAuthURLAnnotation = "authBaseURL"
-	DiscoveryConfig       types.NamespacedName
 )
 
 var ErrBadFormat = errors.New("bad format")
@@ -95,10 +94,6 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 		// If there's an error other than "Not Found", return with the error.
 		return ctrl.Result{}, fmt.Errorf("failed to get DiscoveryConfig %s: %w", req.Name, err)
-	}
-	DiscoveryConfig = types.NamespacedName{
-		Name:      config.GetName(),
-		Namespace: config.GetNamespace(),
 	}
 
 	if err = r.updateDiscoveredClusters(ctx, config); err != nil {
@@ -376,8 +371,4 @@ func getAuthURLOverride(config *discovery.DiscoveryConfig) string {
 		return annotations[baseAuthURLAnnotation]
 	}
 	return ""
-}
-
-func GetDiscoveryConfig() types.NamespacedName {
-	return DiscoveryConfig
 }
