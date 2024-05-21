@@ -338,7 +338,7 @@ func (r *DiscoveredClusterReconciler) EnsureDiscoveredClusterCredentialExists(
 func (r *DiscoveredClusterReconciler) EnsureKlusterletConfig(ctx context.Context, dc discovery.DiscoveredCluster) (
 	ctrl.Result, error) {
 	nn := types.NamespacedName{Name: dc.GetNamespace() + "-config"}
-	existingKC := agentv1.KlusterletAddonConfig{}
+	existingKC := klusterletconfigv1alpha1.KlusterletConfig{}
 
 	if err := r.Get(ctx, nn, &existingKC); apierrors.IsNotFound(err) {
 		logf.Info("Creating KlusterletConfig", "Name", nn.Name)
