@@ -63,14 +63,40 @@ type DiscoveredClusterSpec struct {
 	Type                   string                 `json:"type" yaml:"type"`
 }
 
+type DiscoveredClusterCondition struct {
+	// Type is the type of the discovered cluster condition.
+	// +required
+	Type DiscoveredClusterConditionType `json:"type,omitempty"`
+
+	// Status is the status of the condition. One of True, False, Unknown.
+	// +required
+	Status metav1.ConditionStatus `json:"status,omitempty"`
+
+	// The last time this condition was updated.
+	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
+
+	// LastTransitionTime is the last time the condition changed from one status to another.
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+}
+
+type DiscoveredClusterConditionType string
+
+// These are valid conditions of the multiclusterengine.
+const (
+	DiscoveredClusterActive   DiscoveredClusterConditionType = "Available"
+	DiscoveredClusterReserved DiscoveredClusterConditionType = "Reserved"
+	DiscoveredClusterStale    DiscoveredClusterConditionType = "Stale"
+)
+
 // DiscoveredClusterStatus defines the observed state of DiscoveredCluster
 type DiscoveredClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Conditions []DiscoveredClusterCondition `json:"conditions,omitempty"`
 }
 
 //+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 
 // DiscoveredCluster is the Schema for the discoveredclusters API

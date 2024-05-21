@@ -110,7 +110,7 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 	discoveredclusterLog.Info("validate create", "Name", r.Name)
 
 	// Validate resource
-	if r.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
+	if r.Spec.Type != "ROSA" && r.Spec.Type != "MultiClusterEngineHCP" && r.Spec.ImportAsManagedCluster {
 		return nil, fmt.Errorf(
 			"cannot create DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
 				"Only ROSA type clusters support auto import",
@@ -130,7 +130,7 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 	}
 
 	oldDiscoveredCluster := old.(*DiscoveredCluster)
-	if oldDiscoveredCluster.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
+	if oldDiscoveredCluster.Spec.Type != "ROSA" && oldDiscoveredCluster.Spec.Type != "MultiClusterEngineHCP" && r.Spec.ImportAsManagedCluster {
 		return nil, fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'."+
 				"Only ROSA type clusters support auto import",

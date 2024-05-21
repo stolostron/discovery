@@ -52,12 +52,12 @@ import (
 
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
-	corev1 "k8s.io/api/core/v1"
-	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
-
+	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 	discoveryv1 "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/controllers"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
+	corev1 "k8s.io/api/core/v1"
+	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -80,6 +80,7 @@ func init() {
 	utilruntime.Must(corev1.AddToScheme(scheme))
 	utilruntime.Must(discoveryv1.AddToScheme(scheme))
 	utilruntime.Must(agentv1.SchemeBuilder.AddToScheme(scheme))
+	utilruntime.Must(klusterletconfigv1alpha1.AddToScheme(scheme))
 
 	utilruntime.Must(apiextv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme

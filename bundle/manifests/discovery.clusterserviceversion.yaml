@@ -310,6 +310,15 @@ spec:
           - update
           - patch
           - delete
+        - apiGroups:
+          - config.open-cluster-management.io/v1alpha1
+          resources:
+          - klusterletconfigs
+          verbs:
+          - get
+          - create
+          - update
+          - patch
         serviceAccountName: discovery-operator
     strategy: deployment
   installModes:

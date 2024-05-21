@@ -71,6 +71,16 @@ rules:
   - update
   - watch
 - apiGroups:
+  - config.open-cluster-management.io
+  resources:
+  - klusterletconfigs
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+- apiGroups:
   - discovery.open-cluster-management.io
   resources:
   - discoveredclusters
