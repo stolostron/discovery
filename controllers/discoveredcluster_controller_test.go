@@ -16,9 +16,10 @@ package controllers
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"testing"
 
+	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 	discovery "github.com/stolostron/discovery/api/v1"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -42,6 +43,7 @@ func registerScheme() {
 	discovery.AddToScheme(scheme.Scheme)
 	agentv1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	apiextv1.AddToScheme(scheme.Scheme)
+	klusterletconfigv1alpha1.AddToScheme(scheme.Scheme)
 }
 
 func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
@@ -103,7 +105,7 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 		},
 	}
 
-	crdFile, err := ioutil.ReadFile("../test/resources/klusterletaddonconfig-crd.yml")
+	crdFile, err := os.ReadFile("../test/resources/klusterletaddonconfig-crd.yaml")
 	if err != nil {
 		t.Errorf("failed to read CRD YAML file: %v", err)
 	}
@@ -203,6 +205,32 @@ func Test_Reconciler_CreateAutoImportSecret(t *testing.T) {
 
 			if got := s.GetName() != tt.nn.Name; got {
 				t.Errorf("CreateAutoImportSecret(tt.nn) = want %v, got %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_Reconciler_CreateKlusterletConfig(t *testing.T) {
+	tests := []struct {
+		name string
+		nn   types.NamespacedName
+		want bool
+	}{
+		{
+			name: "should create KlusterletConfig object",
+			nn: types.NamespacedName{
+				Name: "foo",
+			},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			kc := r.CreateKlusterletConfig(tt.nn)
+
+			if got := kc.GetName() != tt.nn.Name; got {
+				t.Errorf("CreateKlusterletConfig(tt.nn) = want %v, got %v", got, tt.want)
 			}
 		})
 	}
@@ -416,6 +444,151 @@ func Test_Reconciler_EnsureAutoImportSecret(t *testing.T) {
 	}
 }
 
+func Test_Reconciler_EnsureCommonResources(t *testing.T) {
+	tests := []struct {
+		name  string
+		dc    discovery.DiscoveredCluster
+		isHCP bool
+		sec   corev1.Secret
+		want  bool
+	}{
+		{
+			name: "should ensure common non HCP cluster resources are created",
+			dc: discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					DisplayName: "foo",
+					Credential: corev1.ObjectReference{
+						Name:      "admin",
+						Namespace: "bar",
+					},
+					RHOCMClusterID: "admin-12345",
+					Type:           "ROSA",
+				},
+			},
+
+			isHCP: false,
+			sec: corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "admin",
+					Namespace: "bar",
+				},
+				Data: map[string][]byte{
+					"ocmAPIToken": []byte("fake-token"),
+				},
+			},
+			want: true,
+		},
+		{
+			name: "should ensure common HCP cluster resources are created",
+			dc: discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					DisplayName: "foo",
+					Type:        "MultiClusterEngineHCP",
+				},
+			},
+			isHCP: true,
+			sec: corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "admin",
+					Namespace: "bar",
+				},
+			},
+			want: true,
+		},
+	}
+
+	registerScheme()
+	crdFile, err := os.ReadFile("../test/resources/klusterletaddonconfig-crd.yaml")
+	if err != nil {
+		t.Errorf("failed to read CRD YAML file: %v", err)
+	}
+
+	kacCRD := unstructured.Unstructured{}
+	if err := yaml.Unmarshal(crdFile, &kacCRD); err != nil {
+		t.Errorf("failed to unmarshal CRD YAML file: %v", err)
+	}
+
+	crdFile, err = os.ReadFile("../test/resources/klusterletconfig-crd.yaml")
+	if err != nil {
+		t.Errorf("failed to read CRD YAML file: %v", err)
+	}
+
+	kcCRD := unstructured.Unstructured{}
+	if err := yaml.Unmarshal(crdFile, &kcCRD); err != nil {
+		t.Errorf("failed to unmarshal CRD YAML file: %v", err)
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				if err := r.Delete(context.TODO(), &tt.sec); err != nil {
+					t.Errorf("failed to delete Secret: %v", err)
+				}
+			}()
+
+			if err := r.Create(context.TODO(), &tt.sec); err != nil {
+				t.Errorf("failed to create secret: %v", err)
+			}
+
+			if _, err := r.EnsureCommonResources(context.TODO(), &tt.dc, tt.isHCP); err != nil {
+				t.Errorf("failed to ensure common resources: %v", err)
+			}
+		})
+	}
+}
+
+func Test_Reconciler_EnsureKlusterletConfig(t *testing.T) {
+	tests := []struct {
+		name string
+		dc   *discovery.DiscoveredCluster
+		want bool
+	}{
+		{
+			name: "should ensure KlusterletConfig created",
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					DisplayName: "foo",
+					Type:        "ROSA",
+				},
+			},
+			want: true,
+		},
+	}
+
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			kc := &klusterletconfigv1alpha1.KlusterletConfig{}
+
+			defer func() {
+				if err := r.Delete(context.TODO(), kc); err != nil {
+					t.Errorf("failed to delete KlusterletConfig: %v", err)
+				}
+			}()
+
+			if _, err := r.EnsureKlusterletConfig(context.TODO(), *tt.dc); err != nil {
+				t.Errorf("failed to create KlusterletConfig resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.GetNamespace() + "-config"}, kc); err != nil {
+				t.Errorf("failed to get KlusterletConfig resource: %v", err)
+			}
+		})
+	}
+}
+
 func Test_Reconciler_EnsureKlusterletAddonConfig(t *testing.T) {
 	tests := []struct {
 		name string
@@ -459,7 +632,7 @@ func Test_Reconciler_EnsureKlusterletAddonConfig(t *testing.T) {
 			}
 
 			if _, err := r.EnsureKlusterletAddonConfig(context.TODO(), *tt.dc); err != nil {
-				t.Errorf("failed to create ManagedCluster resource: %v", err)
+				t.Errorf("failed to create KlusterletAddonConfig resource: %v", err)
 			}
 
 			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName,
@@ -570,32 +743,6 @@ func Test_Reconciler_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
 		})
 	}
 }
-
-// func Test_Reconciler_SetupWithManager(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		want bool
-// 	}{
-// 		{
-// 			name: "should setup reconciler with manager",
-// 			want: true,
-// 		},
-// 	}
-
-// 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{Scheme: scheme.Scheme})
-// 	if err != nil {
-// 		t.Errorf("failed to create manager: %v", err)
-// 	}
-
-// 	registerScheme()
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			if err := r.SetupWithManager(mgr); err != nil {
-// 				t.Errorf("failed to setup manager: %v", err)
-// 			}
-// 		})
-// 	}
-// }
 
 func Test_Reconciler_ShouldReconcile(t *testing.T) {
 	tests := []struct {

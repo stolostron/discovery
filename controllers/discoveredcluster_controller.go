@@ -23,6 +23,7 @@ import (
 	"github.com/pkg/errors"
 	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 	discovery "github.com/stolostron/discovery/api/v1"
+	"github.com/stolostron/discovery/pkg/common"
 	utils "github.com/stolostron/discovery/util"
 	recon "github.com/stolostron/discovery/util/reconciler"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
@@ -92,15 +93,20 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	*/
 	if !dc.Spec.IsManagedCluster && dc.Spec.ImportAsManagedCluster {
 		if !utils.IsAnnotationTrue(dc, utils.AnnotationPreviouslyAutoImported) {
-			if dc.Spec.Type == "ROSA" {
+			switch dc.Spec.Type {
+			case "MultiClusterEngineHCP":
+				if res, err := r.EnsureMultiClusterEngineHCP(ctx, dc); err != nil {
+					return res, err
+				}
+
+			case "ROSA":
 				if res, err := r.EnsureROSA(ctx, dc); err != nil {
 					return res, err
 				}
 
-			} else if dc.Spec.Type == "MultiClusterEngineHCP" {
-				if res, err := r.EnsureMultiClusterEngineHCP(ctx, dc); err != nil {
-					return res, err
-				}
+			default:
+				logf.Info("Unknown cluster type. Skipping automatic import.", "Name", dc.Spec.DisplayName,
+					"Type", dc.Spec.Type)
 			}
 		} else {
 			logf.Info(
@@ -218,7 +224,8 @@ func (r *DiscoveredClusterReconciler) CreateManagedCluster(nn types.NamespacedNa
 			Annotations: annotations,
 		},
 		Spec: clusterapiv1.ManagedClusterSpec{
-			HubAcceptsClient: true,
+			HubAcceptsClient:     true,
+			LeaseDurationSeconds: 60,
 		},
 	}
 }
@@ -286,6 +293,63 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 	} else {
 		logf.Error(err, "failed to parse token from Secret", "Name", nn.Name)
 		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+/*
+EnsureCommonResources ...
+*/
+func (r *DiscoveredClusterReconciler) EnsureCommonResources(ctx context.Context,
+	dc *discovery.DiscoveredCluster, isHCP bool) (ctrl.Result, error) {
+	if res, err := r.EnsureManagedCluster(ctx, *dc); err != nil {
+		logf.Error(err, "failed to ensure ManagedCluster created", "Name", dc.Spec.DisplayName)
+		return res, err
+	}
+
+	if isHCP {
+		// Ensure that the KlusterletConfig CRD exists.
+		crdName := "klusterletconfigs.config.open-cluster-management.io"
+		if res, err := r.EnsureCRDExist(ctx, crdName); err != nil {
+			if !apierrors.IsNotFound(err) {
+				logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
+				return res, err
+			}
+		} else {
+			if res, err := r.EnsureKlusterletConfig(ctx, *dc); err != nil {
+				logf.Error(err, "failed to ensure KlusterletConfig created", "Name", dc.GetNamespace()+"-config")
+				return res, err
+			}
+		}
+	}
+
+	// Ensure that the KlusterletAddOnConfig CRD exists. In standalone MCE mode, the CRD is not deployed.
+	crdName := "klusterletaddonconfigs.agent.open-cluster-management.io"
+	if res, err := r.EnsureCRDExist(ctx, crdName); err != nil {
+		if !apierrors.IsNotFound(err) {
+			logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
+			return res, err
+		}
+	} else {
+		if res, err := r.EnsureKlusterletAddonConfig(ctx, *dc); err != nil {
+			logf.Error(err, "failed to ensure KlusterletAddonConfig created", "Name", dc.Spec.DisplayName)
+			return res, err
+		}
+	}
+
+	if !isHCP {
+		// Ensure that the DiscoveredCluster credentials are available on the cluster.
+		if res, err := r.EnsureDiscoveredClusterCredentialExists(ctx, *dc); err != nil {
+			logf.Error(err, "failed to ensure DiscoveredCluster credential Secret exist", "Name",
+				dc.Spec.DisplayName)
+			return res, err
+		}
+
+		if res, err := r.EnsureAutoImportSecret(ctx, *dc); err != nil {
+			logf.Error(err, "failed to ensure auto import Secret created", "Name", dc.Spec.DisplayName)
+			return res, err
+		}
 	}
 
 	return ctrl.Result{}, nil
@@ -453,64 +517,12 @@ func (r *DiscoveredClusterReconciler) EnsureROSA(ctx context.Context, dc *discov
 		return res, err
 	}
 
-	if res, err := r.EnsureManagedCluster(ctx, *dc); err != nil {
-		logf.Error(err, "failed to ensure ManagedCluster created", "Name", dc.Spec.DisplayName)
-		return res, err
-	}
-
-	// Ensure that the KlusterletAddOnConfig CRD exists. In standalone MCE mode, the CRD is not deployed.
-	crdName := "klusterletaddonconfigs.agent.open-cluster-management.io"
-
-	if res, err := r.EnsureCRDExist(ctx, crdName); err != nil {
-		if !apierrors.IsNotFound(err) {
-			logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
-			return res, err
-		}
-	} else {
-		if res, err := r.EnsureKlusterletAddonConfig(ctx, *dc); err != nil {
-			logf.Error(err, "failed to ensure KlusterletAddonConfig created", "Name", dc.Spec.DisplayName)
-			return res, err
-		}
-	}
-
-	// Ensure that the DiscoveredCluster credentials are available on the cluster.
-	if res, err := r.EnsureDiscoveredClusterCredentialExists(ctx, *dc); err != nil {
-		logf.Error(err, "failed to ensure DiscoveredCluster credential Secret exist", "Name",
-			dc.Spec.DisplayName)
-		return res, err
-	}
-
-	if res, err := r.EnsureAutoImportSecret(ctx, *dc); err != nil {
-		logf.Error(err, "failed to ensure auto import Secret created", "Name", dc.Spec.DisplayName)
-		return res, err
-	}
-
-	return ctrl.Result{}, nil
+	return r.EnsureCommonResources(ctx, dc, false)
 }
 
 func (r *DiscoveredClusterReconciler) EnsureMultiClusterEngineHCP(ctx context.Context, dc *discovery.DiscoveredCluster,
 ) (ctrl.Result, error) {
-	if res, err := r.EnsureManagedCluster(ctx, *dc); err != nil {
-		logf.Error(err, "failed to ensure ManagedCluster created", "Name", dc.Spec.DisplayName)
-		return res, err
-	}
-
-	// Ensure that the KlusterletAddOnConfig CRD exists. In standalone MCE mode, the CRD is not deployed.
-	crdName := "klusterletconfigs.config.open-cluster-management.io"
-
-	if res, err := r.EnsureCRDExist(ctx, crdName); err != nil {
-		if !apierrors.IsNotFound(err) {
-			logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
-			return res, err
-		}
-	} else {
-		if res, err := r.EnsureKlusterletConfig(ctx, *dc); err != nil {
-			logf.Error(err, "failed to ensure KlusterletConfig created", "Name", dc.Spec.DisplayName)
-			return res, err
-		}
-	}
-
-	return ctrl.Result{}, nil
+	return r.EnsureCommonResources(ctx, dc, true)
 }
 
 // SetupWithManager ...
@@ -538,5 +550,5 @@ func (r *DiscoveredClusterReconciler) ShouldReconcile(obj metav1.Object) bool {
 		return false
 	}
 
-	return dc.Spec.Type == "ROSA" || dc.Spec.Type == "MultiClusterEngineHCP"
+	return common.IsSupportedClusterType(dc.Spec.Type)
 }

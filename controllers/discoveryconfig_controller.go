@@ -280,7 +280,7 @@ func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *di
 	}
 
 	// Cluster needs to be updated
-	return r.updateCluster(ctx, config, dc, current)
+	return r.updateCluster(ctx, dc, current)
 }
 
 func (r *DiscoveryConfigReconciler) createCluster(ctx context.Context, config *discovery.DiscoveryConfig, dc discovery.DiscoveredCluster) error {
@@ -310,7 +310,7 @@ func (r *DiscoveryConfigReconciler) createCluster(ctx context.Context, config *d
 	return nil
 }
 
-func (r *DiscoveryConfigReconciler) updateCluster(ctx context.Context, config *discovery.DiscoveryConfig, new, old discovery.DiscoveredCluster) error {
+func (r *DiscoveryConfigReconciler) updateCluster(ctx context.Context, new, old discovery.DiscoveredCluster) error {
 	updated := old
 	updated.Spec = new.Spec
 	if err := r.Update(ctx, &updated); err != nil {

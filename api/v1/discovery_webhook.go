@@ -20,6 +20,7 @@ package v1
 import (
 	"fmt"
 
+	"github.com/stolostron/discovery/pkg/common"
 	admissionregistration "k8s.io/api/admissionregistration/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -102,22 +103,12 @@ func (r *DiscoveredCluster) Default() {
 
 var _ webhook.Validator = &DiscoveredCluster{}
 
-// isSupportedClusterType checks if the cluster type is supported for the import
-func isSupportedClusterType(clusterType string) bool {
-	supportedTypes := map[string]bool{
-		"MultiClusterEngineHCP": true,
-		"ROSA":                  true,
-	}
-
-	return supportedTypes[clusterType]
-}
-
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 	discoveredclusterLog.Info("validate create", "Name", r.Name, "Type", r.Spec.Type)
 
 	// Validate resource
-	if !isSupportedClusterType(r.Spec.Type) && r.Spec.ImportAsManagedCluster {
+	if !common.IsSupportedClusterType(r.Spec.Type) && r.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot create DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
 				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
@@ -135,7 +126,7 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 
 	// Validate resource
 	oldDiscoveredCluster := old.(*DiscoveredCluster)
-	if !isSupportedClusterType(oldDiscoveredCluster.Spec.Type) && r.Spec.ImportAsManagedCluster {
+	if !common.IsSupportedClusterType(oldDiscoveredCluster.Spec.Type) && r.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
 				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
