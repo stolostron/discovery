@@ -270,12 +270,23 @@ func Test_Reconciler_CreateKlusterletAddonConfig(t *testing.T) {
 
 func Test_Reconciler_CreateManagedCluster(t *testing.T) {
 	tests := []struct {
-		name string
-		nn   types.NamespacedName
-		want bool
+		name        string
+		clusterType string
+		nn          types.NamespacedName
+		want        bool
 	}{
 		{
-			name: "should create ManagedCluster object",
+			name:        "should create ROSA ManagedCluster object",
+			clusterType: "ROSA",
+			nn: types.NamespacedName{
+				Name:      "foo",
+				Namespace: "bar",
+			},
+			want: true,
+		},
+		{
+			name:        "should create MCE-HCP ManagedCluster object",
+			clusterType: "MultiClusterEngineHCP",
 			nn: types.NamespacedName{
 				Name:      "foo",
 				Namespace: "bar",
@@ -286,7 +297,7 @@ func Test_Reconciler_CreateManagedCluster(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mc := r.CreateManagedCluster(tt.nn)
+			mc := r.CreateManagedCluster(tt.nn, tt.clusterType)
 
 			if got := mc.GetName() != tt.nn.Name; got {
 				t.Errorf("CreateManagedCluster(tt.nn) = want %v, got %v", got, tt.want)
