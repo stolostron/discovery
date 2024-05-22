@@ -192,7 +192,8 @@ func (r *DiscoveredClusterReconciler) CreateKlusterletAddonConfig(nn types.Names
 CreateManagedCluster creates a ManagedCluster object with the specified NamespacedName. It sets default labels and
 annotations for the ManagedCluster. It also adds a finalizer for cleanup.
 */
-func (r *DiscoveredClusterReconciler) CreateManagedCluster(nn types.NamespacedName, clusterType string) *clusterapiv1.ManagedCluster {
+func (r *DiscoveredClusterReconciler) CreateManagedCluster(nn types.NamespacedName,
+	clusterType string) *clusterapiv1.ManagedCluster {
 	annotations := make(map[string]string)
 
 	switch clusterType {
@@ -445,7 +446,8 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 	return ctrl.Result{}, nil
 }
 
-func (r *DiscoveredClusterReconciler) EnsureROSA(ctx context.Context, dc *discovery.DiscoveredCluster) (ctrl.Result, error) {
+func (r *DiscoveredClusterReconciler) EnsureROSA(ctx context.Context, dc *discovery.DiscoveredCluster) (
+	ctrl.Result, error) {
 	if res, err := r.EnsureNamespaceForDiscoveredCluster(ctx, *dc); err != nil {
 		logf.Error(err, "failed to ensure namespace for DiscoveredCluster", "Name", dc.Spec.DisplayName)
 		return res, err
