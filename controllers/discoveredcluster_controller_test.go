@@ -16,7 +16,9 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
@@ -24,6 +26,7 @@ import (
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -38,12 +41,51 @@ var r = &DiscoveredClusterReconciler{
 	Client: fake.NewClientBuilder().Build(),
 }
 
+var crdDir = "../test/resources/"
+
 func registerScheme() {
 	clusterapiv1.AddToScheme(scheme.Scheme)
 	discovery.AddToScheme(scheme.Scheme)
 	agentv1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	apiextv1.AddToScheme(scheme.Scheme)
 	klusterletconfigv1alpha1.AddToScheme(scheme.Scheme)
+}
+
+func deployCRDs(directory string) error {
+	files, err := os.ReadDir(directory)
+
+	if err != nil {
+		return fmt.Errorf("failed to read directory %s: %v", directory, err)
+	}
+
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+
+		filePath := filepath.Join(directory, f.Name())
+		crdFile, err := os.ReadFile(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to read CRD YAML file: %v", err)
+		}
+
+		crd := &unstructured.Unstructured{}
+		if err := yaml.Unmarshal(crdFile, crd); err != nil {
+			return fmt.Errorf("failed to unmarshal CRD YAML file: %v", err)
+		}
+
+		if err := r.Get(context.TODO(), types.NamespacedName{Name: crd.GetName()}, crd); err != nil {
+			if apierrors.IsNotFound(err) {
+				if err := r.Create(context.TODO(), crd); err != nil {
+					return fmt.Errorf("failed to create CRD: %v", err)
+				}
+
+			} else {
+				return fmt.Errorf("failed to get CRD: %v", err)
+			}
+		}
+	}
+	return nil
 }
 
 func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
@@ -105,17 +147,11 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 		},
 	}
 
-	crdFile, err := os.ReadFile("../test/resources/klusterletaddonconfig-crd.yaml")
-	if err != nil {
-		t.Errorf("failed to read CRD YAML file: %v", err)
-	}
-
-	crd := unstructured.Unstructured{}
-	if err := yaml.Unmarshal(crdFile, &crd); err != nil {
-		t.Errorf("failed to unmarshal CRD YAML file: %v", err)
-	}
-
 	registerScheme()
+	if err := deployCRDs(crdDir); err != nil {
+		t.Errorf("failed to deploy CRDs: %v", err)
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ns := &corev1.Namespace{}
@@ -149,10 +185,6 @@ func Test_DiscoveredCluster_Reconciler_Reconcile(t *testing.T) {
 
 			if err := r.Create(context.TODO(), tt.dc); err != nil {
 				t.Errorf("failed to create DiscoveredCluster: %v", err)
-			}
-
-			if err := r.Create(context.TODO(), &crd); err != nil {
-				t.Errorf("failed to create KlusterletAddonConfig: %v", err)
 			}
 
 			if _, err := r.Reconcile(context.TODO(), tt.req); err != nil {
@@ -506,24 +538,8 @@ func Test_Reconciler_EnsureCommonResources(t *testing.T) {
 	}
 
 	registerScheme()
-	crdFile, err := os.ReadFile("../test/resources/klusterletaddonconfig-crd.yaml")
-	if err != nil {
-		t.Errorf("failed to read CRD YAML file: %v", err)
-	}
-
-	kacCRD := unstructured.Unstructured{}
-	if err := yaml.Unmarshal(crdFile, &kacCRD); err != nil {
-		t.Errorf("failed to unmarshal CRD YAML file: %v", err)
-	}
-
-	crdFile, err = os.ReadFile("../test/resources/klusterletconfig-crd.yaml")
-	if err != nil {
-		t.Errorf("failed to read CRD YAML file: %v", err)
-	}
-
-	kcCRD := unstructured.Unstructured{}
-	if err := yaml.Unmarshal(crdFile, &kcCRD); err != nil {
-		t.Errorf("failed to unmarshal CRD YAML file: %v", err)
+	if err := deployCRDs(crdDir); err != nil {
+		t.Errorf("failed to deploy CRDs: %v", err)
 	}
 
 	for _, tt := range tests {
@@ -700,6 +716,74 @@ func Test_Reconciler_EnsureManagedCluster(t *testing.T) {
 	}
 }
 
+func Test_Reconciler_EnsureMultiClusterEngineHCP(t *testing.T) {
+	tests := []struct {
+		name string
+		dc   *discovery.DiscoveredCluster
+		want bool
+	}{
+		{
+			name: "should ensure MultiClusterEngineHCP created",
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					DisplayName: "foo",
+					Type:        "MultiClusterEngineHCP",
+				},
+			},
+			want: true,
+		},
+	}
+
+	registerScheme()
+	if err := deployCRDs(crdDir); err != nil {
+		t.Errorf("failed to deploy CRDs: %v", err)
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			kc := &klusterletconfigv1alpha1.KlusterletConfig{}
+			kac := &agentv1.KlusterletAddonConfig{}
+			mc := &clusterapiv1.ManagedCluster{}
+
+			defer func() {
+				if err := r.Delete(context.TODO(), mc); err != nil {
+					t.Errorf("failed to delete ManagedCluster: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), kc); err != nil {
+					t.Errorf("failed to delete KlusterletConfig: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), kac); err != nil {
+					t.Errorf("failed to delete KlusterletAddOnConfig: %v", err)
+				}
+			}()
+
+			if _, err := r.EnsureMultiClusterEngineHCP(context.TODO(), tt.dc); err != nil {
+				t.Errorf("failed to ensure MCE-HCP resources created: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, mc); err != nil {
+				t.Errorf("failed to get MCE-HCP ManagedCluster resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.GetNamespace() + "-config"},
+				kc); err != nil {
+				t.Errorf("failed to get MCE-HCP KlusterletConfig resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName,
+				Namespace: tt.dc.Spec.DisplayName}, kac); err != nil {
+				t.Errorf("failed to get MCE-HCP KlusterletAddOnConfig resource: %v", err)
+			}
+		})
+	}
+}
+
 func Test_Reconciler_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
 	tests := []struct {
 		name string
@@ -739,6 +823,96 @@ func Test_Reconciler_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
 
 			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, ns); err != nil {
 				t.Errorf("failed to get Namespace for DiscoveredCluster: %v", err)
+			}
+		})
+	}
+}
+
+func Test_Reconciler_EnsureROSA(t *testing.T) {
+	tests := []struct {
+		name string
+		dc   *discovery.DiscoveredCluster
+		sec  *corev1.Secret
+		want bool
+	}{
+		{
+			name: "should ensure namespace created for DiscoveredCluster",
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					Credential: corev1.ObjectReference{
+						Name:      "admin",
+						Namespace: "bar",
+					},
+					DisplayName: "foo",
+					Type:        "ROSA",
+				},
+			},
+			sec: &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "admin",
+					Namespace: "bar",
+				},
+				Data: map[string][]byte{
+					"ocmAPIToken": []byte("fake-token"),
+				},
+			},
+			want: true,
+		},
+	}
+
+	registerScheme()
+	if err := deployCRDs(crdDir); err != nil {
+		t.Errorf("failed to deploy CRDs: %v", err)
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			kac := &agentv1.KlusterletAddonConfig{}
+			mc := &clusterapiv1.ManagedCluster{}
+			autoSec := &corev1.Secret{}
+
+			defer func() {
+				if err := r.Delete(context.TODO(), tt.sec); err != nil {
+					t.Errorf("failed to delete Secret: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), mc); err != nil {
+					t.Errorf("failed to delete ManagedCluster: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), kac); err != nil {
+					t.Errorf("failed to delete KlusterletAddOnConfig: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), autoSec); err != nil {
+					t.Errorf("failed to delete Secret: %v", err)
+				}
+			}()
+
+			if err := r.Create(context.TODO(), tt.sec); err != nil {
+				t.Errorf("failed to ensure ROSA resources created: %v", err)
+			}
+
+			if _, err := r.EnsureROSA(context.TODO(), tt.dc); err != nil {
+				t.Errorf("failed to ensure ROSA resources created: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, mc); err != nil {
+				t.Errorf("failed to get ROSA ManagedCluster resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName,
+				Namespace: tt.dc.Spec.DisplayName}, kac); err != nil {
+				t.Errorf("failed to get ROSA KlusterletAddOnConfig resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: "auto-import-secret",
+				Namespace: tt.dc.Spec.DisplayName}, autoSec); err != nil {
+				t.Errorf("failed to get ROSA AutoImportSecret resource: %v", err)
 			}
 		})
 	}

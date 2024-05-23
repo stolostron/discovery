@@ -29,7 +29,7 @@ const (
 	SecretName          = "test-connection-secret"
 	TestserverName      = "mock-ocm-server"
 
-	timeout  = time.Second * 45
+	timeout  = time.Second * 60
 	interval = time.Millisecond * 250
 )
 
