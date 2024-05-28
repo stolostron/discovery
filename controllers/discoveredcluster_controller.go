@@ -23,7 +23,6 @@ import (
 
 	"github.com/pkg/errors"
 	discovery "github.com/stolostron/discovery/api/v1"
-	"github.com/stolostron/discovery/pkg/common"
 	utils "github.com/stolostron/discovery/util"
 	recon "github.com/stolostron/discovery/util/reconciler"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
@@ -49,6 +48,11 @@ type DiscoveredClusterReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
+
+const (
+	AddOnDeploymentConfigName = "addon-ns-config"
+	DefaultName               = "default"
+)
 
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters,verbs=create;delete;deletecollection;get;list;patch;update;watch
 // +kubebuilder:rbac:groups=discovery.open-cluster-management.io,resources=discoveredclusters/finalizers,verbs=update
@@ -249,7 +253,7 @@ func (r *DiscoveredClusterReconciler) CreateManagedClusterSetBinding(nn types.Na
 			Namespace: nn.Namespace,
 		},
 		Spec: clusterapiv1beta2.ManagedClusterSetBindingSpec{
-			ClusterSet: common.DefaultName,
+			ClusterSet: DefaultName,
 		},
 	}
 }
@@ -319,7 +323,7 @@ with a requeue signal.
 */
 func (r *DiscoveredClusterReconciler) EnsureAddOnDeploymentConfig(ctx context.Context) (
 	ctrl.Result, error) {
-	nn := types.NamespacedName{Name: common.AddOnDeploymentConfigName, Namespace: os.Getenv("POD_NAMESPACE")}
+	nn := types.NamespacedName{Name: AddOnDeploymentConfigName, Namespace: os.Getenv("POD_NAMESPACE")}
 	existingADC := addonv1alpha1.AddOnDeploymentConfig{}
 
 	if err := r.Get(ctx, nn, &existingADC); apierrors.IsNotFound(err) {
@@ -393,19 +397,19 @@ func (r *DiscoveredClusterReconciler) EnsureCommonResources(ctx context.Context,
 	dc *discovery.DiscoveredCluster, isHCP bool) (ctrl.Result, error) {
 	if isHCP {
 		if res, err := r.EnsureManagedClusterSetBinding(ctx); err != nil {
-			logf.Error(err, "failed to ensure ManagedClusterBindingSet created", "Name", common.DefaultName,
+			logf.Error(err, "failed to ensure ManagedClusterBindingSet created", "Name", DefaultName,
 				"Namespace", os.Getenv("POD_NAMESPACE"))
 			return res, err
 		}
 
 		if res, err := r.EnsurePlacement(ctx); err != nil {
-			logf.Error(err, "failed to ensure Placement created", "Name", common.DefaultName,
+			logf.Error(err, "failed to ensure Placement created", "Name", DefaultName,
 				"Namespace", os.Getenv("POD_NAMESPACE"))
 			return res, err
 		}
 
 		if res, err := r.EnsureAddOnDeploymentConfig(ctx); err != nil {
-			logf.Error(err, "failed to ensure AddOnDeploymentConfig created", "Name", common.AddOnDeploymentConfigName,
+			logf.Error(err, "failed to ensure AddOnDeploymentConfig created", "Name", AddOnDeploymentConfigName,
 				"Namespace", os.Getenv("POD_NAMESPACE"))
 			return res, err
 		}
@@ -567,7 +571,7 @@ If the ManagedClusterSetBinding already exists or if an error occurs during retr
 with a requeue signal.
 */
 func (r *DiscoveredClusterReconciler) EnsureManagedClusterSetBinding(ctx context.Context) (ctrl.Result, error) {
-	nn := types.NamespacedName{Name: common.DefaultName, Namespace: os.Getenv("POD_NAMESPACE")}
+	nn := types.NamespacedName{Name: DefaultName, Namespace: os.Getenv("POD_NAMESPACE")}
 	existingMCSB := &clusterapiv1beta2.ManagedClusterSetBinding{}
 
 	if err := r.Get(ctx, nn, existingMCSB); apierrors.IsNotFound(err) {
@@ -629,7 +633,7 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 EnsurePlacement ...
 */
 func (r *DiscoveredClusterReconciler) EnsurePlacement(ctx context.Context) (ctrl.Result, error) {
-	nn := types.NamespacedName{Name: common.DefaultName, Namespace: os.Getenv("POD_NAMESPACE")}
+	nn := types.NamespacedName{Name: DefaultName, Namespace: os.Getenv("POD_NAMESPACE")}
 	existingPlacement := &clusterapiv1beta1.Placement{}
 
 	if err := r.Get(ctx, nn, existingPlacement); apierrors.IsNotFound(err) {
@@ -682,7 +686,7 @@ func (r *DiscoveredClusterReconciler) AddPlacementToClusterManagementAddOn(ctx c
 	placementAvailable := false
 
 	for _, p := range placements {
-		if p.Name == common.DefaultName && p.Namespace == os.Getenv("POD_NAMESPACE") {
+		if p.Name == DefaultName && p.Namespace == os.Getenv("POD_NAMESPACE") {
 			placementAvailable = true
 			break
 		}
@@ -691,13 +695,13 @@ func (r *DiscoveredClusterReconciler) AddPlacementToClusterManagementAddOn(ctx c
 	if !placementAvailable {
 		placement := addonv1alpha1.PlacementStrategy{
 			PlacementRef: addonv1alpha1.PlacementRef{
-				Name:      common.DefaultName,
+				Name:      DefaultName,
 				Namespace: os.Getenv("POD_NAMESPACE"),
 			},
 			Configs: []addonv1alpha1.AddOnConfig{
 				{
 					ConfigReferent: addonv1alpha1.ConfigReferent{
-						Name:      common.AddOnDeploymentConfigName,
+						Name:      AddOnDeploymentConfigName,
 						Namespace: os.Getenv("POD_NAMESPACE"),
 					},
 					ConfigGroupResource: addonv1alpha1.ConfigGroupResource{
@@ -743,5 +747,5 @@ func (r *DiscoveredClusterReconciler) ShouldReconcile(obj metav1.Object) bool {
 		return false
 	}
 
-	return common.IsSupportedClusterType(dc.Spec.Type)
+	return discovery.IsSupportedClusterType(dc.Spec.Type)
 }

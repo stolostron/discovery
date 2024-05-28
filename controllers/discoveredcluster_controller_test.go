@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	discovery "github.com/stolostron/discovery/api/v1"
-	"github.com/stolostron/discovery/pkg/common"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -285,7 +284,7 @@ func Test_Reconciler_CreateAddOnDeploymentConfig(t *testing.T) {
 		{
 			name: "should create AddOnDeploymentConfig object",
 			nn: types.NamespacedName{
-				Name:      common.AddOnDeploymentConfigName,
+				Name:      AddOnDeploymentConfigName,
 				Namespace: "test-namespace",
 			},
 			want: true,
@@ -468,7 +467,7 @@ func Test_Reconciler_CreatePlacement(t *testing.T) {
 		{
 			name: "should create Placement object",
 			nn: types.NamespacedName{
-				Name:      common.DefaultName,
+				Name:      DefaultName,
 				Namespace: "test-namespace",
 			},
 			want: true,
@@ -670,7 +669,7 @@ func Test_Reconciler_EnsureAddOnDeploymentConfig(t *testing.T) {
 		{
 			name: "should ensure AddOnDeploymentConfig created",
 			nn: types.NamespacedName{
-				Name:      common.AddOnDeploymentConfigName,
+				Name:      AddOnDeploymentConfigName,
 				Namespace: "test-namespace",
 			},
 			want: true,
@@ -822,7 +821,7 @@ func Test_Reconciler_EnsureManagedClusterSetBinding(t *testing.T) {
 	}{
 		{
 			name: "should ensure ManagedClusterSetBinding created",
-			nn:   types.NamespacedName{Name: common.DefaultName, Namespace: "test-namespace"},
+			nn:   types.NamespacedName{Name: DefaultName, Namespace: "test-namespace"},
 			want: true,
 		},
 	}
@@ -922,17 +921,17 @@ func Test_Reconciler_EnsureMultiClusterEngineHCP(t *testing.T) {
 				t.Errorf("failed to ensure MCE-HCP resources created: %v", err)
 			}
 
-			if err := r.Get(context.TODO(), types.NamespacedName{Name: common.DefaultName,
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: DefaultName,
 				Namespace: os.Getenv("POD_NAMESPACE")}, mcsb); err != nil {
 				t.Errorf("failed to get ManagedClusterSetBinding resource: %v", err)
 			}
 
-			if err := r.Get(context.TODO(), types.NamespacedName{Name: common.DefaultName,
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: DefaultName,
 				Namespace: os.Getenv("POD_NAMESPACE")}, p); err != nil {
 				t.Errorf("failed to get Placement resource: %v", err)
 			}
 
-			if err := r.Get(context.TODO(), types.NamespacedName{Name: common.AddOnDeploymentConfigName,
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: AddOnDeploymentConfigName,
 				Namespace: os.Getenv("POD_NAMESPACE")}, adc); err != nil {
 				t.Errorf("failed to get AddOnDeploymentConfig resource: %v", err)
 			}
@@ -1002,7 +1001,7 @@ func Test_Reconciler_EnsurePlacement(t *testing.T) {
 		{
 			name: "should ensure placement created for ClusterManagementAddOn",
 			nn: types.NamespacedName{
-				Name:      common.DefaultName,
+				Name:      DefaultName,
 				Namespace: "test-namespace",
 			},
 			want: true,
