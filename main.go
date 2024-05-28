@@ -42,6 +42,9 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	addonv1alpha1 "open-cluster-management.io/api/addon/v1alpha1"
+	clusterapiv1beta1 "open-cluster-management.io/api/cluster/v1beta1"
+	clusterapiv1beta2 "open-cluster-management.io/api/cluster/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -75,12 +78,15 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
+	utilruntime.Must(addonv1alpha1.AddToScheme(scheme))
 	utilruntime.Must(apixv1.AddToScheme(scheme))
 	utilruntime.Must(clusterapiv1.AddToScheme(scheme))
 	utilruntime.Must(corev1.AddToScheme(scheme))
 	utilruntime.Must(discoveryv1.AddToScheme(scheme))
 	utilruntime.Must(agentv1.SchemeBuilder.AddToScheme(scheme))
 	utilruntime.Must(klusterletconfigv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(clusterapiv1beta1.AddToScheme(scheme))
+	utilruntime.Must(clusterapiv1beta2.AddToScheme(scheme))
 
 	utilruntime.Must(apiextv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme

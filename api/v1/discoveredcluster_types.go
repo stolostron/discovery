@@ -44,23 +44,57 @@ const (
 
 // DiscoveredClusterSpec defines the desired state of DiscoveredCluster
 type DiscoveredClusterSpec struct {
-	ActivityTimestamp      *metav1.Time           `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
-	APIURL                 string                 `json:"apiUrl" yaml:"apiUrl"`
-	CloudProvider          string                 `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
-	Console                string                 `json:"console,omitempty" yaml:"console,omitempty"`
-	CreationTimestamp      *metav1.Time           `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
-	Credential             corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
-	DisplayName            string                 `json:"displayName" yaml:"displayName"`
-	ImportAsManagedCluster bool                   `json:"importAsManagedCluster,omitempty" yaml:"importAsManagedCluster,omitempty"`
-	IsManagedCluster       bool                   `json:"isManagedCluster" yaml:"isManagedCluster"`
-	Name                   string                 `json:"name" yaml:"name"`
-	OCPClusterID           string                 `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
-	OpenshiftVersion       string                 `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
-	Owner                  string                 `json:"owner,omitempty" yaml:"owner,omitempty"`
-	RHOCMClusterID         string                 `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
-	Region                 string                 `json:"region,omitempty" yaml:"region,omitempty"`
-	Status                 string                 `json:"status,omitempty" yaml:"status,omitempty"`
-	Type                   string                 `json:"type" yaml:"type"`
+	// ActivityTimestamp ...
+	ActivityTimestamp *metav1.Time `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
+
+	// APIURL ...
+	APIURL string `json:"apiUrl" yaml:"apiUrl"`
+
+	// CloudProvider ...
+	CloudProvider string `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
+
+	// Console ...
+	Console string `json:"console,omitempty" yaml:"console,omitempty"`
+
+	// CreationTimestamp ...
+	CreationTimestamp *metav1.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
+
+	// Credential ...
+	Credential corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
+
+	// DisplayName ...
+	DisplayName string `json:"displayName" yaml:"displayName"`
+
+	// ImportAsManagedCluster ...
+	// +kubebuilder:default:=false
+	ImportAsManagedCluster bool `json:"importAsManagedCluster,omitempty" yaml:"importAsManagedCluster,omitempty"`
+
+	// IsManagedCluster ...
+	IsManagedCluster bool `json:"isManagedCluster" yaml:"isManagedCluster"`
+
+	// Name ...
+	Name string `json:"name" yaml:"name"`
+
+	// OCPClusterID ...
+	OCPClusterID string `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
+
+	// OpenshiftVersion ...
+	OpenshiftVersion string `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
+
+	// Owner ...
+	Owner string `json:"owner,omitempty" yaml:"owner,omitempty"`
+
+	// RHOCMClusterID ...
+	RHOCMClusterID string `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
+
+	// Region ...
+	Region string `json:"region,omitempty" yaml:"region,omitempty"`
+
+	// Status ...
+	Status string `json:"status,omitempty" yaml:"status,omitempty"`
+
+	// Type ...
+	Type string `json:"type" yaml:"type"`
 }
 
 type DiscoveredClusterCondition struct {

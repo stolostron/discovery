@@ -17,6 +17,17 @@ rules:
   - update
   - watch
 - apiGroups:
+  - addon.open-cluster-management.io
+  resources:
+  - addondeploymentconfigs
+  - clustermanagementaddons
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
   - admissionregistration.k8s.io
   resources:
   - validatingwebhookconfigurations

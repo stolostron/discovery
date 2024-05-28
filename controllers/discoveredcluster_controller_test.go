@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 	discovery "github.com/stolostron/discovery/api/v1"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -32,7 +31,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes/scheme"
+	addonv1alpha1 "open-cluster-management.io/api/addon/v1alpha1"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
+	clusterapiv1beta1 "open-cluster-management.io/api/cluster/v1beta1"
+	clusterapiv1beta2 "open-cluster-management.io/api/cluster/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
@@ -48,7 +50,9 @@ func registerScheme() {
 	discovery.AddToScheme(scheme.Scheme)
 	agentv1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	apiextv1.AddToScheme(scheme.Scheme)
-	klusterletconfigv1alpha1.AddToScheme(scheme.Scheme)
+	addonv1alpha1.AddToScheme(scheme.Scheme)
+	clusterapiv1beta1.AddToScheme(scheme.Scheme)
+	clusterapiv1beta2.AddToScheme(scheme.Scheme)
 }
 
 func deployCRDs(directory string) error {
@@ -85,6 +89,35 @@ func deployCRDs(directory string) error {
 			}
 		}
 	}
+	return nil
+}
+
+func deleteClusterManagementAddOns() error {
+	addonNames := []string{"cluster-proxy", "managed-serviceaccount", "work-manager"}
+	for _, addon := range addonNames {
+		cma := addonv1alpha1.ClusterManagementAddOn{ObjectMeta: metav1.ObjectMeta{Name: addon}}
+		if err := r.Delete(context.TODO(), &cma); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func deployClusterManagementAddOns() error {
+	addonNames := []string{"cluster-proxy", "managed-serviceaccount", "work-manager"}
+	for _, addon := range addonNames {
+		cma := addonv1alpha1.ClusterManagementAddOn{
+			ObjectMeta: metav1.ObjectMeta{Name: addon},
+			Spec: addonv1alpha1.ClusterManagementAddOnSpec{
+				InstallStrategy: addonv1alpha1.InstallStrategy{Type: ""}},
+		}
+
+		if err := r.Create(context.TODO(), &cma); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -242,16 +275,17 @@ func Test_Reconciler_CreateAutoImportSecret(t *testing.T) {
 	}
 }
 
-func Test_Reconciler_CreateKlusterletConfig(t *testing.T) {
+func Test_Reconciler_CreateAddOnDeploymentConfig(t *testing.T) {
 	tests := []struct {
 		name string
 		nn   types.NamespacedName
 		want bool
 	}{
 		{
-			name: "should create KlusterletConfig object",
+			name: "should create AddOnDeploymentConfig object",
 			nn: types.NamespacedName{
-				Name: "foo",
+				Name:      "addon-ns-config",
+				Namespace: "test-namespace",
 			},
 			want: true,
 		},
@@ -259,10 +293,14 @@ func Test_Reconciler_CreateKlusterletConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kc := r.CreateKlusterletConfig(tt.nn)
+			os.Setenv("POD_NAMESPACE", tt.nn.Namespace)
+			defer func() {
+				os.Unsetenv("POD_NAMESPACE")
+			}()
 
-			if got := kc.GetName() != tt.nn.Name; got {
-				t.Errorf("CreateKlusterletConfig(tt.nn) = want %v, got %v", got, tt.want)
+			adc := r.CreateAddOnDeploymentConfig(tt.nn)
+			if got := adc.GetName() != tt.nn.Name && adc.GetNamespace() != tt.nn.Namespace; got {
+				t.Errorf("CreateAddOnDeploymentConfig(tt.nn) = want %v, got %v", got, tt.want)
 			}
 		})
 	}
@@ -308,11 +346,6 @@ func Test_Reconciler_CreateKlusterletAddonConfig(t *testing.T) {
 
 			if got := kac.Spec.CertPolicyControllerConfig.Enabled; !got {
 				t.Errorf("CreateKlusterletAddonConfig(tt.nn).CertPolicyControllerConfig.Enabled = want %v, got %v", got,
-					tt.want)
-			}
-
-			if got := kac.Spec.IAMPolicyControllerConfig.Enabled; !got {
-				t.Errorf("CreateKlusterletAddonConfig(tt.nn).IAMPolicyControllerConfig.Enabled = want %v, got %v", got,
 					tt.want)
 			}
 
@@ -366,6 +399,33 @@ func Test_Reconciler_CreateManagedCluster(t *testing.T) {
 	}
 }
 
+func Test_Reconciler_CreateManagedClusterSetBinding(t *testing.T) {
+	tests := []struct {
+		name string
+		nn   types.NamespacedName
+		want bool
+	}{
+		{
+			name: "should create ManagedClusterSetBinding object",
+			nn: types.NamespacedName{
+				Name:      "foo",
+				Namespace: "bar",
+			},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mcsb := r.CreateManagedClusterSetBinding(tt.nn)
+
+			if got := mcsb.GetName() != tt.nn.Name; got {
+				t.Errorf("CreateManagedClusterSetBinding(tt.nn) = want %v, got %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_Reconciler_CreateNamespaceForDiscoveredCluster(t *testing.T) {
 	tests := []struct {
 		name string
@@ -393,6 +453,37 @@ func Test_Reconciler_CreateNamespaceForDiscoveredCluster(t *testing.T) {
 
 			if got := ns.GetName() != tt.dc.Spec.DisplayName; got {
 				t.Errorf("CreateNamespaceForDiscoveredCluster(tt.dc) = want %v, got %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_Reconciler_CreatePlacement(t *testing.T) {
+	tests := []struct {
+		name string
+		nn   types.NamespacedName
+		want bool
+	}{
+		{
+			name: "should create Placement object",
+			nn: types.NamespacedName{
+				Name:      "default",
+				Namespace: "test-namespace",
+			},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			os.Setenv("POD_NAMESPACE", tt.nn.Namespace)
+			defer func() {
+				os.Unsetenv("POD_NAMESPACE")
+			}()
+
+			placement := r.CreatePlacement(tt.nn)
+			if got := placement.GetName() != tt.nn.Name && placement.GetNamespace() != tt.nn.Namespace; got {
+				t.Errorf("CreatePlacement(tt.nn) = want %v, got %v", got, tt.want)
 			}
 		})
 	}
@@ -548,10 +639,18 @@ func Test_Reconciler_EnsureCommonResources(t *testing.T) {
 				if err := r.Delete(context.TODO(), &tt.sec); err != nil {
 					t.Errorf("failed to delete Secret: %v", err)
 				}
+
+				if err := deleteClusterManagementAddOns(); err != nil {
+					t.Errorf("failed to delete ClusterManagementAddons: %v", err)
+				}
 			}()
 
 			if err := r.Create(context.TODO(), &tt.sec); err != nil {
 				t.Errorf("failed to create secret: %v", err)
+			}
+
+			if err := deployClusterManagementAddOns(); err != nil {
+				t.Errorf("failed to deploy clustermanagementaddons: %v", err)
 			}
 
 			if _, err := r.EnsureCommonResources(context.TODO(), &tt.dc, tt.isHCP); err != nil {
@@ -561,23 +660,17 @@ func Test_Reconciler_EnsureCommonResources(t *testing.T) {
 	}
 }
 
-func Test_Reconciler_EnsureKlusterletConfig(t *testing.T) {
+func Test_Reconciler_EnsureAddOnDeploymentConfig(t *testing.T) {
 	tests := []struct {
 		name string
-		dc   *discovery.DiscoveredCluster
+		nn   types.NamespacedName
 		want bool
 	}{
 		{
-			name: "should ensure KlusterletConfig created",
-			dc: &discovery.DiscoveredCluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "bar",
-				},
-				Spec: discovery.DiscoveredClusterSpec{
-					DisplayName: "foo",
-					Type:        "ROSA",
-				},
+			name: "should ensure AddOnDeploymentConfig created",
+			nn: types.NamespacedName{
+				Name:      "addon-ns-config",
+				Namespace: "test-namespace",
 			},
 			want: true,
 		},
@@ -586,20 +679,24 @@ func Test_Reconciler_EnsureKlusterletConfig(t *testing.T) {
 	registerScheme()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kc := &klusterletconfigv1alpha1.KlusterletConfig{}
+			adc := &addonv1alpha1.AddOnDeploymentConfig{}
 
+			os.Setenv("POD_NAMESPACE", tt.nn.Namespace)
 			defer func() {
-				if err := r.Delete(context.TODO(), kc); err != nil {
-					t.Errorf("failed to delete KlusterletConfig: %v", err)
+				os.Unsetenv("POD_NAMESPACE")
+
+				if err := r.Delete(context.TODO(), adc); err != nil {
+					t.Errorf("failed to delete AddOnDeploymentConfig: %v", err)
 				}
 			}()
 
-			if _, err := r.EnsureKlusterletConfig(context.TODO(), *tt.dc); err != nil {
-				t.Errorf("failed to create KlusterletConfig resource: %v", err)
+			if _, err := r.EnsureAddOnDeploymentConfig(context.TODO()); err != nil {
+				t.Errorf("failed to create AddOnDeploymentConfig resource: %v", err)
 			}
 
-			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.GetNamespace() + "-config"}, kc); err != nil {
-				t.Errorf("failed to get KlusterletConfig resource: %v", err)
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.nn.Name, Namespace: tt.nn.Namespace},
+				adc); err != nil {
+				t.Errorf("failed to get AddOnDeploymentConfig resource: %v", err)
 			}
 		})
 	}
@@ -716,6 +813,43 @@ func Test_Reconciler_EnsureManagedCluster(t *testing.T) {
 	}
 }
 
+func Test_Reconciler_EnsureManagedClusterSetBinding(t *testing.T) {
+	tests := []struct {
+		name string
+		nn   types.NamespacedName
+		want bool
+	}{
+		{
+			name: "should ensure ManagedClusterSetBinding created",
+			nn:   types.NamespacedName{Name: "default", Namespace: "test-namespace"},
+			want: true,
+		},
+	}
+
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mcsb := &clusterapiv1beta2.ManagedClusterSetBinding{}
+
+			os.Setenv("POD_NAMESPACE", tt.nn.Namespace)
+			defer func() {
+				os.Unsetenv("POD_NAMESPACE")
+				if err := r.Delete(context.TODO(), mcsb); err != nil {
+					t.Errorf("failed to delete ManagedClusterSetBinding: %v", err)
+				}
+			}()
+
+			if _, err := r.EnsureManagedClusterSetBinding(context.TODO()); err != nil {
+				t.Errorf("failed to create ManagedClusterSetBinding resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), tt.nn, mcsb); err != nil {
+				t.Errorf("failed to get ManagedClusterSetBinding resource: %v", err)
+			}
+		})
+	}
+}
+
 func Test_Reconciler_EnsureMultiClusterEngineHCP(t *testing.T) {
 	tests := []struct {
 		name string
@@ -745,17 +879,33 @@ func Test_Reconciler_EnsureMultiClusterEngineHCP(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kc := &klusterletconfigv1alpha1.KlusterletConfig{}
+			p := &clusterapiv1beta1.Placement{}
+			adc := &addonv1alpha1.AddOnDeploymentConfig{}
 			kac := &agentv1.KlusterletAddonConfig{}
 			mc := &clusterapiv1.ManagedCluster{}
+			mcsb := &clusterapiv1beta2.ManagedClusterSetBinding{}
 
+			os.Setenv("POD_NAMESPACE", "test-namespace")
 			defer func() {
-				if err := r.Delete(context.TODO(), mc); err != nil {
-					t.Errorf("failed to delete ManagedCluster: %v", err)
+				os.Unsetenv("POD_NAMESPACE")
+				if err := deleteClusterManagementAddOns(); err != nil {
+					t.Errorf("failed to delete ClusterManagementAddOns: %v", err)
 				}
 
-				if err := r.Delete(context.TODO(), kc); err != nil {
-					t.Errorf("failed to delete KlusterletConfig: %v", err)
+				if err := r.Delete(context.TODO(), mcsb); err != nil {
+					t.Errorf("failed to delete ManagedClusterSetBinding: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), p); err != nil {
+					t.Errorf("failed to delete Placement: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), adc); err != nil {
+					t.Errorf("failed to delete AddOnDeploymentConfig: %v", err)
+				}
+
+				if err := r.Delete(context.TODO(), mc); err != nil {
+					t.Errorf("failed to delete ManagedCluster: %v", err)
 				}
 
 				if err := r.Delete(context.TODO(), kac); err != nil {
@@ -763,22 +913,36 @@ func Test_Reconciler_EnsureMultiClusterEngineHCP(t *testing.T) {
 				}
 			}()
 
+			if err := deployClusterManagementAddOns(); err != nil {
+				t.Errorf("failed to create ClusterManagementAddOns: %v", err)
+			}
+
 			if _, err := r.EnsureMultiClusterEngineHCP(context.TODO(), tt.dc); err != nil {
 				t.Errorf("failed to ensure MCE-HCP resources created: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: "default",
+				Namespace: os.Getenv("POD_NAMESPACE")}, mcsb); err != nil {
+				t.Errorf("failed to get ManagedClusterSetBinding resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: "default",
+				Namespace: os.Getenv("POD_NAMESPACE")}, p); err != nil {
+				t.Errorf("failed to get Placement resource: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: "addon-ns-config",
+				Namespace: os.Getenv("POD_NAMESPACE")}, adc); err != nil {
+				t.Errorf("failed to get AddOnDeploymentConfig resource: %v", err)
 			}
 
 			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, mc); err != nil {
 				t.Errorf("failed to get MCE-HCP ManagedCluster resource: %v", err)
 			}
 
-			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.GetNamespace() + "-config"},
-				kc); err != nil {
-				t.Errorf("failed to get MCE-HCP KlusterletConfig resource: %v", err)
-			}
-
 			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName,
 				Namespace: tt.dc.Spec.DisplayName}, kac); err != nil {
-				t.Errorf("failed to get MCE-HCP KlusterletAddOnConfig resource: %v", err)
+				t.Errorf("failed to get KlusterletAddOnConfig resource: %v", err)
 			}
 		})
 	}
@@ -823,6 +987,47 @@ func Test_Reconciler_EnsureNamespaceForDiscoveredCluster(t *testing.T) {
 
 			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.dc.Spec.DisplayName}, ns); err != nil {
 				t.Errorf("failed to get Namespace for DiscoveredCluster: %v", err)
+			}
+		})
+	}
+}
+
+func Test_Reconciler_EnsurePlacement(t *testing.T) {
+	tests := []struct {
+		name string
+		nn   types.NamespacedName
+		want bool
+	}{
+		{
+			name: "should ensure placement created for ClusterManagementAddOn",
+			nn: types.NamespacedName{
+				Name:      "default",
+				Namespace: "test-namespace",
+			},
+			want: true,
+		},
+	}
+
+	registerScheme()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			placement := &clusterapiv1beta1.Placement{}
+
+			os.Setenv("POD_NAMESPACE", tt.nn.Namespace)
+			defer func() {
+				os.Unsetenv("POD_NAMESPACE")
+				if err := r.Delete(context.TODO(), placement); err != nil {
+					t.Errorf("failed to delete Placement: %v", err)
+				}
+			}()
+
+			if _, err := r.EnsurePlacement(context.TODO()); err != nil {
+				t.Errorf("failed to create Placement: %v", err)
+			}
+
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: tt.nn.Name, Namespace: tt.nn.Namespace},
+				placement); err != nil {
+				t.Errorf("failed to get Placement: %v", err)
 			}
 		})
 	}

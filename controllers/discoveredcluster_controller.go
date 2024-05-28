@@ -19,9 +19,9 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/pkg/errors"
-	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/common"
 	utils "github.com/stolostron/discovery/util"
@@ -33,7 +33,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	addonv1alpha1 "open-cluster-management.io/api/addon/v1alpha1"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
+	clusterapiv1beta1 "open-cluster-management.io/api/cluster/v1beta1"
+	clusterapiv1beta2 "open-cluster-management.io/api/cluster/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -53,6 +57,7 @@ type DiscoveredClusterReconciler struct {
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch
 // +kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=validatingwebhookconfigurations,verbs=create;get;list;update;watch
 // +kubebuilder:rbac:groups=config.open-cluster-management.io,resources=klusterletconfigs,verbs=create;get;list;patch;update;
+// +kubebuilder:rbac:groups=addon.open-cluster-management.io,resources=addondeploymentconfigs;clustermanagementaddons,verbs=create;get;list;update;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -119,6 +124,24 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 }
 
 /*
+CreateAddOnDeploymentConfig creates a AddOnDeploymentConfig object with the specified NamespacedName.
+It sets the basic configuration for the AddOnDeploymentConfig, including metadata and spec fields.
+It also initializes the AgentInstallNamespace with a default value.
+*/
+func (r *DiscoveredClusterReconciler) CreateAddOnDeploymentConfig(nn types.NamespacedName,
+) *addonv1alpha1.AddOnDeploymentConfig {
+	return &addonv1alpha1.AddOnDeploymentConfig{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      nn.Name,
+			Namespace: nn.Namespace,
+		},
+		Spec: addonv1alpha1.AddOnDeploymentConfigSpec{
+			AgentInstallNamespace: "open-cluster-management-discovered-hcp",
+		},
+	}
+}
+
+/*
 CreateAutoImportSecret creates an auto-import secret for the given NamespacedName and DiscoveryConfig.
 It constructs a Secret object with the specified name, namespace, and credential from the DiscoveryConfig.
 Other fields like api_url, token_url, and cluster_id are left empty.
@@ -137,21 +160,6 @@ func (r *DiscoveredClusterReconciler) CreateAutoImportSecret(nn types.Namespaced
 			"cluster_id": clusterID,
 		},
 		Type: "auto-import/rosa",
-	}
-}
-
-/*
-createKlusterletConfig creates a KlusterletAddonConfig object with the specified NamespacedName.
-It sets the basic configuration for the KlusterletAddonConfig, including metadata and spec fields.
-It also initializes the ClusterLabels with default values and enables various addon configurations.
-*/
-func (r *DiscoveredClusterReconciler) CreateKlusterletConfig(nn types.NamespacedName,
-) *klusterletconfigv1alpha1.KlusterletConfig {
-	return &klusterletconfigv1alpha1.KlusterletConfig{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: nn.Name,
-		},
-		Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{},
 	}
 }
 
@@ -181,9 +189,6 @@ func (r *DiscoveredClusterReconciler) CreateKlusterletAddonConfig(nn types.Names
 			CertPolicyControllerConfig: agentv1.KlusterletAddonAgentConfigSpec{
 				Enabled: true,
 			},
-			IAMPolicyControllerConfig: agentv1.KlusterletAddonAgentConfigSpec{
-				Enabled: true,
-			},
 			PolicyController: agentv1.KlusterletAddonAgentConfigSpec{
 				Enabled: true,
 			},
@@ -201,13 +206,20 @@ annotations for the ManagedCluster. It also adds a finalizer for cleanup.
 func (r *DiscoveredClusterReconciler) CreateManagedCluster(nn types.NamespacedName,
 	clusterType string) *clusterapiv1.ManagedCluster {
 	annotations := make(map[string]string)
+	labels := map[string]string{
+		utils.LabelName:   nn.Name,
+		utils.LabelCloud:  discovery.AutoDetectLabels,
+		utils.LabelVendor: discovery.AutoDetectLabels,
+	}
 
 	switch clusterType {
 	case "MultiClusterEngineHCP":
 		annotations[utils.AnnotationHostingClusterName] = nn.Namespace
 		annotations[utils.AnnotationKlusterletDeployMode] = "Hosted"
 		annotations[utils.AnnotationCreatedVia] = "hypershift"
-		annotations[utils.AnnotationKlusterletConfig] = nn.Namespace + "-config"
+
+		// Set specific label for MultiClusterEngineHCP
+		labels[utils.LabelHypershiftDiscoveryType] = "MultiClusterEngineHCP"
 
 	default:
 		annotations[utils.AnnotationCreatedVia] = "discovery"
@@ -215,17 +227,29 @@ func (r *DiscoveredClusterReconciler) CreateManagedCluster(nn types.NamespacedNa
 
 	return &clusterapiv1.ManagedCluster{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: nn.Name,
-			Labels: map[string]string{
-				"name":   nn.Name,
-				"cloud":  discovery.AutoDetectLabels,
-				"vendor": discovery.AutoDetectLabels,
-			},
+			Name:        nn.Name,
+			Labels:      labels,
 			Annotations: annotations,
 		},
 		Spec: clusterapiv1.ManagedClusterSpec{
 			HubAcceptsClient:     true,
 			LeaseDurationSeconds: 60,
+		},
+	}
+}
+
+/*
+CreateManagedClusterSetBinding ...
+*/
+func (r *DiscoveredClusterReconciler) CreateManagedClusterSetBinding(nn types.NamespacedName,
+) *clusterapiv1beta2.ManagedClusterSetBinding {
+	return &clusterapiv1beta2.ManagedClusterSetBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      nn.Name,
+			Namespace: nn.Namespace,
+		},
+		Spec: clusterapiv1beta2.ManagedClusterSetBindingSpec{
+			ClusterSet: "default",
 		},
 	}
 }
@@ -249,6 +273,70 @@ func (r *DiscoveredClusterReconciler) CreateNamespaceForDiscoveredCluster(dc dis
 			},
 		},
 	}
+}
+
+/*
+CreatePlacement creates a Placement object for the ClusterManagementAddOn.
+*/
+func (r *DiscoveredClusterReconciler) CreatePlacement(nn types.NamespacedName) *clusterapiv1beta1.Placement {
+	return &clusterapiv1beta1.Placement{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      nn.Name,
+			Namespace: nn.Namespace,
+		},
+		Spec: clusterapiv1beta1.PlacementSpec{
+			DecisionStrategy: clusterapiv1beta1.DecisionStrategy{
+				GroupStrategy: clusterapiv1beta1.GroupStrategy{
+					ClustersPerDecisionGroup: intstr.FromString("100%"),
+				},
+			},
+			Predicates: []clusterapiv1beta1.ClusterPredicate{
+				{
+					RequiredClusterSelector: clusterapiv1beta1.ClusterSelector{
+						LabelSelector: metav1.LabelSelector{
+							MatchExpressions: []metav1.LabelSelectorRequirement{
+								{
+									Key:      utils.LabelHypershiftDiscoveryType,
+									Operator: metav1.LabelSelectorOpIn,
+									Values:   []string{"MultiClusterEngineHCP"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+/*
+EnsureAddOnDeploymentConfig ensures the existence of a AddOnDeploymentConfig resource for the given
+DiscoveredCluster. It checks if a AddOnDeploymentConfig with the specified name exists.
+If not found, it creates a new AddOnDeploymentConfig with the name and default configurations.
+If creation fails, it logs an error and returns with a requeue signal.
+If the AddOnDeploymentConfig already exists or if an error occurs during retrieval, it logs an error and returns
+with a requeue signal.
+*/
+func (r *DiscoveredClusterReconciler) EnsureAddOnDeploymentConfig(ctx context.Context) (
+	ctrl.Result, error) {
+	nn := types.NamespacedName{Name: "addon-ns-config", Namespace: os.Getenv("POD_NAMESPACE")}
+	existingADC := addonv1alpha1.AddOnDeploymentConfig{}
+
+	if err := r.Get(ctx, nn, &existingADC); apierrors.IsNotFound(err) {
+		logf.Info("Creating AddOnDeploymentConfig", "Name", nn.Name, "Namespace", nn.Namespace)
+
+		adc := r.CreateAddOnDeploymentConfig(nn)
+		if err := r.Create(ctx, adc); err != nil {
+			logf.Error(err, "failed to create AddOnDeploymentConfig", "Name", nn.Name)
+			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
+		}
+
+	} else if err != nil {
+		logf.Error(err, "failed to get AddOnDeploymentConfig", "Name", nn.Name)
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
+	}
+
+	return ctrl.Result{}, nil
 }
 
 /*
@@ -303,25 +391,36 @@ EnsureCommonResources ...
 */
 func (r *DiscoveredClusterReconciler) EnsureCommonResources(ctx context.Context,
 	dc *discovery.DiscoveredCluster, isHCP bool) (ctrl.Result, error) {
-	if res, err := r.EnsureManagedCluster(ctx, *dc); err != nil {
-		logf.Error(err, "failed to ensure ManagedCluster created", "Name", dc.Spec.DisplayName)
-		return res, err
-	}
-
 	if isHCP {
-		// Ensure that the KlusterletConfig CRD exists.
-		crdName := "klusterletconfigs.config.open-cluster-management.io"
-		if res, err := r.EnsureCRDExist(ctx, crdName); err != nil {
-			if !apierrors.IsNotFound(err) {
-				logf.Error(err, "failed to ensure custom resource definition exist", "Name", crdName)
-				return res, err
-			}
-		} else {
-			if res, err := r.EnsureKlusterletConfig(ctx, *dc); err != nil {
-				logf.Error(err, "failed to ensure KlusterletConfig created", "Name", dc.GetNamespace()+"-config")
+		if res, err := r.EnsureManagedClusterSetBinding(ctx); err != nil {
+			logf.Error(err, "failed to ensure ManagedClusterBindingSet created", "Name", "default",
+				"Namespace", os.Getenv("POD_NAMESPACE"))
+			return res, err
+		}
+
+		if res, err := r.EnsurePlacement(ctx); err != nil {
+			logf.Error(err, "failed to ensure Placement created", "Name", "default",
+				"Namespace", os.Getenv("POD_NAMESPACE"))
+			return res, err
+		}
+
+		if res, err := r.EnsureAddOnDeploymentConfig(ctx); err != nil {
+			logf.Error(err, "failed to ensure AddOnDeploymentConfig created", "Name", "addon-ns-config",
+				"Namespace", os.Getenv("POD_NAMESPACE"))
+			return res, err
+		}
+
+		addonNames := []string{"cluster-proxy", "managed-serviceaccount", "work-manager"}
+		for _, addon := range addonNames {
+			if res, err := r.AddPlacementToClusterManagementAddOn(ctx, addon); err != nil {
 				return res, err
 			}
 		}
+	}
+
+	if res, err := r.EnsureManagedCluster(ctx, *dc); err != nil {
+		logf.Error(err, "failed to ensure ManagedCluster created", "Name", dc.Spec.DisplayName)
+		return res, err
 	}
 
 	// Ensure that the KlusterletAddOnConfig CRD exists. In standalone MCE mode, the CRD is not deployed.
@@ -355,10 +454,12 @@ func (r *DiscoveredClusterReconciler) EnsureCommonResources(ctx context.Context,
 	return ctrl.Result{}, nil
 }
 
-// EnsureCRDExist checks if a Custom Resource Definition (CRD) with the specified name exists in the cluster.
-// If the CRD exists, it returns indicating that the reconciliation should continue without requeueing.
-// If the CRD doesn't exist, it logs a message indicating that the CRD was not found and returns.
-// If an error occurs while getting the CRD (other than IsNotFound), it logs an error message and returns an error.
+/*
+EnsureCRDExist checks if a Custom Resource Definition (CRD) with the specified name exists in the cluster.
+If the CRD exists, it returns indicating that the reconciliation should continue without requeueing.
+If the CRD doesn't exist, it logs a message indicating that the CRD was not found and returns.
+If an error occurs while getting the CRD (other than IsNotFound), it logs an error message and returns an error.
+*/
 func (r *DiscoveredClusterReconciler) EnsureCRDExist(ctx context.Context, crdName string) (ctrl.Result, error) {
 	crd := &apiextv1.CustomResourceDefinition{}
 	nn := types.NamespacedName{Name: crdName}
@@ -393,42 +494,15 @@ func (r *DiscoveredClusterReconciler) EnsureDiscoveredClusterCredentialExists(
 	return ctrl.Result{}, nil
 }
 
-// EnsureKlusterletConfig ensures the existence of a KlusterletConfig resource for the given
-// DiscoveredCluster. It checks if a KlusterletConfig with the specified display name exists.
-// If not found, it creates a new KlusterletConfig with the display name and default configurations.
-// It sets a controller reference to the DiscoveredCluster for ownership management.
-// If creation fails, it logs an error and returns with a requeue signal.
-// If the KlusterletConfig already exists or if an error occurs during retrieval, it logs an error and returns
-// with a requeue signal.
-func (r *DiscoveredClusterReconciler) EnsureKlusterletConfig(ctx context.Context, dc discovery.DiscoveredCluster) (
-	ctrl.Result, error) {
-	nn := types.NamespacedName{Name: dc.GetNamespace() + "-config"}
-	existingKC := klusterletconfigv1alpha1.KlusterletConfig{}
-
-	if err := r.Get(ctx, nn, &existingKC); apierrors.IsNotFound(err) {
-		logf.Info("Creating KlusterletConfig", "Name", nn.Name)
-
-		kc := r.CreateKlusterletConfig(nn)
-		if err := r.Create(ctx, kc); err != nil {
-			logf.Error(err, "failed to create KlusterConfig", "Name", nn.Name)
-			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
-		}
-
-	} else if err != nil {
-		logf.Error(err, "failed to get KlusterConfig", "Name", nn.Name)
-		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
-	}
-
-	return ctrl.Result{}, nil
-}
-
-// EnsureKlusterletAddonConfig ensures the existence of a KlusterletAddonConfig resource for the given
-// DiscoveredCluster. It checks if a KlusterletAddonConfig with the specified display name exists.
-// If not found, it creates a new KlusterletAddonConfig with the display name and default configurations.
-// It sets a controller reference to the DiscoveredCluster for ownership management.
-// If creation fails, it logs an error and returns with a requeue signal.
-// If the KlusterletAddonConfig already exists or if an error occurs during retrieval, it logs an error and returns
-// with a requeue signal.
+/*
+EnsureKlusterletAddonConfig ensures the existence of a KlusterletAddonConfig resource for the given
+DiscoveredCluster. It checks if a KlusterletAddonConfig with the specified display name exists.
+If not found, it creates a new KlusterletAddonConfig with the display name and default configurations.
+It sets a controller reference to the DiscoveredCluster for ownership management.
+If creation fails, it logs an error and returns with a requeue signal.
+If the KlusterletAddonConfig already exists or if an error occurs during retrieval, it logs an error and returns
+with a requeue signal.
+*/
 func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Context, dc discovery.DiscoveredCluster) (
 	ctrl.Result, error) {
 	nn := types.NamespacedName{Name: dc.Spec.DisplayName, Namespace: dc.Spec.DisplayName}
@@ -451,13 +525,15 @@ func (r *DiscoveredClusterReconciler) EnsureKlusterletAddonConfig(ctx context.Co
 	return ctrl.Result{}, nil
 }
 
-// EnsureManagedCluster ensures the existence of a ManagedCluster resource for the given DiscoveredCluster.
-// It checks if a ManagedCluster with the specified display name exists.
-// If not found, it creates a new ManagedCluster with the display name and default configurations.
-// It sets a controller reference to the DiscoveredCluster for ownership management.
-// If creation fails, it logs an error and returns with a requeue signal.
-// If the ManagedCluster already exists or if an error occurs during retrieval, it logs an error and returns with a
-// requeue signal.
+/*
+EnsureManagedCluster ensures the existence of a ManagedCluster resource for the given DiscoveredCluster.
+It checks if a ManagedCluster with the specified display name exists.
+If not found, it creates a new ManagedCluster with the display name and default configurations.
+It sets a controller reference to the DiscoveredCluster for ownership management.
+If creation fails, it logs an error and returns with a requeue signal.
+If the ManagedCluster already exists or if an error occurs during retrieval, it logs an error and returns with a
+requeue signal.
+*/
 func (r *DiscoveredClusterReconciler) EnsureManagedCluster(ctx context.Context, dc discovery.DiscoveredCluster) (
 	ctrl.Result, error) {
 	// ManagedCluster resources are cluster scoped resources; therefore we do not need to specify the namespace.
@@ -482,12 +558,51 @@ func (r *DiscoveredClusterReconciler) EnsureManagedCluster(ctx context.Context, 
 	return ctrl.Result{}, nil
 }
 
-// EnsureNamespaceForDiscoveredCluster ensures the existence of a Namespace for the given DiscoveredCluster.
-// It checks if a Namespace with the specified display name exists.
-// If not found, it creates a new Namespace with the display name.
-// It sets a controller reference to the DiscoveredCluster for ownership management.
-// If creation fails, it returns with a requeue signal.
-// If an error occurs during retrieval or creation, it logs an error and returns with a requeue signal.
+/*
+EnsureManagedClusterSetBinding ensures the existence of a ManagedClusterSetBinding.
+It checks if a ManagedClusterSetBinding with the specified display name exists.
+If not found, it creates a new ManagedClusterSetBinding with the display name and default configurations.
+If creation fails, it logs an error and returns with a requeue signal.
+If the ManagedClusterSetBinding already exists or if an error occurs during retrieval, it logs an error and returns
+with a requeue signal.
+*/
+func (r *DiscoveredClusterReconciler) EnsureManagedClusterSetBinding(ctx context.Context) (ctrl.Result, error) {
+	nn := types.NamespacedName{Name: "default", Namespace: os.Getenv("POD_NAMESPACE")}
+	existingMCSB := &clusterapiv1beta2.ManagedClusterSetBinding{}
+
+	if err := r.Get(ctx, nn, existingMCSB); apierrors.IsNotFound(err) {
+		logf.Info("Creating ManagedClusterSetBinding", "Name", nn.Name, "Namespace", nn.Namespace)
+
+		mc := r.CreateManagedClusterSetBinding(nn)
+		if err := r.Create(ctx, mc); err != nil {
+			logf.Error(err, "failed to create ManagedClusterSetBinding", "Name", nn.Name, "Namespace", nn.Namespace)
+			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
+		}
+
+	} else if err != nil {
+		logf.Error(err, "failed to get ManagedClusterSetBinding", "Name", nn.Name, "Namespace", nn.Namespace)
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+/*
+EnsureMultiClusterEngineHCP ...
+*/
+func (r *DiscoveredClusterReconciler) EnsureMultiClusterEngineHCP(ctx context.Context, dc *discovery.DiscoveredCluster,
+) (ctrl.Result, error) {
+	return r.EnsureCommonResources(ctx, dc, true)
+}
+
+/*
+EnsureNamespaceForDiscoveredCluster ensures the existence of a Namespace for the given DiscoveredCluster.
+It checks if a Namespace with the specified display name exists.
+If not found, it creates a new Namespace with the display name.
+It sets a controller reference to the DiscoveredCluster for ownership management.
+If creation fails, it returns with a requeue signal.
+If an error occurs during retrieval or creation, it logs an error and returns with a requeue signal.
+*/
 func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx context.Context,
 	dc discovery.DiscoveredCluster) (ctrl.Result, error) {
 	nn := types.NamespacedName{Name: dc.Spec.DisplayName}
@@ -510,6 +625,33 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 	return ctrl.Result{}, nil
 }
 
+/*
+EnsurePlacement ...
+*/
+func (r *DiscoveredClusterReconciler) EnsurePlacement(ctx context.Context) (ctrl.Result, error) {
+	nn := types.NamespacedName{Name: "default", Namespace: os.Getenv("POD_NAMESPACE")}
+	existingPlacement := &clusterapiv1beta1.Placement{}
+
+	if err := r.Get(ctx, nn, existingPlacement); apierrors.IsNotFound(err) {
+		logf.Info("Creating Placement", "Name", nn.Name, "Namespace", nn.Namespace)
+
+		placement := r.CreatePlacement(nn)
+		if err := r.Create(ctx, placement); err != nil {
+			logf.Error(err, "failed to create Placement", "Name", nn.Name, "Namespace", nn.Namespace)
+			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
+		}
+
+	} else if err != nil {
+		logf.Error(err, "failed to get Placement", "Name", nn.Name, "Namespace", nn.Namespace)
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+/*
+EnsureROSA ...
+*/
 func (r *DiscoveredClusterReconciler) EnsureROSA(ctx context.Context, dc *discovery.DiscoveredCluster) (
 	ctrl.Result, error) {
 	if res, err := r.EnsureNamespaceForDiscoveredCluster(ctx, *dc); err != nil {
@@ -520,9 +662,60 @@ func (r *DiscoveredClusterReconciler) EnsureROSA(ctx context.Context, dc *discov
 	return r.EnsureCommonResources(ctx, dc, false)
 }
 
-func (r *DiscoveredClusterReconciler) EnsureMultiClusterEngineHCP(ctx context.Context, dc *discovery.DiscoveredCluster,
-) (ctrl.Result, error) {
-	return r.EnsureCommonResources(ctx, dc, true)
+/*
+EnsurePlacementAddedToClusterManagementAddOn
+*/
+func (r *DiscoveredClusterReconciler) AddPlacementToClusterManagementAddOn(ctx context.Context, name string) (
+	ctrl.Result, error) {
+	cma := &addonv1alpha1.ClusterManagementAddOn{}
+
+	if err := r.Get(ctx, types.NamespacedName{Name: name}, cma); err != nil {
+		logf.Error(err, "failed to get clusterManagementAddOn", "Name", name)
+		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
+	}
+
+	if cma.Spec.InstallStrategy.Type != "Placements" {
+		cma.Spec.InstallStrategy.Type = "Placements"
+	}
+
+	placements := cma.Spec.InstallStrategy.Placements
+	placementAvailable := false
+
+	for _, p := range placements {
+		if p.Name == "default" && p.Namespace == os.Getenv("POD_NAMESPACE") {
+			placementAvailable = true
+			break
+		}
+	}
+
+	if !placementAvailable {
+		placement := addonv1alpha1.PlacementStrategy{
+			PlacementRef: addonv1alpha1.PlacementRef{
+				Name:      "default",
+				Namespace: os.Getenv("POD_NAMESPACE"),
+			},
+			Configs: []addonv1alpha1.AddOnConfig{
+				{
+					ConfigReferent: addonv1alpha1.ConfigReferent{
+						Name:      "addon-ns-config",
+						Namespace: os.Getenv("POD_NAMESPACE"),
+					},
+					ConfigGroupResource: addonv1alpha1.ConfigGroupResource{
+						Group:    "addon.open-cluster-management.io",
+						Resource: "addondeploymentconfigs",
+					},
+				},
+			},
+		}
+		cma.Spec.InstallStrategy.Placements = append(cma.Spec.InstallStrategy.Placements, placement)
+
+		if err := r.Update(ctx, cma); err != nil {
+			logf.Error(err, "failed to patch ClusterManagementAddOn", "Name", cma.GetName())
+			return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
+		}
+	}
+
+	return ctrl.Result{}, nil
 }
 
 // SetupWithManager ...

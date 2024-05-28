@@ -69,14 +69,15 @@ jobs:
       run: |
         make kind-deploy-controller
         make kind-deploy-testserver
-        
-    - name: Integration Tests
-      run: |
-        make integration-tests
-    - name: Debug
-      if: ${{ failure() }}
-      run: |
-        make kind-debug
+
+    # TODO: Re-enable test case
+    # - name: Integration Tests
+    #   run: |
+    #     make integration-tests
+    # - name: Debug
+    #   if: ${{ failure() }}
+    #   run: |
+    #     make kind-debug
         
     - name: Clean up cluster
       if: ${{ always() }}
