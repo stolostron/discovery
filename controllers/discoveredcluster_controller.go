@@ -249,7 +249,7 @@ func (r *DiscoveredClusterReconciler) CreateManagedClusterSetBinding(nn types.Na
 			Namespace: nn.Namespace,
 		},
 		Spec: clusterapiv1beta2.ManagedClusterSetBindingSpec{
-			ClusterSet: "default",
+			ClusterSet: common.DefaultName,
 		},
 	}
 }
@@ -319,7 +319,7 @@ with a requeue signal.
 */
 func (r *DiscoveredClusterReconciler) EnsureAddOnDeploymentConfig(ctx context.Context) (
 	ctrl.Result, error) {
-	nn := types.NamespacedName{Name: "addon-ns-config", Namespace: os.Getenv("POD_NAMESPACE")}
+	nn := types.NamespacedName{Name: common.AddOnDeploymentConfigName, Namespace: os.Getenv("POD_NAMESPACE")}
 	existingADC := addonv1alpha1.AddOnDeploymentConfig{}
 
 	if err := r.Get(ctx, nn, &existingADC); apierrors.IsNotFound(err) {
@@ -393,19 +393,19 @@ func (r *DiscoveredClusterReconciler) EnsureCommonResources(ctx context.Context,
 	dc *discovery.DiscoveredCluster, isHCP bool) (ctrl.Result, error) {
 	if isHCP {
 		if res, err := r.EnsureManagedClusterSetBinding(ctx); err != nil {
-			logf.Error(err, "failed to ensure ManagedClusterBindingSet created", "Name", "default",
+			logf.Error(err, "failed to ensure ManagedClusterBindingSet created", "Name", common.DefaultName,
 				"Namespace", os.Getenv("POD_NAMESPACE"))
 			return res, err
 		}
 
 		if res, err := r.EnsurePlacement(ctx); err != nil {
-			logf.Error(err, "failed to ensure Placement created", "Name", "default",
+			logf.Error(err, "failed to ensure Placement created", "Name", common.DefaultName,
 				"Namespace", os.Getenv("POD_NAMESPACE"))
 			return res, err
 		}
 
 		if res, err := r.EnsureAddOnDeploymentConfig(ctx); err != nil {
-			logf.Error(err, "failed to ensure AddOnDeploymentConfig created", "Name", "addon-ns-config",
+			logf.Error(err, "failed to ensure AddOnDeploymentConfig created", "Name", common.AddOnDeploymentConfigName,
 				"Namespace", os.Getenv("POD_NAMESPACE"))
 			return res, err
 		}
@@ -567,7 +567,7 @@ If the ManagedClusterSetBinding already exists or if an error occurs during retr
 with a requeue signal.
 */
 func (r *DiscoveredClusterReconciler) EnsureManagedClusterSetBinding(ctx context.Context) (ctrl.Result, error) {
-	nn := types.NamespacedName{Name: "default", Namespace: os.Getenv("POD_NAMESPACE")}
+	nn := types.NamespacedName{Name: common.DefaultName, Namespace: os.Getenv("POD_NAMESPACE")}
 	existingMCSB := &clusterapiv1beta2.ManagedClusterSetBinding{}
 
 	if err := r.Get(ctx, nn, existingMCSB); apierrors.IsNotFound(err) {
@@ -629,7 +629,7 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 EnsurePlacement ...
 */
 func (r *DiscoveredClusterReconciler) EnsurePlacement(ctx context.Context) (ctrl.Result, error) {
-	nn := types.NamespacedName{Name: "default", Namespace: os.Getenv("POD_NAMESPACE")}
+	nn := types.NamespacedName{Name: common.DefaultName, Namespace: os.Getenv("POD_NAMESPACE")}
 	existingPlacement := &clusterapiv1beta1.Placement{}
 
 	if err := r.Get(ctx, nn, existingPlacement); apierrors.IsNotFound(err) {
@@ -682,7 +682,7 @@ func (r *DiscoveredClusterReconciler) AddPlacementToClusterManagementAddOn(ctx c
 	placementAvailable := false
 
 	for _, p := range placements {
-		if p.Name == "default" && p.Namespace == os.Getenv("POD_NAMESPACE") {
+		if p.Name == common.DefaultName && p.Namespace == os.Getenv("POD_NAMESPACE") {
 			placementAvailable = true
 			break
 		}
@@ -691,13 +691,13 @@ func (r *DiscoveredClusterReconciler) AddPlacementToClusterManagementAddOn(ctx c
 	if !placementAvailable {
 		placement := addonv1alpha1.PlacementStrategy{
 			PlacementRef: addonv1alpha1.PlacementRef{
-				Name:      "default",
+				Name:      common.DefaultName,
 				Namespace: os.Getenv("POD_NAMESPACE"),
 			},
 			Configs: []addonv1alpha1.AddOnConfig{
 				{
 					ConfigReferent: addonv1alpha1.ConfigReferent{
-						Name:      "addon-ns-config",
+						Name:      common.AddOnDeploymentConfigName,
 						Namespace: os.Getenv("POD_NAMESPACE"),
 					},
 					ConfigGroupResource: addonv1alpha1.ConfigGroupResource{

@@ -16,6 +16,11 @@ limitations under the License.
 
 package common
 
+const (
+	AddOnDeploymentConfigName = "addon-ns-config"
+	DefaultName               = "default"
+)
+
 // IsSupportedClusterType checks if the cluster type is supported for the import
 func IsSupportedClusterType(clusterType string) bool {
 	supportedTypes := map[string]bool{
