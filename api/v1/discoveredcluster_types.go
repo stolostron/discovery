@@ -44,33 +44,93 @@ const (
 
 // DiscoveredClusterSpec defines the desired state of DiscoveredCluster
 type DiscoveredClusterSpec struct {
-	ActivityTimestamp      *metav1.Time           `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
-	APIURL                 string                 `json:"apiUrl" yaml:"apiUrl"`
-	CloudProvider          string                 `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
-	Console                string                 `json:"console,omitempty" yaml:"console,omitempty"`
-	CreationTimestamp      *metav1.Time           `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
-	Credential             corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
-	DisplayName            string                 `json:"displayName" yaml:"displayName"`
-	ImportAsManagedCluster bool                   `json:"importAsManagedCluster,omitempty" yaml:"importAsManagedCluster,omitempty"`
-	IsManagedCluster       bool                   `json:"isManagedCluster" yaml:"isManagedCluster"`
-	Name                   string                 `json:"name" yaml:"name"`
-	OCPClusterID           string                 `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
-	OpenshiftVersion       string                 `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
-	Owner                  string                 `json:"owner,omitempty" yaml:"owner,omitempty"`
-	RHOCMClusterID         string                 `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
-	Region                 string                 `json:"region,omitempty" yaml:"region,omitempty"`
-	Status                 string                 `json:"status,omitempty" yaml:"status,omitempty"`
-	Type                   string                 `json:"type" yaml:"type"`
+	// ActivityTimestamp ...
+	ActivityTimestamp *metav1.Time `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
+
+	// APIURL ...
+	APIURL string `json:"apiUrl" yaml:"apiUrl"`
+
+	// CloudProvider ...
+	CloudProvider string `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
+
+	// Console ...
+	Console string `json:"console,omitempty" yaml:"console,omitempty"`
+
+	// CreationTimestamp ...
+	CreationTimestamp *metav1.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
+
+	// Credential ...
+	Credential corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
+
+	// DisplayName ...
+	DisplayName string `json:"displayName" yaml:"displayName"`
+
+	// ImportAsManagedCluster ...
+	// +kubebuilder:default:=false
+	ImportAsManagedCluster bool `json:"importAsManagedCluster,omitempty" yaml:"importAsManagedCluster,omitempty"`
+
+	// IsManagedCluster ...
+	IsManagedCluster bool `json:"isManagedCluster" yaml:"isManagedCluster"`
+
+	// Name ...
+	Name string `json:"name" yaml:"name"`
+
+	// OCPClusterID ...
+	OCPClusterID string `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
+
+	// OpenshiftVersion ...
+	OpenshiftVersion string `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
+
+	// Owner ...
+	Owner string `json:"owner,omitempty" yaml:"owner,omitempty"`
+
+	// RHOCMClusterID ...
+	RHOCMClusterID string `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
+
+	// Region ...
+	Region string `json:"region,omitempty" yaml:"region,omitempty"`
+
+	// Status ...
+	Status string `json:"status,omitempty" yaml:"status,omitempty"`
+
+	// Type ...
+	Type string `json:"type" yaml:"type"`
 }
+
+type DiscoveredClusterCondition struct {
+	// Type is the type of the discovered cluster condition.
+	// +required
+	Type DiscoveredClusterConditionType `json:"type,omitempty"`
+
+	// Status is the status of the condition. One of True, False, Unknown.
+	// +required
+	Status metav1.ConditionStatus `json:"status,omitempty"`
+
+	// The last time this condition was updated.
+	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
+
+	// LastTransitionTime is the last time the condition changed from one status to another.
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+}
+
+type DiscoveredClusterConditionType string
+
+// These are valid conditions of the multiclusterengine.
+const (
+	DiscoveredClusterActive   DiscoveredClusterConditionType = "Available"
+	DiscoveredClusterReserved DiscoveredClusterConditionType = "Reserved"
+	DiscoveredClusterStale    DiscoveredClusterConditionType = "Stale"
+)
 
 // DiscoveredClusterStatus defines the observed state of DiscoveredCluster
 type DiscoveredClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Conditions []DiscoveredClusterCondition `json:"conditions,omitempty"`
 }
 
 //+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 
 // DiscoveredCluster is the Schema for the discoveredclusters API

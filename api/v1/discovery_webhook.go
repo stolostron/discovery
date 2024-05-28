@@ -107,7 +107,7 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 	discoveredclusterLog.Info("validate create", "Name", r.Name, "Type", r.Spec.Type)
 
 	// Validate resource
-	if r.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
+	if !IsSupportedClusterType(r.Spec.Type) && r.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot create DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
 				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
@@ -125,7 +125,7 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 
 	// Validate resource
 	oldDiscoveredCluster := old.(*DiscoveredCluster)
-	if oldDiscoveredCluster.Spec.Type != "ROSA" && r.Spec.ImportAsManagedCluster {
+	if !IsSupportedClusterType(oldDiscoveredCluster.Spec.Type) && r.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
 				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
@@ -141,4 +141,14 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 func (r *DiscoveredCluster) ValidateDelete() (admission.Warnings, error) {
 	discoveredclusterLog.Info("validate delete", "Name", r.Name, "Type", r.Spec.Type)
 	return nil, nil
+}
+
+// IsSupportedClusterType returns true if the cluster type is supported by the registry
+func IsSupportedClusterType(clusterType string) bool {
+	supportedTypes := map[string]bool{
+		"MultiClusterEngineHCP": true,
+		"ROSA":                  true,
+	}
+
+	return supportedTypes[clusterType]
 }
