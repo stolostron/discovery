@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_1.21 AS plugin-builder
+FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_1.21 AS plugin-builder
 
 WORKDIR /workspace
 
@@ -14,12 +14,16 @@ RUN go mod download
 # Copy the go source
 COPY . .
 
+# Tidy up the go.mod file and vendor dependencies
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go mod tidy
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go mod vendor
+
 # Build
-RUN go build -a -o manager main.go
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -a -o manager main.go
 
 # Use ubi-minimal as minimal base image to package the manager binary
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 WORKDIR /
-COPY --from=builder /workspace/manager .
+COPY --from=plugin-builder /workspace/manager .
 
 ENTRYPOINT ["/manager"]
