@@ -14,7 +14,7 @@ metadata:
     appstudio.openshift.io/component: discovery-operator
     pipelines.appstudio.openshift.io/type: build
   name: discovery-operator-on-pull-request
-  namespace: red-hat-acm-tenant
+  namespace: crt-redhat-acm-tenant
 spec:
   params:
     - name: dockerfile
