@@ -19,6 +19,7 @@ package v1
 
 import (
 	"fmt"
+	"regexp"
 
 	admissionregistration "k8s.io/api/admissionregistration/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -116,6 +117,15 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 		return nil, err
 	}
 
+	if !IsStringValid(r.Spec.DisplayName) && r.Spec.ImportAsManagedCluster {
+		err := fmt.Errorf(
+			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters with an invalid display name '%s'. "+
+				"Display name must consist of lowercase alphanumeric characters, '-' or '.'", r.Name, r.Spec.DisplayName)
+
+		discoveredclusterLog.Error(err, "validation failed")
+		return nil, err
+	}
+
 	return nil, nil
 }
 
@@ -129,6 +139,15 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 		err := fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
 				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
+
+		discoveredclusterLog.Error(err, "validation failed")
+		return nil, err
+	}
+
+	if !IsStringValid(r.Spec.DisplayName) && r.Spec.ImportAsManagedCluster {
+		err := fmt.Errorf(
+			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters with an invalid display name '%s'. "+
+				"Display name must consist of lowercase alphanumeric characters, '-' or '.'", r.Name, r.Spec.DisplayName)
 
 		discoveredclusterLog.Error(err, "validation failed")
 		return nil, err
@@ -151,4 +170,10 @@ func IsSupportedClusterType(clusterType string) bool {
 	}
 
 	return supportedTypes[clusterType]
+}
+
+// IsStringValid returns true if the string conforms to the RFC 1123 standards.
+func IsStringValid(s string) bool {
+	re := regexp.MustCompile(`^[a-zA-Z0-9.-]+$`)
+	return re.MatchString(s)
 }
