@@ -18,7 +18,7 @@ COPY . .
 # Build
 RUN go build -a -o local-server testserver/main.go
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 WORKDIR /
 COPY --from=builder /workspace/local-server .

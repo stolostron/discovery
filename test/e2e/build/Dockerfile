@@ -12,7 +12,7 @@ COPY go.sum go.sum
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@latest
 RUN ginkgo build test/e2e
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 ENV KUBECONFIG "/opt/.kube/config"
 
