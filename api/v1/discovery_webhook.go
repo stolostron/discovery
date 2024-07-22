@@ -120,7 +120,7 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 	if !IsStringValid(r.Spec.DisplayName) && r.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters with an invalid display name '%s'. "+
-				"Display name must consist of lowercase alphanumeric characters, '-' or '.'", r.Name, r.Spec.DisplayName)
+				"Display name must consist of lowercase alphanumeric characters or '-'", r.Name, r.Spec.DisplayName)
 
 		discoveredclusterLog.Error(err, "validation failed")
 		return nil, err
@@ -147,7 +147,7 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 	if !IsStringValid(r.Spec.DisplayName) && r.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters with an invalid display name '%s'. "+
-				"Display name must consist of lowercase alphanumeric characters, '-' or '.'", r.Name, r.Spec.DisplayName)
+				"Display name must consist of lowercase alphanumeric characters or '-'", r.Name, r.Spec.DisplayName)
 
 		discoveredclusterLog.Error(err, "validation failed")
 		return nil, err
@@ -174,6 +174,6 @@ func IsSupportedClusterType(clusterType string) bool {
 
 // IsStringValid returns true if the string conforms to the RFC 1123 standards.
 func IsStringValid(s string) bool {
-	re := regexp.MustCompile(`^[a-zA-Z0-9.-]+$`)
+	re := regexp.MustCompile(`^[a-zA-Z0-9-]+$`)
 	return re.MatchString(s)
 }
