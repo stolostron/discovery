@@ -174,6 +174,6 @@ func IsSupportedClusterType(clusterType string) bool {
 
 // IsStringValid returns true if the string conforms to the RFC 1123 standards.
 func IsStringValid(s string) bool {
-	re := regexp.MustCompile(`^[a-zA-Z0-9.-]+$`)
+	re := regexp.MustCompile(`^[a-zA-Z0-9-]+$`)
 	return re.MatchString(s)
 }
