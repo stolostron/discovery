@@ -277,6 +277,39 @@ func Test_parseSecretForAuth(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Missing field service account",
+			secret: &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+				},
+				Data: map[string][]byte{
+					"auth_method": []byte("service-account"),
+					"client_id":   []byte("dc05925d-630b-408b-bfb7-02099be7b789"),
+				},
+			},
+			want: auth.AuthRequest{
+				AuthMethod: "service-account",
+			},
+			wantErr: true,
+		},
+		{
+			name: "Invalid authentication method",
+			secret: &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+				},
+				Data: map[string][]byte{
+					"auth_method": []byte("invalid-method"),
+				},
+			},
+			want: auth.AuthRequest{
+				AuthMethod: "invalid-method",
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
