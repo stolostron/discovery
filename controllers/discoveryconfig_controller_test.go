@@ -233,6 +233,7 @@ func Test_parseSecretForAuth(t *testing.T) {
 					Namespace: "test",
 				},
 				Data: map[string][]byte{
+					"auth_method": []byte("offline-token"),
 					"ocmAPIToken": []byte("dummytoken"),
 				},
 			},
@@ -255,6 +256,26 @@ func Test_parseSecretForAuth(t *testing.T) {
 				Token:      "",
 			},
 			wantErr: true,
+		},
+		{
+			name: "Dummy service account token",
+			secret: &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+				},
+				Data: map[string][]byte{
+					"auth_method":   []byte("service-account"),
+					"client_id":     []byte("dc05925d-630b-408b-bfb7-02099be7b789"),
+					"client_secret": []byte("ZZocNUZWgYSuJHIqK0j0D1mZVdufng6z"),
+				},
+			},
+			want: auth.AuthRequest{
+				AuthMethod: "service-account",
+				ID:         "dc05925d-630b-408b-bfb7-02099be7b789",
+				Secret:     "ZZocNUZWgYSuJHIqK0j0D1mZVdufng6z",
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
