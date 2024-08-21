@@ -16,8 +16,12 @@ type AuthTokenResponse struct {
 }
 
 type AuthRequest struct {
-	BaseURL string
-	Token   string
+	AuthMethod  string `json:"auth_method,omitempty" yaml:"auth_method,omitempty"`
+	BaseURL     string `json:"base_url,omitempty" yaml:"base_url,omitempty"`
+	BaseAuthURL string `json:"base_auth_url,omitempty" yaml:"base_auth_url,omitempty"`
+	ID          string `json:"client_id,omitempty" yaml:"client_id,omitempty"`
+	Secret      string `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
+	Token       string `json:"ocmAPIToken,omitempty" yaml:"ocmAPIToken,omitempty"`
 }
 
 type AuthError struct {

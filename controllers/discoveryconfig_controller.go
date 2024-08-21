@@ -35,6 +35,7 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm"
+	"github.com/stolostron/discovery/pkg/ocm/auth"
 	recon "github.com/stolostron/discovery/util/reconciler"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -131,21 +132,23 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	}
 
 	// Parse user token from ocm secret.
-	userToken, err := parseUserToken(ocmSecret)
+	authRequest, err := parseSecretForAuth(ocmSecret)
+
 	if err != nil {
 		logf.Error(err, "Error parsing token from secret. Deleting all clusters.", "Secret", ocmSecret.GetName())
 		return r.deleteAllClusters(ctx, config)
 	}
 
-	baseURL := getURLOverride(config)
-	baseAuthURL := getAuthURLOverride(config)
+	// Set the baseURL for authentication requests.
+	authRequest.BaseURL = getURLOverride(config)
+	authRequest.BaseAuthURL = getAuthURLOverride(config)
 	filters := config.Spec.Filters
 
 	discovered, err := []discovery.DiscoveredCluster{}, nil
 	if val, ok := os.LookupEnv("UNIT_TEST"); ok && val == "true" {
 		discovered, err = mockDiscoveredCluster()
 	} else {
-		discovered, err = ocm.DiscoverClusters(userToken, baseURL, baseAuthURL, filters)
+		discovered, err = ocm.DiscoverClusters(authRequest, filters)
 	}
 
 	if err != nil {
@@ -218,14 +221,54 @@ func (r *DiscoveryConfigReconciler) validateDiscoveryConfigName(reqName string) 
 	return nil
 }
 
-// parseUserToken takes a secret cotaining credentials and returns the stored OCM api token.
-func parseUserToken(secret *corev1.Secret) (string, error) {
-	token, ok := secret.Data["ocmAPIToken"]
-	if !ok {
-		return "", fmt.Errorf("%s: %w", secret.Name, ErrBadFormat)
+/*
+parseSecretForAuth parses the given Secret to retrieve authentication credentials.
+Depending on the "auth_method" field in the secret, it returns either service account credentials
+(client_id, client_secret) or an offline token (ocmAPIToken). If "auth_method" is not set, it
+defaults to using the "offline-token" method. Returns an error if the expected fields are missing.
+*/
+func parseSecretForAuth(secret *corev1.Secret) (auth.AuthRequest, error) {
+	// Set the default auth_method to "offline-token"
+	authMethod := "offline-token"
+
+	// Check if the "auth_method" key is present in the Secret data
+	if method, found := secret.Data["auth_method"]; found {
+		authMethod = string(method)
 	}
 
-	return strings.TrimSuffix(string(token), "\n"), nil
+	credentials := auth.AuthRequest{
+		AuthMethod: strings.TrimSuffix(string(authMethod), "\n"), // Set the authentication method
+	}
+
+	// Handle based on the "auth_method" value
+	switch credentials.AuthMethod {
+	case "service-account":
+		// Retrieve client_id and client_secret for service-account auth method
+		clientID, idOk := secret.Data["client_id"]
+		clientSecret, secretOk := secret.Data["client_secret"]
+
+		if !idOk || !secretOk {
+			return credentials, fmt.Errorf(
+				"%s: bad format: secret must contain client_id and client_secret", secret.Name)
+		}
+
+		credentials.ID = strings.TrimSuffix(string(clientID), "\n")
+		credentials.Secret = strings.TrimSuffix(string(clientSecret), "\n")
+
+	case "offline-token":
+		// Retrive ocmAPIToken for offline-token auth method
+		token, tokenOk := secret.Data["ocmAPIToken"]
+		if !tokenOk {
+			return credentials, fmt.Errorf("%s: bad format: secret must contain ocmAPIToken", secret.Name)
+		}
+
+		credentials.Token = strings.TrimSuffix(string(token), "\n")
+
+	default:
+		return credentials, fmt.Errorf("%s: bad format: unsupported auth_method:  %s", secret.Name, authMethod)
+	}
+
+	return credentials, nil
 }
 
 // assignManagedStatus marks clusters in the discovered map as managed if they are in the managed list

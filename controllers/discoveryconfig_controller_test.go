@@ -218,11 +218,11 @@ var _ = Describe("Discoveryconfig controller", func() {
 
 })
 
-func Test_parseUserToken(t *testing.T) {
+func Test_parseSecretForAuth(t *testing.T) {
 	tests := []struct {
 		name    string
 		secret  *corev1.Secret
-		want    string
+		want    auth.AuthRequest
 		wantErr bool
 	}{
 		{
@@ -236,7 +236,10 @@ func Test_parseUserToken(t *testing.T) {
 					"ocmAPIToken": []byte("dummytoken"),
 				},
 			},
-			want:    "dummytoken",
+			want: auth.AuthRequest{
+				AuthMethod: "offline-token",
+				Token:      "dummytoken",
+			},
 			wantErr: false,
 		},
 		{
@@ -247,19 +250,22 @@ func Test_parseUserToken(t *testing.T) {
 					Namespace: "test",
 				},
 			},
-			want:    "",
+			want: auth.AuthRequest{
+				AuthMethod: "offline-token",
+				Token:      "",
+			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseUserToken(tt.secret)
+			got, err := parseSecretForAuth(tt.secret)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("parseUserToken() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("parseSecretForAuth() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("parseUserToken() = %v, want %v", got, tt.want)
+				t.Errorf("parseSecretForAuth() = %v, want %v", got, tt.want)
 			}
 		})
 	}
