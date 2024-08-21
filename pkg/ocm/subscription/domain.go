@@ -79,11 +79,12 @@ type SubscriptionRequest struct {
 // SubscriptionError represents the error format response by OCM on a subscription request.
 // Full list of responses available at https://api.openshift.com/api/accounts_mgmt/v1/errors/
 type SubscriptionError struct {
-	Kind   string `json:"kind"`
-	ID     string `json:"id"`
-	Href   string `json:"href"`
-	Code   string `json:"code"`
-	Reason string `json:"reason"`
+	Kind       string `json:"kind"`
+	ID         string `json:"id"`
+	Href       string `json:"href"`
+	Code       string `json:"code"`
+	Reason     string `json:"reason"`
+	StatusCode int    `json:"status_code,omitempty"`
 	// Error is for setting an internal error for tracking
 	Error error `json:"-"`
 	// Response is for storing the raw response on an error

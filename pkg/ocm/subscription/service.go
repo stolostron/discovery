@@ -68,10 +68,31 @@ func (client *subscriptionClient) GetSubscriptions() ([]Subscription, error) {
 			if err.Error == nil && err.Reason != "" {
 				err.Error = fmt.Errorf(err.Reason)
 			}
+
 			logf.Error(err.Error, "Failed to retrieve subscriptions", "Page", request.Page,
 				"BaseURL", client.Config.BaseURL)
 
-			return nil, fmt.Errorf(err.Error.Error())
+			switch err.StatusCode {
+			case 401, 403:
+				logf.Info(fmt.Sprintf("%v error occurred, returning empty subscription list", err.StatusCode))
+				return []Subscription{}, nil
+
+			case 404:
+				logf.Info("404 error occurred, returning empty subscription list")
+
+			case 429:
+				logf.Info("429 Too Many Requests: Rate limit hit, returning empty subscription list")
+				return []Subscription{}, nil
+
+			case 500, 502, 503, 504:
+				logf.Info(fmt.Sprintf("Server error occurred (Code %v), returning empty subscription list",
+					err.StatusCode))
+
+				return []Subscription{}, nil
+
+			default:
+				return nil, err.Error
+			}
 		}
 
 		// Handle empty discovered list

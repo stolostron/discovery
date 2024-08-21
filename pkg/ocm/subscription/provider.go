@@ -106,6 +106,8 @@ func parseResponse(response *http.Response) (*SubscriptionResponse, *Subscriptio
 			errResponse.Error = fmt.Errorf("unexpected json response body")
 			errResponse.Response = bytes
 		}
+
+		errResponse.StatusCode = response.StatusCode
 		return nil, &errResponse
 	}
 
