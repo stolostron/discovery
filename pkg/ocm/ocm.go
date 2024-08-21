@@ -32,7 +32,7 @@ func DiscoverClusters(authRequest auth.AuthRequest, filters discovery.Filter) ([
 	subscriptionClient := subscription.SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
 	subscriptions, err := subscriptionClient.GetSubscriptions()
 	if err != nil {
-		return []discovery.DiscoveredCluster{}, err
+		return nil, err
 	}
 
 	var discoveredClusters []discovery.DiscoveredCluster

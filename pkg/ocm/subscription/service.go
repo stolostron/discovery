@@ -71,7 +71,7 @@ func (client *subscriptionClient) GetSubscriptions() ([]Subscription, error) {
 			logf.Error(err.Error, "Failed to retrieve subscriptions", "Page", request.Page,
 				"BaseURL", client.Config.BaseURL)
 
-			return []Subscription{}, fmt.Errorf(err.Error.Error())
+			return nil, fmt.Errorf(err.Error.Error())
 		}
 
 		// Handle empty discovered list
