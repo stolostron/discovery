@@ -79,6 +79,7 @@ func (client *subscriptionClient) GetSubscriptions() ([]Subscription, error) {
 
 			case 404:
 				logf.Info("404 error occurred, returning empty subscription list")
+				return []Subscription{}, nil
 
 			case 429:
 				logf.Info("429 Too Many Requests: Rate limit hit, returning empty subscription list")
