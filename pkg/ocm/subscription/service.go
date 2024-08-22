@@ -100,7 +100,7 @@ func (client *subscriptionClient) GetSubscriptions() ([]Subscription, error) {
 			logf.V(3).Info("Discovered list returned empty or is nil for subscriptions", "Page", request.Page)
 			break
 		} else {
-			logf.V(3).Info("Recieved subscription response", "Page", request.Page, "Items", len(discoveredList.Items))
+			logf.V(3).Info("Received subscription response", "Page", request.Page, "Items", len(discoveredList.Items))
 		}
 
 		// Filter and append the subscriptions
