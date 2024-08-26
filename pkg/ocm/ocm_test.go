@@ -54,17 +54,11 @@ func subscriptionResponse(testdata string) func() ([]subscription.Subscription, 
 }
 
 func TestDiscoverClusters(t *testing.T) {
-	type args struct {
-		token       string
-		baseURL     string
-		baseAuthURL string
-		filters     discovery.Filter
-	}
 	tests := []struct {
 		name             string
 		authfunc         func(auth.AuthRequest) (string, error)
 		subscriptionFunc func() ([]subscription.Subscription, error)
-		args             args
+		authRequest      auth.AuthRequest
 		want             int
 		wantErr          bool
 	}{
@@ -76,11 +70,10 @@ func TestDiscoverClusters(t *testing.T) {
 			},
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
 			subscriptionFunc: subscriptionResponse("testdata/1_mock_subscription.json"),
-			args: args{
-				token:       "test",
-				baseURL:     "test",
-				baseAuthURL: "test",
-				filters:     discovery.Filter{},
+			authRequest: auth.AuthRequest{
+				Token:       "test",
+				BaseURL:     "test",
+				BaseAuthURL: "test",
 			},
 			want:    1,
 			wantErr: false,
@@ -93,11 +86,10 @@ func TestDiscoverClusters(t *testing.T) {
 			},
 			// this mock returns 3 subscriptions read from mock_subscriptions.json
 			subscriptionFunc: subscriptionResponse("testdata/3_mock_subscriptions.json"),
-			args: args{
-				token:       "test",
-				baseURL:     "test",
-				baseAuthURL: "test",
-				filters:     discovery.Filter{},
+			authRequest: auth.AuthRequest{
+				Token:       "test",
+				BaseURL:     "test",
+				BaseAuthURL: "test",
 			},
 			want:    2,
 			wantErr: false,
@@ -112,7 +104,7 @@ func TestDiscoverClusters(t *testing.T) {
 			// TODO: Running `getSubscriptionsFunc` should yield the subscriptions to test against, but we don't do this
 			getSubscriptionsFunc = tt.subscriptionFunc
 
-			got, err := DiscoverClusters(tt.args.token, tt.args.baseURL, tt.args.baseAuthURL, tt.args.filters)
+			got, err := DiscoverClusters(tt.authRequest, discovery.Filter{})
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DiscoverClusters() error = %v, wantErr %v", err, tt.wantErr)
 				return

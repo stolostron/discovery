@@ -365,14 +365,14 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 		return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, err
 	}
 
-	if apiToken, err := parseUserToken(&existingSecret); err == nil {
+	if authRequest, err := parseSecretForAuth(&existingSecret); err == nil {
 		nn := types.NamespacedName{Name: "auto-import-secret", Namespace: dc.Spec.DisplayName}
 		existingSecret = corev1.Secret{}
 
 		if err := r.Get(ctx, nn, &existingSecret, &client.GetOptions{}); apierrors.IsNotFound(err) {
 			logf.Info("Creating auto-import-secret for managed cluster", "Namespace", nn.Namespace)
 
-			s := r.CreateAutoImportSecret(nn, dc.Spec.RHOCMClusterID, apiToken)
+			s := r.CreateAutoImportSecret(nn, dc.Spec.RHOCMClusterID, authRequest.Token)
 			if err := r.Create(ctx, s); err != nil {
 				logf.Error(err, "failed to create auto-import Secret for ManagedCluster", "Name", nn.Name)
 				return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err

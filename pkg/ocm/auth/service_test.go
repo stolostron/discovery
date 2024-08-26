@@ -36,7 +36,7 @@ func TestProviderGetTokenNoError(t *testing.T) {
 	assert.EqualValues(t, "new_access_token", response)
 }
 
-// recieved an AuthTokenResponse but it's missing and `access_token`
+// received an AuthTokenResponse but it's missing and `access_token`
 func TestGetTokenMissingAccessToken(t *testing.T) {
 	getTokenFunc = func(request AuthRequest) (*AuthTokenResponse, *AuthError) {
 		return &AuthTokenResponse{}, nil
@@ -50,7 +50,7 @@ func TestGetTokenMissingAccessToken(t *testing.T) {
 	assert.EqualValues(t, "", response)
 }
 
-// recieved an error caused by unmarshalling rather than from the API
+// received an error caused by unmarshalling rather than from the API
 func TestGetTokenInvalidErrorResponse(t *testing.T) {
 	getTokenFunc = func(request AuthRequest) (*AuthTokenResponse, *AuthError) {
 		return nil, &AuthError{
