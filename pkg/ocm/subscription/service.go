@@ -3,6 +3,7 @@
 package subscription
 
 import (
+	"errors"
 	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -66,7 +67,7 @@ func (client *subscriptionClient) GetSubscriptions() ([]Subscription, error) {
 
 		if err != nil {
 			if err.Error == nil && err.Reason != "" {
-				err.Error = fmt.Errorf(err.Reason)
+				err.Error = errors.New(err.Reason)
 			}
 
 			logf.Error(err.Error, "Failed to retrieve subscriptions", "Page", request.Page,

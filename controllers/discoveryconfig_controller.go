@@ -131,6 +131,13 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 		return err
 	}
 
+	// Update secret to include default authentication method if the field is missing.
+	if _, found := ocmSecret.Data["auth_method"]; !found {
+		if err := r.AddDefaultAuthMethodToSecret(ctx, ocmSecret); err != nil {
+			return err
+		}
+	}
+
 	// Parse user token from ocm secret.
 	authRequest, err := parseSecretForAuth(ocmSecret)
 
@@ -269,6 +276,26 @@ func parseSecretForAuth(secret *corev1.Secret) (auth.AuthRequest, error) {
 	}
 
 	return credentials, nil
+}
+
+func (r *DiscoveryConfigReconciler) AddDefaultAuthMethodToSecret(ctx context.Context, secret *corev1.Secret) error {
+	// Set the default auth_method to "offline-token"
+	secret.Data["auth_method"] = []byte("offline-token")
+
+	// Check if both client_id and client_secret are present in the secret data
+	if _, idOK := secret.Data["client_id"]; idOK {
+		if _, secretOk := secret.Data["client_secret"]; secretOk {
+			secret.Data["auth_method"] = []byte("service-account")
+		}
+	}
+
+	// Update the secret
+	if err := r.Client.Update(ctx, secret); err != nil {
+		logf.Error(err, "failed to update Secret with default auth_method: 'offline-token'", "Name", secret.GetName())
+		return err
+	}
+
+	return nil
 }
 
 // assignManagedStatus marks clusters in the discovered map as managed if they are in the managed list
