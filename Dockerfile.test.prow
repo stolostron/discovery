@@ -9,7 +9,7 @@ COPY test/e2e/ test/e2e/
 COPY go.mod go.mod
 COPY go.sum go.sum
 
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@latest
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.8.0
 RUN ginkgo build test/e2e
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
