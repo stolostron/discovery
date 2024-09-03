@@ -15,12 +15,8 @@ import (
 
 // DiscoverClusters returns a list of DiscoveredClusters found in both the accounts_mgmt and
 // accounts_mgmt apis with the given filters
-func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters discovery.Filter) ([]discovery.DiscoveredCluster, error) {
+func DiscoverClusters(authRequest auth.AuthRequest, filters discovery.Filter) ([]discovery.DiscoveredCluster, error) {
 	// Request ephemeral access token with user token. This will be used for OCM requests
-	authRequest := auth.AuthRequest{
-		Token:   token,
-		BaseURL: baseAuthURL,
-	}
 	accessToken, err := auth.AuthClient.GetToken(authRequest)
 	if err != nil {
 		return nil, err
@@ -29,9 +25,10 @@ func DiscoverClusters(token string, baseURL string, baseAuthURL string, filters 
 	// Get subscriptions from accounts_mgmt api
 	subscriptionRequestConfig := subscription.SubscriptionRequest{
 		Token:   accessToken,
-		BaseURL: baseURL,
+		BaseURL: authRequest.BaseURL,
 		Filter:  filters,
 	}
+
 	subscriptionClient := subscription.SubscriptionClientGenerator.NewClient(subscriptionRequestConfig)
 	subscriptions, err := subscriptionClient.GetSubscriptions()
 	if err != nil {

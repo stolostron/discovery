@@ -40,10 +40,22 @@ type authProvider struct{}
 
 func (a *authProvider) GetToken(request AuthRequest) (retRes *AuthTokenResponse, retErr *AuthError) {
 	postUrl := fmt.Sprintf(authEndpoint, request.BaseURL)
-	data := url.Values{
-		"grant_type":    {"refresh_token"},
-		"client_id":     {"cloud-services"},
-		"refresh_token": {request.Token},
+
+	var data url.Values
+	switch request.AuthMethod {
+	case "service-account":
+		data = url.Values{
+			"grant_type":    {"client_credentials"},
+			"client_id":     {request.ID},
+			"client_secret": {request.Secret},
+		}
+
+	default:
+		data = url.Values{
+			"grant_type":    {"refresh_token"},
+			"client_id":     {"cloud-services"},
+			"refresh_token": {request.Token},
+		}
 	}
 
 	response, err := httpClient.Post(postUrl, data)
