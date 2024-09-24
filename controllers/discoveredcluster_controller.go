@@ -146,13 +146,13 @@ func (r *DiscoveredClusterReconciler) CreateAddOnDeploymentConfig(nn types.Names
 }
 
 /*
-CreateAutoImportSecret creates an auto-import secret for the given NamespacedName and DiscoveryConfig.
+CreateAutoImportSecretOfflineToken creates an auto-import secret for the given NamespacedName and DiscoveryConfig.
 It constructs a Secret object with the specified name, namespace, and credential from the DiscoveryConfig.
 Other fields like api_url, token_url, and cluster_id are left empty.
 It sets the retry_times field to a default value of "2".
 The secret type is set to "auto-import/rosa".
 */
-func (r *DiscoveredClusterReconciler) CreateAutoImportSecret(nn types.NamespacedName, clusterID, apiToken string,
+func (r *DiscoveredClusterReconciler) CreateAutoImportSecretOfflineToken(nn types.NamespacedName, clusterID, apiToken string,
 ) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -160,8 +160,33 @@ func (r *DiscoveredClusterReconciler) CreateAutoImportSecret(nn types.Namespaced
 			Namespace: nn.Namespace,
 		},
 		StringData: map[string]string{
-			"api_token":  apiToken,
-			"cluster_id": clusterID,
+			"auth_method": "offline-token",
+			"api_token":   apiToken,
+			"cluster_id":  clusterID,
+		},
+		Type: "auto-import/rosa",
+	}
+}
+
+/*
+CreateAutoImportSecretServiceAccount creates an auto-import secret for the given NamespacedName and DiscoveryConfig.
+It constructs a Secret object with the specified name, namespace, and credential from the DiscoveryConfig.
+Other fields like api_url, token_url, and cluster_id are left empty.
+It sets the retry_times field to a default value of "2".
+The secret type is set to "auto-import/rosa".
+*/
+func (r *DiscoveredClusterReconciler) CreateAutoImportSecretServiceAccount(nn types.NamespacedName, clusterID, clientID, clientSecret string,
+) *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      nn.Name,
+			Namespace: nn.Namespace,
+		},
+		StringData: map[string]string{
+			"auth_method":   "service-account",
+			"cluster_id":    clusterID,
+			"client_id":     clientID,
+			"client_secret": clientSecret,
 		},
 		Type: "auto-import/rosa",
 	}
@@ -372,7 +397,14 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 		if err := r.Get(ctx, nn, &existingSecret, &client.GetOptions{}); apierrors.IsNotFound(err) {
 			logf.Info("Creating auto-import-secret for managed cluster", "Namespace", nn.Namespace)
 
-			s := r.CreateAutoImportSecret(nn, dc.Spec.RHOCMClusterID, authRequest.Token)
+			var s *corev1.Secret
+			if authRequest.AuthMethod == "service-account" {
+				s = r.CreateAutoImportSecretServiceAccount(nn, dc.Spec.RHOCMClusterID, authRequest.ID, authRequest.Secret)
+			} else if authRequest.AuthMethod == "offline-token" {
+				s = r.CreateAutoImportSecretOfflineToken(nn, dc.Spec.RHOCMClusterID, authRequest.Token)
+			} else {
+				return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, fmt.Errorf("unsupported auth method: %s", authRequest.AuthMethod)
+			}
 			if err := r.Create(ctx, s); err != nil {
 				logf.Error(err, "failed to create auto-import Secret for ManagedCluster", "Name", nn.Name)
 				return ctrl.Result{RequeueAfter: recon.ErrorRefreshInterval}, err
