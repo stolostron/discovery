@@ -266,10 +266,43 @@ func Test_Reconciler_CreateAutoImportSecret(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := r.CreateAutoImportSecret(tt.nn, tt.clusterID, tt.token)
+			s := r.CreateAutoImportSecretOfflineToken(tt.nn, tt.clusterID, tt.token)
 
 			if got := s.GetName() != tt.nn.Name; got {
 				t.Errorf("CreateAutoImportSecret(tt.nn) = want %v, got %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_Reconciler_CreateAutoImportSecretServiceAccount(t *testing.T) {
+	tests := []struct {
+		name         string
+		clusterID    string
+		nn           types.NamespacedName
+		clientID     string
+		clientSecret string
+		want         bool
+	}{
+		{
+			name:      "should create auto import Secret object",
+			clusterID: "BASS9-ADJAN-349AS-923SD",
+			nn: types.NamespacedName{
+				Name:      "foo",
+				Namespace: "bar",
+			},
+			clientID:     "sample-client-id",
+			clientSecret: "sample-client-secret",
+			want:         true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := r.CreateAutoImportSecretServiceAccount(tt.nn, tt.clusterID, tt.clientID, tt.clientSecret)
+
+			if got := s.GetName() != tt.nn.Name; got {
+				t.Errorf("CreateAutoImportSecretServiceAccount(tt.nn) = want %v, got %v", got, tt.want)
 			}
 		})
 	}
