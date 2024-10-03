@@ -140,7 +140,6 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 
 	// Parse user token from ocm secret.
 	authRequest, err := parseSecretForAuth(ocmSecret)
-
 	if err != nil {
 		logf.Error(err, "Error parsing token from secret. Deleting all clusters.", "Secret", ocmSecret.GetName())
 		return r.deleteAllClusters(ctx, config)
@@ -151,7 +150,7 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	authRequest.BaseAuthURL = getAuthURLOverride(config)
 	filters := config.Spec.Filters
 
-	discovered, err := []discovery.DiscoveredCluster{}, nil
+	var discovered []discovery.DiscoveredCluster
 	if val, ok := os.LookupEnv("UNIT_TEST"); ok && val == "true" {
 		discovered, err = mockDiscoveredCluster()
 	} else {
@@ -159,8 +158,8 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	}
 
 	if err != nil {
-		if ocm.IsUnrecoverable(err) {
-			logf.Info("Unrecoverable error. Cleaning up clusters.", "Error", err.Error())
+		if ocm.IsUnrecoverable(err) || ocm.IsUnauthorizedClient(err) {
+			logf.Info("Error encountered. Cleaning up clusters.", "Error", err.Error())
 			return r.deleteAllClusters(ctx, config)
 		}
 		return err

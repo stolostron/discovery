@@ -25,8 +25,9 @@ func (client authClient) GetToken(request AuthRequest) (string, error) {
 	response, err := AuthProvider.GetToken(request)
 
 	if err != nil {
-		return "", fmt.Errorf("%s: %w", "couldn't get token", err.Error)
+		return "", fmt.Errorf("%s: %v", "couldn't get token", err)
 	}
+
 	if response.AccessToken == "" {
 		return "", fmt.Errorf("missing `access_token` in response")
 	}
