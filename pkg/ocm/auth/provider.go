@@ -19,7 +19,8 @@ var (
 	httpClient   AuthPostInterface = &authRestClient{}
 	AuthProvider IAuthProvider     = &authProvider{}
 
-	ErrInvalidToken = errors.New("invalid token")
+	ErrInvalidToken       = errors.New("invalid token")
+	ErrUnauthorizedClient = errors.New("unauthorized_client")
 )
 
 type AuthPostInterface interface {

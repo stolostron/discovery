@@ -87,6 +87,11 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 	return discoveredCluster, true
 }
 
+// IsUnauthorizedClient returns true if the specified error is unauthorized client side error.
+func IsUnauthorizedClient(err error) bool {
+	return strings.Contains(err.Error(), auth.ErrUnauthorizedClient.Error())
+}
+
 // IsUnrecoverable returns true if the specified error is not temporary
 // and will continue to occur with the current state.
 func IsUnrecoverable(err error) bool {
