@@ -274,7 +274,39 @@ func Test_computeType(t *testing.T) {
 	}
 }
 
-func TestIsRecoverable(t *testing.T) {
+func Test_IsUnauthorizedClient(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{
+			name: "Unrecoverable Unauthorized Client Error",
+			err:  auth.ErrUnauthorizedClient,
+			want: true,
+		},
+		{
+			name: "Recoverable Error",
+			err:  errors.New("test error"),
+			want: false,
+		},
+		{
+			name: "Empty Error",
+			err:  nil,
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsUnauthorizedClient(tt.err); got != tt.want {
+				t.Errorf("IsUnauthorizedClient() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+}
+
+func Test_IsRecoverable(t *testing.T) {
 	tests := []struct {
 		name string
 		err  error
