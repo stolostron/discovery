@@ -3,7 +3,6 @@
 package ocm
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -95,7 +94,7 @@ func IsUnauthorizedClient(err error) bool {
 // IsUnrecoverable returns true if the specified error is not temporary
 // and will continue to occur with the current state.
 func IsUnrecoverable(err error) bool {
-	return errors.Is(err, auth.ErrInvalidToken)
+	return strings.Contains(err.Error(), auth.ErrInvalidToken.Error())
 }
 
 // computeDisplayName tries to provide a more user-friendly name if set
