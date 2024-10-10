@@ -3,7 +3,6 @@
 package ocm
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -89,13 +88,19 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 
 // IsUnauthorizedClient returns true if the specified error is unauthorized client side error.
 func IsUnauthorizedClient(err error) bool {
-	return strings.Contains(err.Error(), auth.ErrUnauthorizedClient.Error())
+	if err != nil {
+		return strings.Contains(err.Error(), auth.ErrUnauthorizedClient.Error())
+	}
+	return false
 }
 
 // IsUnrecoverable returns true if the specified error is not temporary
 // and will continue to occur with the current state.
 func IsUnrecoverable(err error) bool {
-	return errors.Is(err, auth.ErrInvalidToken)
+	if err != nil {
+		return strings.Contains(err.Error(), auth.ErrInvalidToken.Error())
+	}
+	return false
 }
 
 // computeDisplayName tries to provide a more user-friendly name if set
