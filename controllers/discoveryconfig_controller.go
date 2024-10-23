@@ -158,7 +158,7 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	}
 
 	if err != nil {
-		if ocm.IsUnrecoverable(err) || ocm.IsUnauthorizedClient(err) {
+		if ocm.IsUnrecoverable(err) || ocm.IsUnauthorizedClient(err) || ocm.IsInvalidClient(err) {
 			logf.Info("Error encountered. Cleaning up clusters.", "Error", err.Error())
 			return r.deleteAllClusters(ctx, config)
 		}
