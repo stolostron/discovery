@@ -338,6 +338,38 @@ func Test_IsRecoverable(t *testing.T) {
 
 }
 
+func Test_IsInvalidClient(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{
+			name: "Unrecoverable Invalid Client Error",
+			err:  auth.ErrInvalidClient,
+			want: true,
+		},
+		{
+			name: "Recoverable Error",
+			err:  errors.New("test error"),
+			want: false,
+		},
+		{
+			name: "Empty Error",
+			err:  nil,
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsInvalidClient(tt.err); got != tt.want {
+				t.Errorf("IsInvalidClient() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+}
+
 // BOOKMARK: This is the test for No ExternalClusterID
 func TestFormatCLusterError(t *testing.T) {
 	tests := []struct {

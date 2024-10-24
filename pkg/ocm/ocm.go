@@ -86,6 +86,14 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 	return discoveredCluster, true
 }
 
+// IsInvalidClient returns true if the specified error is invalid client side error.
+func IsInvalidClient(err error) bool {
+	if err != nil {
+		return strings.Contains(err.Error(), auth.ErrInvalidClient.Error())
+	}
+	return false
+}
+
 // IsUnauthorizedClient returns true if the specified error is unauthorized client side error.
 func IsUnauthorizedClient(err error) bool {
 	if err != nil {
