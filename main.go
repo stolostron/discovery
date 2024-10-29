@@ -284,3 +284,33 @@ func ensureWebhooks(k8sClient client.Client) error {
 	}
 	return fmt.Errorf("unable to ensure validatingwebhook exists in allotted time")
 }
+
+func addDiscoverySecretWatch(ctx context.Context, mgr ctrl.Manager, uncachedClient client.Client) {
+	for {
+		config := &discovery.DiscoveryConfig{}
+		configName := "discovery"
+		err := uncachedClient.Get(ctx, types.NamespacedName{Name: configName},  configName)
+		//crdKey := client.ObjectKey{Name: multiclusterengine.Namespace().GetObjectMeta().GetName()}
+		//err := uncachedClient.Get(ctx, crdKey, &mcev1.MultiClusterEngine{})
+		if err == nil {
+			err := discovery.Watch(source.Kind(mgr.GetCache(), &corev1.Secret{},
+				handler.TypedFuncs[*mcev1.MultiClusterEngine]{
+					UpdateFunc: func(ctx context.Context, e event.TypedUpdateEvent[*corev1.Secret], q workqueue.RateLimitingInterface) {
+						q.Add(
+							reconcile.Request{
+								NamespacedName: types.NamespacedName{
+									Name:      config.Spec.Credential,
+									Namespace: config.Spec.Namesspace,
+								},
+							},
+						)
+					},
+				}))
+			if err == nil {
+				setupLog.Info("discovery secret watch added")
+				return
+			}
+		}
+		time.Sleep(30 * time.Second)
+	}
+}
