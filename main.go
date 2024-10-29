@@ -30,7 +30,12 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	goruntime "runtime"
-
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/source"
+	"k8s.io/client-go/util/workqueue"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"go.uber.org/zap/zapcore"
 	admissionregistration "k8s.io/api/admissionregistration/v1"
 	apixv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -47,7 +52,6 @@ import (
 	clusterapiv1beta2 "open-cluster-management.io/api/cluster/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -71,6 +75,7 @@ const (
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
+	discoveryConfigController controller.Controller
 
 	ControllerError = "unable to create controller"
 )
@@ -159,10 +164,12 @@ func main() {
 
 	events := make(chan event.GenericEvent)
 
-	if err = (&controllers.DiscoveryConfigReconciler{
+	discoveryConfigReconciler := &controllers.DiscoveryConfigReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	}
+	discoveryConfigController, err = discoveryConfigReconciler.SetupWithManager(mgr)
+	if err != nil {
 		setupLog.Error(err, ControllerError, "controller", "DiscoveryConfig")
 		os.Exit(1)
 	}
@@ -207,6 +214,8 @@ func main() {
 		setupLog.Error(err, "unable to set up ready check")
 		os.Exit(1)
 	}
+
+	go addDiscoverySecretWatch(context.TODO(), mgr, uncachedClient)
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
@@ -287,25 +296,25 @@ func ensureWebhooks(k8sClient client.Client) error {
 
 func addDiscoverySecretWatch(ctx context.Context, mgr ctrl.Manager, uncachedClient client.Client) {
 	for {
-		config := &discovery.DiscoveryConfig{}
+		config := &discoveryv1.DiscoveryConfig{}
 		configName := "discovery"
-		err := uncachedClient.Get(ctx, types.NamespacedName{Name: configName},  configName)
+		err := uncachedClient.Get(ctx, types.NamespacedName{Name: configName},  config)
 		//crdKey := client.ObjectKey{Name: multiclusterengine.Namespace().GetObjectMeta().GetName()}
 		//err := uncachedClient.Get(ctx, crdKey, &mcev1.MultiClusterEngine{})
 		if err == nil {
-			err := discovery.Watch(source.Kind(mgr.GetCache(), &corev1.Secret{},
-				handler.TypedFuncs[*mcev1.MultiClusterEngine]{
+			err := discoveryConfigController.Watch(source.Kind(mgr.GetCache(), &corev1.Secret{}),
+				handler.TypedFuncs[*corev1.Secret]{
 					UpdateFunc: func(ctx context.Context, e event.TypedUpdateEvent[*corev1.Secret], q workqueue.RateLimitingInterface) {
 						q.Add(
 							reconcile.Request{
 								NamespacedName: types.NamespacedName{
 									Name:      config.Spec.Credential,
-									Namespace: config.Spec.Namesspace,
+									Namespace: config.Namespace,
 								},
 							},
 						)
 					},
-				}))
+				})
 			if err == nil {
 				setupLog.Info("discovery secret watch added")
 				return
