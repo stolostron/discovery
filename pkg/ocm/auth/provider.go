@@ -20,6 +20,7 @@ var (
 	AuthProvider IAuthProvider     = &authProvider{}
 
 	ErrInvalidToken       = errors.New("invalid token")
+	ErrInvalidClient      = errors.New("invalid_client")
 	ErrUnauthorizedClient = errors.New("unauthorized_client")
 )
 
