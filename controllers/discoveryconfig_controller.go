@@ -31,8 +31,8 @@ import (
 	ref "k8s.io/client-go/tools/reference"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm"
