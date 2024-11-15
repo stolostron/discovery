@@ -33,7 +33,7 @@ CRD_OPTIONS ?= "crd:crdVersions=v1"
 ENVTEST_K8S_VERSION = 1.25
 
 # Namespace to deploy resources into
-NAMESPACE ?= open-cluster-management
+NAMESPACE ?= multicluster-engine
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -88,7 +88,7 @@ secret: ## Generate secret for OCM access
 config: ## Create custom resources
 	cd config/samples && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
 	$(KUSTOMIZE) build config/samples | kubectl apply -f -
-	cd config/samples && $(KUSTOMIZE) edit set namespace open-cluster-management
+	cd config/samples && $(KUSTOMIZE) edit set namespace multicluster-engine
 
 logs: ## Print operator logs
 	@kubectl logs -f $(shell kubectl get pod -l app=discovery-operator -o jsonpath="{.items[0].metadata.name}")

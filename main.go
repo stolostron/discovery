@@ -306,16 +306,17 @@ func addDiscoverySecretWatch(ctx context.Context, mgr ctrl.Manager, uncachedClie
 			err := discoveryConfigController.Watch(source.Kind(mgr.GetCache(), &corev1.Secret{},
 				handler.TypedFuncs[*corev1.Secret]{
 					UpdateFunc: func(ctx context.Context, e event.TypedUpdateEvent[*corev1.Secret], q workqueue.RateLimitingInterface) {
-						name := config.Spec.Credential
-						namespace := config.Namespace
-						q.Add(
-							reconcile.Request{
-								NamespacedName: types.NamespacedName{
-									Name:      name,
-									Namespace: namespace,
+						updatedSecret := e.ObjectNew
+						if updatedSecret.Name == config.Spec.Credential && updatedSecret.Namespace == config.Namespace {
+							q.Add(
+								reconcile.Request{
+									NamespacedName: types.NamespacedName{
+										Name:      config.Name,
+										Namespace: config.Namespace,
+									},
 								},
-							},
-						)
+							)
+						}
 					},
 				}))
 			if err == nil {
