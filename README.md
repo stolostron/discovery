@@ -57,10 +57,11 @@ The discovery operator generates `DiscoveredClusters` based on a `DiscoveryConfi
 make secret OCM_API_TOKEN=<OpenShift Cluster Manager API Token>
 ```
 
-The OpenShift Cluster Manager API Token can be retrieved from [here](https://cloud.redhat.com/openshift/token). This will create a secret named `ocm-api-token` in the current namespace. With the secret created you can then create the `DiscoveryConfig` resource using the following command:
+The OpenShift Cluster Manager API Token can be retrieved from [here](https://cloud.redhat.com/openshift/token). This will create a secret named `ocm-api-token` in the current namespace. With the secret created you can then create the `DiscoveryConfig` resource using the following commands:
 
 ```shell
-make samples
+make secret
+make connfig
 ```
 
 This will create a `DiscoveryConfig` like the example below:

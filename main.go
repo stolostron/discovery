@@ -31,6 +31,11 @@ import (
 
 	goruntime "runtime"
 
+	"k8s.io/client-go/util/workqueue"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/source"
+
 	"go.uber.org/zap/zapcore"
 	admissionregistration "k8s.io/api/admissionregistration/v1"
 	apixv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -47,10 +52,11 @@ import (
 	clusterapiv1beta2 "open-cluster-management.io/api/cluster/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -69,8 +75,9 @@ const (
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme                    = runtime.NewScheme()
+	setupLog                  = ctrl.Log.WithName("setup")
+	discoveryConfigController controller.Controller
 
 	ControllerError = "unable to create controller"
 )
@@ -159,10 +166,12 @@ func main() {
 
 	events := make(chan event.GenericEvent)
 
-	if err = (&controllers.DiscoveryConfigReconciler{
+	discoveryConfigReconciler := &controllers.DiscoveryConfigReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	}
+	discoveryConfigController, err = discoveryConfigReconciler.SetupWithManager(mgr)
+	if err != nil {
 		setupLog.Error(err, ControllerError, "controller", "DiscoveryConfig")
 		os.Exit(1)
 	}
@@ -208,6 +217,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	go addDiscoverySecretWatch(context.Background(), mgr, uncachedClient)
+
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
@@ -233,7 +244,7 @@ func ensureWebhooks(k8sClient client.Client) error {
 		// This way if the CRD is deleted the webhook will be removed with it
 		crdKey := types.NamespacedName{Name: crdName}
 		owner := &apixv1.CustomResourceDefinition{}
-		if err := k8sClient.Get(context.TODO(), crdKey, owner); err != nil {
+		if err := k8sClient.Get(context.Background(), crdKey, owner); err != nil {
 			setupLog.Error(err, "Failed to get DiscoveredCluster CRD")
 			time.Sleep(5 * time.Second)
 			continue
@@ -283,4 +294,38 @@ func ensureWebhooks(k8sClient client.Client) error {
 		}
 	}
 	return fmt.Errorf("unable to ensure validatingwebhook exists in allotted time")
+}
+
+func addDiscoverySecretWatch(ctx context.Context, mgr ctrl.Manager, uncachedClient client.Client) {
+	for {
+		config := &discoveryv1.DiscoveryConfig{}
+		configName := "discovery"
+		err := uncachedClient.Get(ctx, types.NamespacedName{Name: configName}, config)
+		// Create the event handler
+		if err == nil {
+			err := discoveryConfigController.Watch(source.Kind(mgr.GetCache(), &corev1.Secret{},
+				handler.TypedFuncs[*corev1.Secret]{
+					UpdateFunc: func(ctx context.Context, e event.TypedUpdateEvent[*corev1.Secret], q workqueue.RateLimitingInterface) {
+						updatedSecret := e.ObjectNew
+						if updatedSecret.Name == config.Spec.Credential && updatedSecret.Namespace == config.Namespace {
+							q.Add(
+								reconcile.Request{
+									NamespacedName: types.NamespacedName{
+										Name:      config.Name,
+										Namespace: config.Namespace,
+									},
+								},
+							)
+						}
+					},
+				}))
+			if err == nil {
+				setupLog.Info("secret watch added")
+				return
+			}
+		}
+
+		// If we encounter an error, wait and retry
+		time.Sleep(30 * time.Second)
+	}
 }

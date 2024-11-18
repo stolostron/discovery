@@ -31,6 +31,7 @@ import (
 	ref "k8s.io/client-go/tools/reference"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	discovery "github.com/stolostron/discovery/api/v1"
@@ -107,10 +108,10 @@ func (r *DiscoveryConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 }
 
 // SetupWithManager ...
-func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *DiscoveryConfigReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Controller, error) {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&discovery.DiscoveryConfig{}).
-		Complete(r)
+		Build(r)
 }
 
 func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context, config *discovery.DiscoveryConfig) error {
