@@ -217,7 +217,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	go addDiscoverySecretWatch(context.TODO(), mgr, uncachedClient)
+	go addDiscoverySecretWatch(context.Background(), mgr, uncachedClient)
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
@@ -244,7 +244,7 @@ func ensureWebhooks(k8sClient client.Client) error {
 		// This way if the CRD is deleted the webhook will be removed with it
 		crdKey := types.NamespacedName{Name: crdName}
 		owner := &apixv1.CustomResourceDefinition{}
-		if err := k8sClient.Get(context.TODO(), crdKey, owner); err != nil {
+		if err := k8sClient.Get(context.Background(), crdKey, owner); err != nil {
 			setupLog.Error(err, "Failed to get DiscoveredCluster CRD")
 			time.Sleep(5 * time.Second)
 			continue
