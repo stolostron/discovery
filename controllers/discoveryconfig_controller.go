@@ -42,7 +42,7 @@ import (
 )
 
 const (
-	defaultDiscoveryConfigName = "discovery"
+	DefaultDiscoveryConfigName = "discovery"
 )
 
 var logf = log.Log.WithName("reconcile")
@@ -218,12 +218,12 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 
 /*
 ValidateDiscoveryConfigName validates the name of the DiscoveryConfig resource.
-It ensures that the provided name matches the defaultDiscoveryConfigName.
+It ensures that the provided name matches the DefaultDiscoveryConfigName.
 */
 func (r *DiscoveryConfigReconciler) validateDiscoveryConfigName(reqName string) error {
-	if reqName != defaultDiscoveryConfigName {
+	if reqName != DefaultDiscoveryConfigName {
 		return fmt.Errorf("invalid DiscoveryConfig resource name '%s', it must be '%s'",
-			reqName, defaultDiscoveryConfigName)
+			reqName, DefaultDiscoveryConfigName)
 	}
 	return nil
 }

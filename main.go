@@ -298,34 +298,77 @@ func ensureWebhooks(k8sClient client.Client) error {
 
 func addDiscoverySecretWatch(ctx context.Context, mgr ctrl.Manager, uncachedClient client.Client) {
 	for {
-		config := &discoveryv1.DiscoveryConfig{}
-		configName := "discovery"
-		err := uncachedClient.Get(ctx, types.NamespacedName{Name: configName}, config)
-		// Create the event handler
-		if err == nil {
+		// Fetch the list of DiscoveryConfig resources
+		discoveryConfigList := &discoveryv1.DiscoveryConfigList{}
+		err := uncachedClient.List(ctx, discoveryConfigList)
+
+		// We only want to watch secrets in discovery, if a DiscoveryConfig resource was created.
+		if err == nil && len(discoveryConfigList.Items) > 0 {
+			setupLog.Info("DiscoveryConfig resources found, initializing secret watch", "DiscoveryConfigCount",
+				len(discoveryConfigList.Items))
+
+			// Set up an event handler to watch Secrets across all namespaces, as the Secret may be configured in
+			// any namespace.
 			err := discoveryConfigController.Watch(source.Kind(mgr.GetCache(), &corev1.Secret{},
 				handler.TypedFuncs[*corev1.Secret]{
-					UpdateFunc: func(ctx context.Context, e event.TypedUpdateEvent[*corev1.Secret], q workqueue.RateLimitingInterface) {
-						updatedSecret := e.ObjectNew
-						if updatedSecret.Name == config.Spec.Credential && updatedSecret.Namespace == config.Namespace {
-							q.Add(
-								reconcile.Request{
-									NamespacedName: types.NamespacedName{
-										Name:      config.Name,
-										Namespace: config.Namespace,
-									},
-								},
-							)
-						}
+					UpdateFunc: func(ctx context.Context, e event.TypedUpdateEvent[*corev1.Secret],
+						q workqueue.RateLimitingInterface) {
+						handleSecretEvent(ctx, e.ObjectNew, uncachedClient, q, "update")
+					},
+
+					DeleteFunc: func(ctx context.Context, e event.TypedDeleteEvent[*corev1.Secret],
+						q workqueue.RateLimitingInterface) {
+						handleSecretEvent(ctx, e.Object, uncachedClient, q, "delete")
 					},
 				}))
+
 			if err == nil {
-				setupLog.Info("secret watch added")
+				setupLog.Info("Secret watch successfully added")
 				return
 			}
+		} else if err != nil {
+			setupLog.Error(err, "Failed to list DiscoveryConfig resources")
 		}
 
 		// If we encounter an error, wait and retry
+		setupLog.Info("No DiscoveryConfig resources found, retrying in 30 seconds...")
 		time.Sleep(30 * time.Second)
+	}
+}
+
+func handleSecretEvent(ctx context.Context, secret *corev1.Secret, uncachedClient client.Client,
+	q workqueue.RateLimitingInterface, action string) {
+
+	// Fetch all DiscoveryConfig resources
+	allDiscoveryConfigs := &discoveryv1.DiscoveryConfigList{}
+	if err := uncachedClient.List(ctx, allDiscoveryConfigs); err != nil {
+		setupLog.Error(err,
+			"Failed to retrieve the latest DiscoveryConfig resources for secret change")
+		return
+	}
+
+	for _, discoveryConfig := range allDiscoveryConfigs.Items {
+		if discoveryConfig.GetName() == controllers.DefaultDiscoveryConfigName {
+			// NamespacedName for the Credential from DiscoveryConfig
+			credential := types.NamespacedName{
+				Name:      discoveryConfig.Spec.Credential,
+				Namespace: discoveryConfig.GetNamespace(),
+			}
+
+			// Compare the secret with the configured credential
+			if secret.GetName() == credential.Name && secret.GetNamespace() == credential.Namespace {
+				q.Add(
+					reconcile.Request{
+						NamespacedName: types.NamespacedName{
+							Name:      discoveryConfig.Name,
+							Namespace: discoveryConfig.Namespace,
+						},
+					},
+				)
+				setupLog.Info(fmt.Sprintf("Secret %s matched, triggered reconciliation", action), "Secret",
+					secret.GetName(), "DiscoveryConfig", discoveryConfig.GetName(),
+					"Namespace", discoveryConfig.GetNamespace())
+			}
+		}
 	}
 }
