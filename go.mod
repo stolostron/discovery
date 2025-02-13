@@ -1,6 +1,6 @@
 module github.com/stolostron/discovery
 
-go 1.22.4
+go 1.23.4
 
 require (
 	github.com/gin-gonic/gin v1.9.1

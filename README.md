@@ -1,5 +1,3 @@
-
-
 # WORK IN PROGRESS
 
 We are in the process of enabling this repo for community contribution. See wiki [here](https://open-cluster-management.io/concepts/architecture/).
@@ -10,7 +8,7 @@ Operator for managing discovered clusters from OpenShift Cluster Manager
 
 ## Prerequisites
 
-- Go v1.22+
+- Go v1.23+
 - kubectl 1.21+
 - Operator-sdk v1.22.2
 - Docker
