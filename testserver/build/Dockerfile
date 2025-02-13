@@ -1,6 +1,6 @@
 # Copyright Contributors to the Open Cluster Management project
 
-FROM golang:1.21 as builder
+FROM golang:1.24 as builder
 
 WORKDIR /workspace
 
