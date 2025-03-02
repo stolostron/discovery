@@ -18,7 +18,7 @@ require (
 	k8s.io/metrics v0.24.3
 	open-cluster-management.io/api v0.8.0
 	sigs.k8s.io/controller-runtime v0.12.3
-	sigs.k8s.io/yaml v1.3.0
+	sigs.k8s.io/yaml v1.4.0
 )
 
 require (
