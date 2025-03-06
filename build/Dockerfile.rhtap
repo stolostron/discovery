@@ -15,6 +15,19 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -mod=readonly -o manager main
 
 # Use ubi-minimal as minimal base image to package the manager binary
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+
+
+LABEL org.label-schema.vendor="Red Hat" \
+      org.label-schema.name="discovery-operator" \
+      org.label-schema.description="Operator for managing discovered clusters from OpenShift Cluster Manager" \
+      name="multicluster-engine/discovery-rhel9" \
+      summary="Discovers and identifies new clusters within the OpenShift Cluster Manager" \
+      description="Operator for managing discovered clusters from OpenShift Cluster Manager" \
+      io.k8s.display-name="MultiClusterEngine operator" \
+      io.k8s.description="Operator for managing discovered clusters from OpenShift Cluster Manager" \
+      com.redhat.component="multicluster-engine-discovery-operator-container" \
+      io.openshift.tags="data,images"
+
 WORKDIR /
 COPY --from=plugin-builder /workspace/manager .
 
