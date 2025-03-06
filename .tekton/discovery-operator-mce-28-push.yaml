@@ -27,7 +27,7 @@ spec:
       value:
         - linux/x86_64
     - name: dockerfile
-      value: Dockerfile.rhtap
+      value: build/Dockerfile.rhtap
     - name: path-context
       value: .
     - name: build-source-image
