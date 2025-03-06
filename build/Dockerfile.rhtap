@@ -16,7 +16,6 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -mod=readonly -o manager main
 # Use ubi-minimal as minimal base image to package the manager binary
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
-
 LABEL org.label-schema.vendor="Red Hat" \
       org.label-schema.name="discovery-operator" \
       org.label-schema.description="Operator for managing discovered clusters from OpenShift Cluster Manager" \
