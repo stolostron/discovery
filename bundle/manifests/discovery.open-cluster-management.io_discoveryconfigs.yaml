@@ -49,8 +49,8 @@ spec:
                   clusterTypes:
                     description: |-
                       ClusterTypes is the list of cluster types to discover. These types represent the platform
-                      the cluster is running on, such as OpenShift Container Platform (OCP),
-                      Azure Red Hat OpenShift (ARO), or others.
+                      the cluster is running on, such as OpenShift Container Platform (OCP), Azure Red Hat OpenShift (ARO),
+                      or others.
                     items:
                       type: string
                     type: array
