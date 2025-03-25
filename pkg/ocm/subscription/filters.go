@@ -39,7 +39,10 @@ func all(s Subscription, fs []filterFunc) bool {
 func createFilters(f discovery.Filter) []filterFunc {
 	return []filterFunc{
 		statusFilter(),
+		clusterTypeFilter(f.ClusterTypes),
+		infrastructureProviderFilter(f.InfrastructureProviders),
 		openshiftVersionFilter(f.OpenShiftVersions),
+		regionFilter(f.Regions),
 		lastActiveFilter(time.Now(), f.LastActive),
 	}
 }
@@ -58,6 +61,48 @@ func deprovisionedFilter() filterFunc {
 	return func(sub Subscription) bool {
 		return sub.Status != "Deprovisioned"
 	}
+}
+
+func commonFilter[T comparable](list []T, matchFunc func(sub Subscription) T) filterFunc {
+	if len(list) == 0 {
+		// noop filter
+		return func(sub Subscription) bool { return true }
+	}
+
+	return func(sub Subscription) bool {
+		if len(sub.Metrics) == 0 {
+			return false
+		}
+
+		value := matchFunc(sub)
+		for _, item := range list {
+			if value == item {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+// clusterTypeFilter filters out subscriptions with cluster types not in the given list
+func clusterTypeFilter(clusterTypes []string) filterFunc {
+	return commonFilter(clusterTypes, func(sub Subscription) string {
+		return sub.Plan.ID
+	})
+}
+
+// infrastructureProviderFilter filters out subscriptions with cloud providers not in the given list
+func infrastructureProviderFilter(infrastructures []string) filterFunc {
+	return commonFilter(infrastructures, func(sub Subscription) string {
+		return sub.CloudProviderID
+	})
+}
+
+// regionFilter filters out subscriptions with regions not in the given list
+func regionFilter(regions []string) filterFunc {
+	return commonFilter(regions, func(sub Subscription) string {
+		return sub.RegionID
+	})
 }
 
 // openshiftVersionFilter filters out clusters with versions not in the
