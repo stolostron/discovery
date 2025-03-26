@@ -21,8 +21,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Filter ...
+// Filter defines the criteria for discovering clusters based on specific attributes.
 type Filter struct {
+	// ClusterTypes is the list of cluster types to discover. These types represent the platform
+	// the cluster is running on, such as OpenShift Container Platform (OCP), Azure Red Hat OpenShift (ARO),
+	// or others.
+	// +optional
+	ClusterTypes []string `json:"clusterTypes,omitempty"`
+
+	// InfrastructureProviders is the list of infrastructure providers to discover. This can be
+	// a list of cloud providers or platforms (e.g., AWS, Azure, GCP) where clusters might be running.
+	// +optional
+	InfrastructureProviders []string `json:"infrastructureProviders,omitempty"`
+
 	// LastActive is the last active in days of clusters to discover, determined by activity timestamp
 	// +optional
 	LastActive int `json:"lastActive,omitempty"`
@@ -30,6 +41,12 @@ type Filter struct {
 	// OpenShiftVersions is the list of release versions of OpenShift of the form "<Major>.<Minor>"
 	// +optional
 	OpenShiftVersions []Semver `json:"openShiftVersions,omitempty"`
+
+	// Regions is the list of regions where OpenShift clusters are located. This helps in filtering
+	// clusters based on geographic location or data center region, useful for compliance or latency
+	// requirements.
+	// +optional
+	Regions []string `json:"regions,omitempty"`
 }
 
 // Semver represents a partial semver string with the major and minor version
