@@ -14,7 +14,19 @@ spec:
     singular: discoveredcluster
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - description: Human-readable name assigned to the cluster
+      jsonPath: .spec.displayName
+      name: DisplayName
+      type: string
+    - description: Cloud provider where the cluster is hosted (e.g., AWS, Azure, GCP)
+      jsonPath: .spec.cloudProvider
+      name: CloudProvider
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
     schema:
       openAPIV3Schema:
         description: DiscoveredCluster is the Schema for the discoveredclusters API
