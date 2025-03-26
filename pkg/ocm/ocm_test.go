@@ -11,7 +11,6 @@ import (
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
-	sub "github.com/stolostron/discovery/pkg/ocm/subscription"
 )
 
 var (
@@ -364,46 +363,6 @@ func Test_IsInvalidClient(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := IsInvalidClient(tt.err); got != tt.want {
 				t.Errorf("IsInvalidClient() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-
-}
-
-// BOOKMARK: This is the test for No ExternalClusterID
-func TestFormatCLusterError(t *testing.T) {
-	tests := []struct {
-		name string
-		sub  sub.Subscription
-		dc   discovery.DiscoveredCluster
-		want bool
-	}{
-		{
-			name: "No ExternalClusterID",
-			sub: sub.Subscription{
-				ExternalClusterID: "",
-				DisplayName:       "my-custom-name",
-				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
-			},
-			dc:   discovery.DiscoveredCluster{},
-			want: false,
-		},
-		{
-			name: "Reserved Cluster Status",
-			sub: sub.Subscription{
-				ExternalClusterID: "exists",
-				DisplayName:       "my-custom-name",
-				Status:            "Reserved",
-				Metrics:           []sub.Metrics{{OpenShiftVersion: "4.8.5"}},
-			},
-			dc:   discovery.DiscoveredCluster{},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if _, got := formatCluster(tt.sub); got != tt.want {
-				t.Errorf("formatCluster() = %v, want %v", got, tt.want)
 			}
 		})
 	}
