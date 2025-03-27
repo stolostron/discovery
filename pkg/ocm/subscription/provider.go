@@ -92,7 +92,7 @@ func prepareRequest(request SubscriptionRequest) (*http.Request, error) {
 	query.Add("search", "external_cluster_id is not null")
 
 	applyPreFilters(query, request.Filter)
-	logf.V(1).Info("Request", "Query", query)
+	// logf.V(1).Info("Request", "Query", query)
 
 	getRequest, err := http.NewRequest("GET", getURL, nil)
 	if err != nil {
