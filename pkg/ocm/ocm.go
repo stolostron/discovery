@@ -52,12 +52,7 @@ func formatCluster(sub subscription.Subscription) (discovery.DiscoveredCluster, 
 	if len(sub.Metrics) == 0 {
 		return discoveredCluster, false
 	}
-	if sub.ExternalClusterID == "" {
-		return discoveredCluster, false
-	}
-	if sub.Status == "Reserved" {
-		return discoveredCluster, false
-	}
+
 	discoveredCluster = discovery.DiscoveredCluster{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "operator.open-cluster-management.io/v1",
