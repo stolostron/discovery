@@ -17,11 +17,15 @@ spec:
   - additionalPrinterColumns:
     - description: Human-readable name assigned to the cluster
       jsonPath: .spec.displayName
-      name: DisplayName
+      name: Display Name
       type: string
     - description: Cloud provider where the cluster is hosted (e.g., AWS, Azure, GCP)
       jsonPath: .spec.cloudProvider
-      name: CloudProvider
+      name: Cloud Provider
+      type: string
+    - description: Current state of the discovered cluster (e.g Active, Stale)
+      jsonPath: .spec.status
+      name: Status
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age

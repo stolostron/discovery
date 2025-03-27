@@ -133,8 +133,9 @@ type DiscoveredClusterStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",description="Human-readable name assigned to the cluster"
-// +kubebuilder:printcolumn:name="CloudProvider",type="string",JSONPath=".spec.cloudProvider",description="Cloud provider where the cluster is hosted (e.g., AWS, Azure, GCP)"
+// +kubebuilder:printcolumn:name="Display Name",type="string",JSONPath=".spec.displayName",description="Human-readable name assigned to the cluster"
+// +kubebuilder:printcolumn:name="Cloud Provider",type="string",JSONPath=".spec.cloudProvider",description="Cloud provider where the cluster is hosted (e.g., AWS, Azure, GCP)"
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".spec.status",description="Current state of the discovered cluster (e.g Active, Stale)"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // DiscoveredCluster is the Schema for the discoveredclusters API
 type DiscoveredCluster struct {
