@@ -44,56 +44,56 @@ const (
 
 // DiscoveredClusterSpec defines the desired state of DiscoveredCluster
 type DiscoveredClusterSpec struct {
-	// ActivityTimestamp ...
+	// ActivityTimestamp records the last observed activity of the cluster.
 	ActivityTimestamp *metav1.Time `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
 
-	// APIURL ...
+	// APIURL is the endpoint used to access the cluster's API server.
 	APIURL string `json:"apiUrl" yaml:"apiUrl"`
 
-	// CloudProvider ...
+	// CloudProvider specifies the cloud provider where the cluster is hosted (e.g., AWS, Azure, GCP).
 	CloudProvider string `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
 
-	// Console ...
+	// Console provides the URL of the cluster's web-based console.
 	Console string `json:"console,omitempty" yaml:"console,omitempty"`
 
-	// CreationTimestamp ...
+	// CreationTimestamp marks when the cluster was initially discovered.
 	CreationTimestamp *metav1.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
 
-	// Credential ...
+	// Credential references the Kubernetes secret containing authentication details for the cluster.
 	Credential corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
 
-	// DisplayName ...
+	// DisplayName is a human-readable name assigned to the cluster.
 	DisplayName string `json:"displayName" yaml:"displayName"`
 
-	// ImportAsManagedCluster ...
+	// ImportAsManagedCluster determines whether the discovered cluster should be automatically imported as a managed cluster.
 	// +kubebuilder:default:=false
 	ImportAsManagedCluster bool `json:"importAsManagedCluster,omitempty" yaml:"importAsManagedCluster,omitempty"`
 
-	// IsManagedCluster ...
+	// IsManagedCluster indicates whether the cluster is currently managed.
 	IsManagedCluster bool `json:"isManagedCluster" yaml:"isManagedCluster"`
 
-	// Name ...
+	// Name represents the unique identifier of the discovered cluster.
 	Name string `json:"name" yaml:"name"`
 
-	// OCPClusterID ...
+	// OCPClusterID contains the unique identifier assigned by OpenShift to the cluster.
 	OCPClusterID string `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
 
-	// OpenshiftVersion ...
+	// OpenshiftVersion specifies the OpenShift version running on the cluster.
 	OpenshiftVersion string `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
 
-	// Owner ...
+	// Owner identifies the owner or organization responsible for the cluster.
 	Owner string `json:"owner,omitempty" yaml:"owner,omitempty"`
 
-	// RHOCMClusterID ...
+	// RHOCMClusterID contains the cluster ID from Red Hat OpenShift Cluster Manager.
 	RHOCMClusterID string `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
 
-	// Region ...
+	// Region specifies the geographical region where the cluster is deployed.
 	Region string `json:"region,omitempty" yaml:"region,omitempty"`
 
-	// Status ...
+	// Status represents the current state of the discovered cluster (e.g Active, Stale).
 	Status string `json:"status,omitempty" yaml:"status,omitempty"`
 
-	// Type ...
+	// Type defines the type of cluster, such as OpenShift, Kubernetes, or a specific managed service type.
 	Type string `json:"type" yaml:"type"`
 }
 
@@ -133,6 +133,10 @@ type DiscoveredClusterStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 
+// +kubebuilder:printcolumn:name="Display Name",type="string",JSONPath=".spec.displayName",description="Human-readable name assigned to the cluster"
+// +kubebuilder:printcolumn:name="Cloud Provider",type="string",JSONPath=".spec.cloudProvider",description="Cloud provider where the cluster is hosted (e.g., AWS, Azure, GCP)"
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".spec.status",description="Current state of the discovered cluster (e.g Active, Stale)"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // DiscoveredCluster is the Schema for the discoveredclusters API
 type DiscoveredCluster struct {
 	metav1.TypeMeta   `json:",inline"`
