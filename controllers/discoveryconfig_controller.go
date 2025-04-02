@@ -279,6 +279,12 @@ func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *di
 		return nil
 	}
 
+	/*
+		Ensure the discovered cluster resource from OCM retains the importAsManagedCluster status from the existing
+		cluster, as this field is internally defined and not included in OCM's data.
+	*/
+	dc.Spec.ImportAsManagedCluster = current.Spec.ImportAsManagedCluster
+
 	// Cluster needs to be updated
 	return r.updateCluster(ctx, dc, current)
 }
