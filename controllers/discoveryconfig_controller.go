@@ -344,6 +344,19 @@ func (r *DiscoveryConfigReconciler) applyCluster(ctx context.Context, config *di
 		return r.createCluster(ctx, config, dc)
 	}
 
+	/*
+		In MCE 2.6, we introduced a feature that allows discovered cluster resources to be automatically imported when
+		the importAsManagedCluster field is set to true. Since this field is not included in the subscription data when
+		querying OCM, we must ensure that the discovered cluster resource retains the importAsManagedCluster status
+		from the original discovered cluster. This is necessary because the field is internally defined and not part
+		of OCM's data.
+
+		To ensure proper functionality, we need to pass the value before determining if the cluster requires an update.
+		Otherwise, the cluster will always be marked for update, as the field is not present in the most recent
+		discovered cluster specification.
+	*/
+	dc.Spec.ImportAsManagedCluster = current.Spec.ImportAsManagedCluster
+
 	if dc.Equal(current) {
 		// Discovered cluster has not changed
 		return nil
