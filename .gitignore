@@ -40,3 +40,6 @@ test/e2e/results
 test/scale/results
 
 .vscode/*
+
+# Ignore partial workflow directory
+workflow/
