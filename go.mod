@@ -1,6 +1,8 @@
 module github.com/stolostron/discovery
 
-go 1.20
+go 1.22
+
+toolchain go1.24.4
 
 require (
 	github.com/gin-gonic/gin v1.8.1
@@ -18,7 +20,7 @@ require (
 	k8s.io/metrics v0.24.3
 	open-cluster-management.io/api v0.8.0
 	sigs.k8s.io/controller-runtime v0.12.3
-	sigs.k8s.io/yaml v1.3.0
+	sigs.k8s.io/yaml v1.6.0
 )
 
 require (
@@ -72,6 +74,7 @@ require (
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
+	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220722155238-128564f6959c // indirect
