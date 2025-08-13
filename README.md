@@ -8,7 +8,7 @@ Operator for managing discovered clusters from OpenShift Cluster Manager
 
 ## Prerequisites
 
-- Go v1.23+
+- Go v1.24.4+
 - kubectl 1.21+
 - Operator-sdk v1.22.2
 - Docker
