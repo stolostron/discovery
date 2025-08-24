@@ -47,7 +47,6 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
@@ -104,4 +103,4 @@ replace golang.org/x/oauth2 => github.com/openshift/golang-oauth2 v0.26.1-0.2025
 
 // CVE-2025-22869
 // This is from tag v0.33.openshift.1
-replace golang/x/crypto => github.com/openshift/golang-crypto v0.33.1-0.20250310193910-9003f682e581
+replace golang/x/crypto => github.com/openshift/golang-crypto v0.36.0
