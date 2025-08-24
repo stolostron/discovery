@@ -1,6 +1,8 @@
 module github.com/stolostron/discovery
 
-go 1.20
+go 1.23
+
+toolchain go1.24.6
 
 require (
 	github.com/gin-gonic/gin v1.8.1
@@ -35,7 +37,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/go-logr/zapr v1.2.3 // indirect
 	github.com/go-openapi/jsonpointer v0.21.1 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
