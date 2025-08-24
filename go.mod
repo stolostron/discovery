@@ -1,6 +1,8 @@
 module github.com/stolostron/discovery
 
-go 1.20
+go 1.23.0
+
+toolchain go1.24.6
 
 require (
 	github.com/gin-gonic/gin v1.8.1
@@ -95,7 +97,7 @@ require (
 
 // CVE-2025-22868
 // This is from tag v0.26.openshift.1
-replace golang.org/x/oauth2 => github.com/openshift/golang-oauth2 v0.26.1-0.20250310184649-06a918c6239d
+replace golang.org/x/oauth2 => github.com/openshift/golang-oauth2 v0.28.0
 
 // CVE-2025-22869
 // This is from tag v0.33.openshift.1
