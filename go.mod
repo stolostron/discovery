@@ -3,7 +3,7 @@ module github.com/stolostron/discovery
 go 1.24.4
 
 require (
-	github.com/gin-gonic/gin v1.9.1
+	github.com/gin-gonic/gin v1.10.1
 	github.com/go-logr/logr v1.4.3
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
@@ -86,7 +86,7 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/arch v0.7.0 // indirect
+	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b // indirect
 	golang.org/x/net v0.43.0 // indirect
