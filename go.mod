@@ -9,7 +9,7 @@ require (
 	github.com/onsi/gomega v1.33.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.0
-	github.com/rs/zerolog v1.32.0
+	github.com/rs/zerolog v1.34.0
 	github.com/stolostron/cluster-lifecycle-api v0.0.0-20240813023109-42b5c115d0a3
 	github.com/stolostron/klusterlet-addon-controller v0.0.0-20250820015307-6dfda59bb043
 	github.com/stretchr/testify v1.11.1
@@ -87,10 +87,10 @@ require (
 	github.com/ugorji/go/codec v1.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.21.0 // indirect
-	golang.org/x/oauth2 v0.31.0 // indirect
 	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/exp v0.0.0-20250911091902-df9299821621 // indirect
 	golang.org/x/net v0.44.0 // indirect
+	golang.org/x/oauth2 v0.31.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/term v0.35.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
