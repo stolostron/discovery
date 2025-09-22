@@ -17,6 +17,7 @@ RUN CGO_ENABLED=1 go build -mod=readonly -o manager main.go
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 LABEL org.label-schema.vendor="Red Hat" \
+      url="https://github.com/stolostron/discovery" \
       org.label-schema.name="discovery-operator" \
       org.label-schema.description="Operator for managing discovered clusters from OpenShift Cluster Manager" \
       name="multicluster-engine/discovery-rhel9" \
