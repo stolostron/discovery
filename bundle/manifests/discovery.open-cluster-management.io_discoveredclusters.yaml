@@ -165,9 +165,6 @@ spec:
                     type:
                       description: Type is the type of the discovered cluster condition.
                       type: string
-                  required:
-                  - status
-                  - type
                   type: object
                 type: array
             type: object
