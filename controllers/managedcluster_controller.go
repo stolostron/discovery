@@ -134,8 +134,7 @@ func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	if err := c.Watch(
-		&source.Channel{Source: r.Trigger},
-		&handler.EnqueueRequestForObject{},
+		source.Channel(r.Trigger, &handler.EnqueueRequestForObject{}),
 	); err != nil {
 		return errors.Wrapf(err, "failed adding a watch channel")
 	}
