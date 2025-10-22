@@ -21,13 +21,13 @@ metadata:
       ]
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
-    createdAt: "2024-10-10T16:27:01Z"
+    createdAt: "2025-10-21T18:49:33Z"
     description: This operator discovers OpenShift Conatiner Platform clusters which
       are not yet under management by Open Cluster Management.
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.37.0
+    operators.operatorframework.io/builder: operator-sdk-v1.41.1
     operators.operatorframework.io/internal-objects: '["discoveredclusters.discovery.open-cluster-management.io"]'
-    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
     support: Red Hat
   name: discovery.v0.0.1
   namespace: placeholder
@@ -168,14 +168,9 @@ spec:
           - discovery.open-cluster-management.io
           resources:
           - discoveredclusters/finalizers
-          verbs:
-          - get
-          - patch
-          - update
-        - apiGroups:
-          - discovery.open-cluster-management.io
-          resources:
           - discoveredclusters/status
+          - discoveryconfigs/finalizers
+          - discoveryconfigs/status
           verbs:
           - get
           - patch
@@ -192,22 +187,6 @@ spec:
           - patch
           - update
           - watch
-        - apiGroups:
-          - discovery.open-cluster-management.io
-          resources:
-          - discoveryconfigs/finalizers
-          verbs:
-          - get
-          - patch
-          - update
-        - apiGroups:
-          - discovery.open-cluster-management.io
-          resources:
-          - discoveryconfigs/status
-          verbs:
-          - get
-          - patch
-          - update
         - apiGroups:
           - register.open-cluster-management.io
           resources:
