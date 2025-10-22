@@ -23,6 +23,10 @@ spec:
       jsonPath: .spec.cloudProvider
       name: Cloud Provider
       type: string
+    - description: Region where the cluster is deployed (e.g., us-east-1, us-central1)
+      jsonPath: .spec.region
+      name: Region
+      type: string
     - description: Current state of the discovered cluster (e.g Active, Stale)
       jsonPath: .spec.status
       name: Status
