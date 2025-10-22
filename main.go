@@ -310,14 +310,14 @@ func addDiscoverySecretWatch(ctx context.Context, mgr ctrl.Manager, uncachedClie
 			// Set up an event handler to watch Secrets across all namespaces, as the Secret may be configured in
 			// any namespace.
 			err := discoveryConfigController.Watch(source.Kind(mgr.GetCache(), &corev1.Secret{},
-				handler.TypedFuncs[*corev1.Secret]{
+				handler.TypedFuncs[*corev1.Secret, reconcile.Request]{
 					UpdateFunc: func(ctx context.Context, e event.TypedUpdateEvent[*corev1.Secret],
-						q workqueue.RateLimitingInterface) {
+						q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
 						handleSecretEvent(ctx, e.ObjectNew, uncachedClient, q, "update")
 					},
 
 					DeleteFunc: func(ctx context.Context, e event.TypedDeleteEvent[*corev1.Secret],
-						q workqueue.RateLimitingInterface) {
+						q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
 						handleSecretEvent(ctx, e.Object, uncachedClient, q, "delete")
 					},
 				}))
@@ -337,7 +337,7 @@ func addDiscoverySecretWatch(ctx context.Context, mgr ctrl.Manager, uncachedClie
 }
 
 func handleSecretEvent(ctx context.Context, secret *corev1.Secret, uncachedClient client.Client,
-	q workqueue.RateLimitingInterface, action string) {
+	q workqueue.TypedRateLimitingInterface[reconcile.Request], action string) {
 
 	// Fetch all DiscoveryConfig resources
 	allDiscoveryConfigs := &discoveryv1.DiscoveryConfigList{}
