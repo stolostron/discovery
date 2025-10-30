@@ -11,7 +11,7 @@ require (
 	github.com/onsi/gomega v1.33.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.1
-	github.com/rs/zerolog v1.32.0
+	github.com/rs/zerolog v1.34.0
 	github.com/stolostron/cluster-lifecycle-api v0.0.0-20240130112703-747158a63f05
 	github.com/stolostron/klusterlet-addon-controller v0.0.0-20240229083605-8bd4a2ae81c0
 	github.com/stretchr/testify v1.9.0
