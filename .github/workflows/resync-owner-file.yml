@@ -20,6 +20,8 @@ jobs:
     strategy:
       matrix:
         branch: [
+            'backplane-2.10',
+            'backplane-2.9',
             'backplane-2.8',
             'backplane-2.7',
             'backplane-2.6',
