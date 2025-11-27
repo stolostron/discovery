@@ -23,7 +23,7 @@ require (
 	k8s.io/metrics v0.29.3
 	open-cluster-management.io/api v0.13.0
 	sigs.k8s.io/controller-runtime v0.19.4
-	sigs.k8s.io/yaml v1.4.0
+	sigs.k8s.io/yaml v1.6.0
 )
 
 require (
@@ -77,6 +77,7 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
+	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/exp v0.0.0-20240404231335-c0f41cb1a7a0 // indirect
