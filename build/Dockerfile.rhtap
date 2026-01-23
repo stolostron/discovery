@@ -26,7 +26,8 @@ LABEL org.label-schema.vendor="Red Hat" \
       io.k8s.display-name="MultiClusterEngine operator" \
       io.k8s.description="Operator for managing discovered clusters from OpenShift Cluster Manager" \
       com.redhat.component="multicluster-engine-discovery-operator-container" \
-      io.openshift.tags="data,images"
+      io.openshift.tags="data,images" \
+      cpe="cpe:/a:redhat:multicluster_engine:2.11::el9"
 
 WORKDIR /
 COPY --from=plugin-builder /workspace/manager .
