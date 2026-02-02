@@ -308,6 +308,13 @@ kind-deploy-controller: kustomize
 	@echo Installing discovery controller
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 
+	@echo "Creating dummy webhook secret"
+	kubectl create secret generic discovery-operator-webhook-service \
+		--from-literal=tls.crt="" \
+		--from-literal=tls.key="" \
+		-n $(NAMESPACE) \
+		--dry-run=client -o yaml | kubectl apply -f -
+
 	cd config/default && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 	cd config/default && $(KUSTOMIZE) edit set namespace open-cluster-management
