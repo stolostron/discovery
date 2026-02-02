@@ -307,15 +307,26 @@ $(ENVTEST): $(LOCALBIN)
 kind-deploy-controller: kustomize
 	@echo Installing discovery controller
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	
+
+	@echo "Creating dummy webhook secret"
+	kubectl create secret generic discovery-operator-webhook-service \
+		--from-literal=tls.crt="" \
+		--from-literal=tls.key="" \
+		-n $(NAMESPACE) \
+		--dry-run=client -o yaml | kubectl apply -f -
+
 	cd config/default && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 	cd config/default && $(KUSTOMIZE) edit set namespace open-cluster-management
-	
-	@echo "Patch deployment image"
+
+	@echo "Patch deployment image and disable webhooks"
 	kubectl patch deployment discovery-operator -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"discovery-operator\",\"imagePullPolicy\":\"Never\"}]}}}}"
 	kubectl patch deployment discovery-operator -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"discovery-operator\",\"image\":\"$(URL)\"}]}}}}"
+	kubectl patch deployment discovery-operator -n $(NAMESPACE) -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"discovery-operator\",\"env\":[{\"name\":\"ENABLE_WEBHOOKS\",\"value\":\"false\"}]}]}}}}"
 	kubectl rollout status -n $(NAMESPACE) deployment discovery-operator --timeout=180s
+
+	@echo "Clean up webhook configuration"
+	kubectl delete validatingwebhookconfiguration discovery.open-cluster-management.io --ignore-not-found=true
 
 kind-load-image:
 	@echo Pushing image to KinD cluster
