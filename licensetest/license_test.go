@@ -30,6 +30,11 @@ func TestLicense(t *testing.T) {
 			return nil
 		}
 
+		// Skip .venv and other hidden directories
+		if info.IsDir() && (filepath.Base(path) == ".venv" || filepath.Base(path)[0] == '.') {
+			return filepath.SkipDir
+		}
+
 		if err != nil {
 			return err
 		}
