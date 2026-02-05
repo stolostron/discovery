@@ -6,7 +6,7 @@ toolchain go1.24.11
 
 require (
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-logr/logr v1.4.2
+	github.com/go-logr/logr v1.4.3
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	github.com/pkg/errors v0.9.1
