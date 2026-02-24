@@ -54,7 +54,7 @@ func (client *subscriptionClient) GetSubscriptions() ([]Subscription, error) {
 	for {
 		discoveredList, err := SubscriptionProvider.GetSubscriptions(request)
 		if err != nil {
-			return nil, fmt.Errorf(err.Error.Error())
+			return nil, fmt.Errorf("%s", err.Error.Error())
 		}
 
 		filteredSubs := Filter(discoveredList.Items, client.Config.Filter)
