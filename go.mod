@@ -1,8 +1,6 @@
 module github.com/stolostron/discovery
 
-go 1.24.0
-
-toolchain go1.24.8
+go 1.25.0
 
 require (
 	github.com/gin-gonic/gin v1.9.1
@@ -102,7 +100,7 @@ require (
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.32.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/term v0.37.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
