@@ -130,10 +130,6 @@ func getAPIURL(sub subscription.Subscription, clusterClient cluster.Client, log 
 	}
 
 	if clusterInfo.API.URL != "" {
-		log.V(1).Info("Using API URL from cluster_mgmt API",
-			"clusterID", sub.ClusterID,
-			"externalID", sub.ExternalClusterID,
-			"apiURL", clusterInfo.API.URL)
 		return clusterInfo.API.URL
 	}
 
