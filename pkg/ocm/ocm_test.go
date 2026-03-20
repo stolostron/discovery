@@ -422,7 +422,7 @@ func Test_getAPIURL(t *testing.T) {
 		cluster *cluster.Cluster
 		err     error
 	}
-	
+
 	mockClient := func(cl *cluster.Cluster, err error) cluster.Client {
 		return &mockClusterClientImpl{cluster: cl, err: err}
 	}
@@ -503,7 +503,7 @@ func Test_getAPIURL(t *testing.T) {
 			want: "https://api.test-cluster.example.com:6443",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := getAPIURL(tt.sub, tt.clusterClient, log); got != tt.want {
