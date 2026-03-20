@@ -15,6 +15,11 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+const (
+	// Default OCM API base URL
+	defaultOCMBaseURL = "https://api.openshift.com"
+)
+
 // DiscoverClusters returns a list of DiscoveredClusters found in both the accounts_mgmt and
 // clusters_mgmt apis with the given filters
 func DiscoverClusters(authRequest auth.AuthRequest, filters discovery.Filter) ([]discovery.DiscoveredCluster, error) {
@@ -39,8 +44,14 @@ func DiscoverClusters(authRequest auth.AuthRequest, filters discovery.Filter) ([
 		return nil, err
 	}
 
+	// Determine OCM API base URL (default if not set via annotation)
+	ocmBaseURL := authRequest.BaseURL
+	if ocmBaseURL == "" {
+		ocmBaseURL = defaultOCMBaseURL
+	}
+
 	// Create cluster client for querying individual ROSA clusters
-	clusterClient := cluster.NewClient(authRequest.BaseURL, accessToken)
+	clusterClient := cluster.NewClient(ocmBaseURL, accessToken)
 
 	var discoveredClusters []discovery.DiscoveredCluster
 	for _, sub := range subscriptions {
