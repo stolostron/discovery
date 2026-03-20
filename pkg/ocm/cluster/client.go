@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 const (
@@ -34,9 +35,11 @@ type clusterClient struct {
 // NewClient creates a new cluster client
 func NewClient(baseURL, token string) Client {
 	return &clusterClient{
-		baseURL:    baseURL,
-		token:      token,
-		httpClient: &http.Client{},
+		baseURL: baseURL,
+		token:   token,
+		httpClient: &http.Client{
+			Timeout: 30 * time.Second, // Prevent indefinite blocking
+		},
 	}
 }
 
