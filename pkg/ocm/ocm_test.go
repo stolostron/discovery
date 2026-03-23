@@ -10,7 +10,9 @@ import (
 
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
+	"github.com/stolostron/discovery/pkg/ocm/cluster"
 	"github.com/stolostron/discovery/pkg/ocm/subscription"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var (
@@ -367,4 +369,156 @@ func Test_IsInvalidClient(t *testing.T) {
 		})
 	}
 
+}
+func Test_isROSA(t *testing.T) {
+	tests := []struct {
+		name   string
+		planID string
+		want   bool
+	}{
+		{
+			name:   "MOA is ROSA",
+			planID: "MOA",
+			want:   true,
+		},
+		{
+			name:   "MOA-HostedControlPlane is ROSA",
+			planID: "MOA-HostedControlPlane",
+			want:   true,
+		},
+		{
+			name:   "ROSA is ROSA",
+			planID: "ROSA",
+			want:   true,
+		},
+		{
+			name:   "ROSA-HyperShift is ROSA",
+			planID: "ROSA-HyperShift",
+			want:   true,
+		},
+		{
+			name:   "OCP is not ROSA",
+			planID: "OCP",
+			want:   false,
+		},
+		{
+			name:   "OSD is not ROSA",
+			planID: "OSD",
+			want:   false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isROSA(tt.planID); got != tt.want {
+				t.Errorf("isROSA() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_getAPIURL(t *testing.T) {
+	// Mock cluster client for testing
+	type mockClusterClient struct {
+		cluster *cluster.Cluster
+		err     error
+	}
+
+	mockClient := func(cl *cluster.Cluster, err error) cluster.Client {
+		return &mockClusterClientImpl{cluster: cl, err: err}
+	}
+
+	log := logf.Log.WithName("test")
+
+	tests := []struct {
+		name          string
+		sub           subscription.Subscription
+		clusterClient cluster.Client
+		want          string
+	}{
+		{
+			name: "Non-ROSA cluster uses heuristic",
+			sub: subscription.Subscription{
+				Plan: subscription.StandardKind{
+					ID: "OCP",
+				},
+				ConsoleURL: "https://console-openshift-console.apps.test-cluster.example.com",
+			},
+			clusterClient: nil, // Should not be called
+			want:          "https://api.test-cluster.example.com:6443",
+		},
+		{
+			name: "ROSA cluster with valid cluster_mgmt response",
+			sub: subscription.Subscription{
+				Plan: subscription.StandardKind{
+					ID: "MOA-HostedControlPlane",
+				},
+				ClusterID:  "test-cluster-id",
+				ConsoleURL: "https://console-openshift-console.apps.rosa.test-cluster.example.com",
+			},
+			clusterClient: mockClient(&cluster.Cluster{
+				API: cluster.APISettings{
+					URL: "https://api.test-cluster.example.com:443",
+				},
+			}, nil),
+			want: "https://api.test-cluster.example.com:443",
+		},
+		{
+			name: "ROSA cluster with cluster_mgmt error falls back to heuristic",
+			sub: subscription.Subscription{
+				Plan: subscription.StandardKind{
+					ID: "ROSA",
+				},
+				ClusterID:  "test-cluster-id",
+				ConsoleURL: "https://console-openshift-console.apps.test-cluster.example.com",
+			},
+			clusterClient: mockClient(nil, errors.New("API error")),
+			want:          "https://api.test-cluster.example.com:6443",
+		},
+		{
+			name: "ROSA cluster with missing ClusterID uses heuristic",
+			sub: subscription.Subscription{
+				Plan: subscription.StandardKind{
+					ID: "MOA",
+				},
+				ClusterID:  "",
+				ConsoleURL: "https://console-openshift-console.apps.test-cluster.example.com",
+			},
+			clusterClient: nil, // Should not be called
+			want:          "https://api.test-cluster.example.com:6443",
+		},
+		{
+			name: "ROSA cluster with empty API URL falls back to heuristic",
+			sub: subscription.Subscription{
+				Plan: subscription.StandardKind{
+					ID: "ROSA-HyperShift",
+				},
+				ClusterID:  "test-cluster-id",
+				ConsoleURL: "https://console-openshift-console.apps.test-cluster.example.com",
+			},
+			clusterClient: mockClient(&cluster.Cluster{
+				API: cluster.APISettings{
+					URL: "",
+				},
+			}, nil),
+			want: "https://api.test-cluster.example.com:6443",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getAPIURL(tt.sub, tt.clusterClient, log); got != tt.want {
+				t.Errorf("getAPIURL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// mockClusterClientImpl is a mock implementation of cluster.Client for testing
+type mockClusterClientImpl struct {
+	cluster *cluster.Cluster
+	err     error
+}
+
+func (m *mockClusterClientImpl) GetClusterByID(clusterID string) (*cluster.Cluster, error) {
+	return m.cluster, m.err
 }
