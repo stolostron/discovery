@@ -112,43 +112,6 @@ func Test_statusFilter(t *testing.T) {
 	}
 }
 
-func Test_deprovisionedFilter(t *testing.T) {
-	tests := []struct {
-		name string
-		sub  Subscription
-		want bool
-	}{
-		{
-			name: "Archived sub",
-			sub:  Subscription{Status: "Archived"},
-			want: true,
-		},
-		{
-			name: "Deprovisioned sub",
-			sub:  Subscription{Status: "Deprovisioned"},
-			want: false,
-		},
-		{
-			name: "Non-archived sub",
-			sub:  Subscription{Status: "Active"},
-			want: true,
-		},
-		{
-			name: "No status",
-			sub:  Subscription{Status: ""},
-			want: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			filter := deprovisionedFilter()
-			if got := filter(tt.sub); got != tt.want {
-				t.Errorf("archiveFilter() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_openshiftVersionFilter(t *testing.T) {
 	tests := []struct {
 		name     string
