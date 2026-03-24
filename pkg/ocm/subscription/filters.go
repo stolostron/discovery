@@ -56,13 +56,6 @@ func statusFilter() filterFunc {
 	}
 }
 
-// deprovisionedFilter filters out clusters with a 'Deprovisioned' status
-func deprovisionedFilter() filterFunc {
-	return func(sub Subscription) bool {
-		return sub.Status != "Deprovisioned"
-	}
-}
-
 // openshiftVersionFilter filters out clusters with versions not in the
 // list of Major/Minor semver versions
 func openshiftVersionFilter(versions []discovery.Semver) filterFunc {
