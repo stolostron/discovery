@@ -50,7 +50,7 @@ SHELL = /usr/bin/env bash -o pipefail
 
 # Use toolchain from go.mod so Go uses a complete install (with covdata); avoids
 # "no such tool covdata" when auto-downloaded minimal toolchain is used (golang/go#75031).
-GOTOOLCHAIN ?= $(shell (grep '^toolchain ' go.mod | cut -d' ' -f2) || echo "go$$(grep '^go ' go.mod | cut -d' ' -f2)")
+GOTOOLCHAIN ?= $(shell awk '/^toolchain /{print $$2; found=1} /^go /{gover=$$2} END{if(found==0) print "go"gover}' go.mod)
 export GOTOOLCHAIN
 
 all: build
@@ -287,6 +287,7 @@ ENVTEST ?= $(LOCALBIN)/setup-envtest
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v4.5.7
 CONTROLLER_TOOLS_VERSION ?= v0.15.0
+SETUP_ENVTEST_VERSION ?= v0.0.0-20260404204528-885e77d7d9fc
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
@@ -302,7 +303,7 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
 $(ENVTEST): $(LOCALBIN)
-	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION)
 
 ############################################################
 # KinD CI section
