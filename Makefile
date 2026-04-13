@@ -229,7 +229,7 @@ podman-catalog-push: ## Push a catalog image.
 
 .PHONY: test
 test: envtest ## Run unit tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --arch=amd64 --bin-dir=$(LOCALBIN) -p path)" go test `go list ./... | grep -v e2e` -coverprofile cover.out
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --arch=amd64 --bin-dir=$(LOCALBIN) --use-deprecated-gcs=false -p path)" go test `go list ./... | grep -v e2e` -coverprofile cover.out
 
 integration-tests: ## Run functional/integration tests
 	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
