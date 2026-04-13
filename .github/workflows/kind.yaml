@@ -1,10 +1,5 @@
 name: KinD tests
 
-# NOTE: This workflow may fail during the "Unit Tests" step due to a known issue where
-# setup-envtest cannot authenticate with Google Cloud Storage (GCS 401 Unauthorized error)
-# when downloading Kubernetes test binaries. This is a CI infrastructure issue, not a code
-# issue. Local tests pass successfully with 'make test'.
-
 on:
   pull_request:
     branches:
