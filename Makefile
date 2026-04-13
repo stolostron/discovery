@@ -48,6 +48,11 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
+# Use toolchain from go.mod so Go uses a complete install (with covdata); avoids
+# "no such tool covdata" when auto-downloaded minimal toolchain is used (golang/go#75031).
+GOTOOLCHAIN ?= $(shell (grep '^toolchain ' go.mod | cut -d' ' -f2) || echo "go$$(grep '^go ' go.mod | cut -d' ' -f2)")
+export GOTOOLCHAIN
+
 all: build
 
 ##@ General
@@ -224,7 +229,7 @@ podman-catalog-push: ## Push a catalog image.
 
 .PHONY: test
 test: envtest ## Run unit tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --arch=amd64 --bin-dir=$(LOCALBIN) -p path)" go test `go list ./... | grep -v e2e` -coverprofile cover.out
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test `go list ./... | grep -v e2e` -coverprofile cover.out
 
 integration-tests: ## Run functional/integration tests
 	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
@@ -297,7 +302,7 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
 $(ENVTEST): $(LOCALBIN)
-	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.17
 
 ############################################################
 # KinD CI section

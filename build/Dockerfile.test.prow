@@ -4,6 +4,9 @@ FROM registry.ci.openshift.org/stolostron/builder:go1.25-linux AS builder
 
 WORKDIR /workspace
 
+# Enable automatic Go toolchain downloads
+ENV GOTOOLCHAIN=auto
+
 COPY api/ api/
 COPY test/e2e/ test/e2e/
 COPY go.mod go.mod
