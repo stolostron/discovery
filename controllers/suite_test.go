@@ -41,6 +41,10 @@ var signalHandlerContext context.Context
 var _ = BeforeSuite(func() {
 	log.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
+	// Disable WatchListClient feature to avoid cache sync timeouts with k8s.io v0.35.3
+	// See https://redhat.atlassian.net/browse/ACM-32357
+	Expect(os.Setenv("KUBE_FEATURE_WatchListClient", "false")).To(Succeed())
+
 	// SetupSignalHandler can only be called once, so we'll save the
 	// context it returns and reuse it each time we start a new
 	// manager.
@@ -114,4 +118,5 @@ var _ = BeforeSuite(func() {
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	Expect(os.Unsetenv("UNIT_TEST")).To(Succeed())
+	Expect(os.Unsetenv("KUBE_FEATURE_WatchListClient")).To(Succeed())
 })
