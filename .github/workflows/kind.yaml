@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - 'backplane-*'
 
 defaults:
   run:
@@ -18,7 +19,7 @@ jobs:
     strategy:
       matrix:
         go:
-          - '1.25.2'
+          - '1.25.8'
         kind:
           - 'latest'
     name: KinD tests
