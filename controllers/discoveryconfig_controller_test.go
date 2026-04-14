@@ -276,27 +276,37 @@ var _ = Describe("Discoveryconfig controller", func() {
 				return clusters, nil
 			}
 
-			By("Waiting for some clusters to be created (before check triggers)", func() {
-				Eventually(func() (int, error) {
-					return countDiscoveredClusters(secretChangeNamespace)
-				}, timeout, interval).Should(BeNumerically(">", 0))
+			// Set up hook to change secret after 100 clusters
+			secretChanged := make(chan bool, 1)
+			testClusterApplyHook = func(count int) {
+				if count == 100 {
+					secret := &corev1.Secret{}
+					err := k8sClient.Get(ctx, types.NamespacedName{
+						Name:      secretChangeName,
+						Namespace: secretChangeNamespace,
+					}, secret)
+					if err == nil {
+						secret.Data["ocmAPIToken"] = []byte("changed-token")
+						_ = k8sClient.Update(ctx, secret)
+						secretChanged <- true
+					}
+				}
+			}
+			defer func() { testClusterApplyHook = nil }()
+
+			By("Waiting for reconciliation to complete", func() {
+				// Wait for either secret change or timeout
+				Eventually(secretChanged, timeout).Should(Receive())
 			})
 
-			By("Changing the secret credentials", func() {
-				secret := &corev1.Secret{}
-				Expect(k8sClient.Get(ctx, types.NamespacedName{
-					Name:      secretChangeName,
-					Namespace: secretChangeNamespace,
-				}, secret)).Should(Succeed())
+			By("Verifying that cluster creation was aborted at 100", func() {
+				// Give it a moment to finish processing
+				time.Sleep(time.Millisecond * 500)
 
-				secret.Data["ocmAPIToken"] = []byte("changed-token")
-				Expect(k8sClient.Update(ctx, secret)).Should(Succeed())
-			})
-
-			By("Verifying that not all 150 clusters were created (aborted at check)", func() {
-				Consistently(func() (int, error) {
-					return countDiscoveredClusters(secretChangeNamespace)
-				}, time.Second*5, interval).Should(BeNumerically("<", 150))
+				count, err := countDiscoveredClusters(secretChangeNamespace)
+				Expect(err).NotTo(HaveOccurred())
+				// Should have aborted right at the 100-cluster check (check happens when clusterCount%100==0)
+				Expect(count).Should(Equal(100))
 			})
 		})
 
@@ -357,25 +367,45 @@ var _ = Describe("Discoveryconfig controller", func() {
 				return clusters, nil
 			}
 
-			By("Waiting for initial clusters to be created", func() {
-				Eventually(func() (int, error) {
-					return countDiscoveredClusters(deletionNamespace)
-				}, timeout, interval).Should(BeNumerically(">", 0))
+			// Set up hook to delete secret after 100 clusters
+			secretDeleted := make(chan bool, 1)
+			testClusterApplyHook = func(count int) {
+				if count == 100 {
+					GinkgoWriter.Printf("Test hook triggered at count=%d\n", count)
+					secret := &corev1.Secret{}
+					err := k8sClient.Get(ctx, types.NamespacedName{
+						Name:      deletionSecretName,
+						Namespace: deletionNamespace,
+					}, secret)
+					if err != nil {
+						GinkgoWriter.Printf("Error getting secret: %v\n", err)
+					} else {
+						GinkgoWriter.Printf("Deleting secret\n")
+						deleteErr := k8sClient.Delete(ctx, secret)
+						if deleteErr != nil {
+							GinkgoWriter.Printf("Error deleting secret: %v\n", deleteErr)
+						}
+						secretDeleted <- true
+					}
+				}
+			}
+			defer func() {
+				GinkgoWriter.Printf("Cleaning up test hook\n")
+				testClusterApplyHook = nil
+			}()
+
+			By("Waiting for reconciliation and secret deletion", func() {
+				Eventually(secretDeleted, timeout).Should(Receive())
 			})
 
-			By("Deleting the secret", func() {
-				secret := &corev1.Secret{}
-				Expect(k8sClient.Get(ctx, types.NamespacedName{
-					Name:      deletionSecretName,
-					Namespace: deletionNamespace,
-				}, secret)).Should(Succeed())
-				Expect(k8sClient.Delete(ctx, secret)).Should(Succeed())
-			})
+			By("Verifying that cluster creation was aborted at 100", func() {
+				// Give it a moment to finish processing
+				time.Sleep(time.Millisecond * 500)
 
-			By("Verifying that not all 150 clusters were created (aborted)", func() {
-				Consistently(func() (int, error) {
-					return countDiscoveredClusters(deletionNamespace)
-				}, time.Second*5, interval).Should(BeNumerically("<", 150))
+				count, err := countDiscoveredClusters(deletionNamespace)
+				Expect(err).NotTo(HaveOccurred())
+				// Should have aborted right at the 100-cluster check (check happens when clusterCount%100==0)
+				Expect(count).Should(Equal(100))
 			})
 		})
 

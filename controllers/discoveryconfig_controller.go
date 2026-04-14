@@ -59,6 +59,9 @@ var mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
 	return []discovery.DiscoveredCluster{}, nil
 }
 
+// testClusterApplyHook is a test hook called after each cluster is applied (only used in tests)
+var testClusterApplyHook func(clusterCount int)
+
 // DiscoveryConfigReconciler reconciles a DiscoveryConfig object
 type DiscoveryConfigReconciler struct {
 	client.Client
@@ -261,6 +264,11 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 		}
 		delete(existing, discoveredCluster.Spec.Name)
 		clusterCount++
+
+		// Call test hook if set (for coordinating test actions during cluster creation)
+		if testClusterApplyHook != nil {
+			testClusterApplyHook(clusterCount)
+		}
 	}
 
 	// Everything remaining in existing should be deleted
