@@ -92,6 +92,7 @@ func init() {
 	utilruntime.Must(apixv1.AddToScheme(scheme))
 	utilruntime.Must(clusterapiv1.AddToScheme(scheme))
 	utilruntime.Must(corev1.AddToScheme(scheme))
+	utilruntime.Must(configv1.AddToScheme(scheme))
 	utilruntime.Must(discoveryv1.AddToScheme(scheme))
 	utilruntime.Must(agentv1.SchemeBuilder.AddToScheme(scheme))
 	utilruntime.Must(klusterletconfigv1alpha1.AddToScheme(scheme))
