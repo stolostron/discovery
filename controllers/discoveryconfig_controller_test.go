@@ -242,20 +242,8 @@ var _ = Describe("Discoveryconfig controller", func() {
 				})).Should(Succeed())
 			})
 
-			By("Creating a DiscoveryConfig", func() {
-				Expect(k8sClient.Create(ctx, &discovery.DiscoveryConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      TestDiscoveryConfigName,
-						Namespace: secretChangeNamespace,
-					},
-					Spec: discovery.DiscoveryConfigSpec{
-						Credential: secretChangeName,
-						Filters:    discovery.Filter{LastActive: 7},
-					},
-				})).Should(Succeed())
-			})
-
 			// Mock returning 150 clusters to trigger the check at cluster 100
+			// IMPORTANT: Set up mock and hook BEFORE creating DiscoveryConfig
 			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
 				clusters := make([]discovery.DiscoveredCluster, 150)
 				for i := 0; i < 150; i++ {
@@ -278,6 +266,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 			}
 
 			// Set up hook to change secret after 100 clusters
+			// IMPORTANT: Set up BEFORE creating DiscoveryConfig so it's ready when reconciliation starts
 			secretChanged := make(chan bool, 1)
 			testClusterApplyHook = func(count int) {
 				if count == 100 {
@@ -294,6 +283,19 @@ var _ = Describe("Discoveryconfig controller", func() {
 				}
 			}
 			defer func() { testClusterApplyHook = nil }()
+
+			By("Creating a DiscoveryConfig to trigger reconciliation", func() {
+				Expect(k8sClient.Create(ctx, &discovery.DiscoveryConfig{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      TestDiscoveryConfigName,
+						Namespace: secretChangeNamespace,
+					},
+					Spec: discovery.DiscoveryConfigSpec{
+						Credential: secretChangeName,
+						Filters:    discovery.Filter{LastActive: 7},
+					},
+				})).Should(Succeed())
+			})
 
 			By("Waiting for secret change to be triggered", func() {
 				// Wait for hook to trigger secret change
@@ -345,19 +347,7 @@ var _ = Describe("Discoveryconfig controller", func() {
 				})).Should(Succeed())
 			})
 
-			By("Creating a DiscoveryConfig", func() {
-				Expect(k8sClient.Create(ctx, &discovery.DiscoveryConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      TestDiscoveryConfigName,
-						Namespace: deletionNamespace,
-					},
-					Spec: discovery.DiscoveryConfigSpec{
-						Credential: deletionSecretName,
-						Filters:    discovery.Filter{LastActive: 7},
-					},
-				})).Should(Succeed())
-			})
-
+			// IMPORTANT: Set up mock and hook BEFORE creating DiscoveryConfig
 			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
 				clusters := make([]discovery.DiscoveredCluster, 150)
 				for i := 0; i < 150; i++ {
@@ -380,31 +370,35 @@ var _ = Describe("Discoveryconfig controller", func() {
 			}
 
 			// Set up hook to delete secret after 100 clusters
+			// IMPORTANT: Set up BEFORE creating DiscoveryConfig so it's ready when reconciliation starts
 			secretDeleted := make(chan bool, 1)
 			testClusterApplyHook = func(count int) {
 				if count == 100 {
-					GinkgoWriter.Printf("Test hook triggered at count=%d\n", count)
 					secret := &corev1.Secret{}
 					err := k8sClient.Get(ctx, types.NamespacedName{
 						Name:      deletionSecretName,
 						Namespace: deletionNamespace,
 					}, secret)
-					if err != nil {
-						GinkgoWriter.Printf("Error getting secret: %v\n", err)
-					} else {
-						GinkgoWriter.Printf("Deleting secret\n")
-						deleteErr := k8sClient.Delete(ctx, secret)
-						if deleteErr != nil {
-							GinkgoWriter.Printf("Error deleting secret: %v\n", deleteErr)
-						}
+					if err == nil {
+						_ = k8sClient.Delete(ctx, secret)
 						secretDeleted <- true
 					}
 				}
 			}
-			defer func() {
-				GinkgoWriter.Printf("Cleaning up test hook\n")
-				testClusterApplyHook = nil
-			}()
+			defer func() { testClusterApplyHook = nil }()
+
+			By("Creating a DiscoveryConfig to trigger reconciliation", func() {
+				Expect(k8sClient.Create(ctx, &discovery.DiscoveryConfig{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      TestDiscoveryConfigName,
+						Namespace: deletionNamespace,
+					},
+					Spec: discovery.DiscoveryConfigSpec{
+						Credential: deletionSecretName,
+						Filters:    discovery.Filter{LastActive: 7},
+					},
+				})).Should(Succeed())
+			})
 
 			By("Waiting for secret deletion to be triggered", func() {
 				// Wait for hook to trigger secret deletion
