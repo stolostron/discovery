@@ -30,6 +30,7 @@ import (
 	discovery "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/pkg/ocm/auth"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -294,19 +295,32 @@ var _ = Describe("Discoveryconfig controller", func() {
 			}
 			defer func() { testClusterApplyHook = nil }()
 
-			By("Waiting for reconciliation to complete", func() {
-				// Wait for either secret change or timeout
+			By("Waiting for secret change to be triggered", func() {
+				// Wait for hook to trigger secret change
 				Eventually(secretChanged, timeout).Should(Receive())
 			})
 
-			By("Verifying that cluster creation was aborted at 100", func() {
-				// Give it a moment to finish processing
-				time.Sleep(time.Millisecond * 500)
+			By("Verifying the secret was actually mutated", func() {
+				secret := &corev1.Secret{}
+				Expect(k8sClient.Get(ctx, types.NamespacedName{
+					Name:      secretChangeName,
+					Namespace: secretChangeNamespace,
+				}, secret)).Should(Succeed())
+				Expect(string(secret.Data["ocmAPIToken"])).Should(Equal("changed-token"))
+			})
 
-				count, err := countDiscoveredClusters(secretChangeNamespace)
-				Expect(err).NotTo(HaveOccurred())
-				// Should have aborted right at the 100-cluster check (check happens when clusterCount%100==0)
-				Expect(count).Should(Equal(100))
+			By("Verifying that cluster creation was aborted at 100", func() {
+				// Poll until count stabilizes to ensure reconciliation stopped
+				var stableCount int
+				Eventually(func() int {
+					count, err := countDiscoveredClusters(secretChangeNamespace)
+					Expect(err).NotTo(HaveOccurred())
+					if count == stableCount {
+						return count
+					}
+					stableCount = count
+					return -1 // Return sentinel until stable
+				}, timeout, interval).Should(Equal(100))
 			})
 		})
 
@@ -394,18 +408,32 @@ var _ = Describe("Discoveryconfig controller", func() {
 				testClusterApplyHook = nil
 			}()
 
-			By("Waiting for reconciliation and secret deletion", func() {
+			By("Waiting for secret deletion to be triggered", func() {
+				// Wait for hook to trigger secret deletion
 				Eventually(secretDeleted, timeout).Should(Receive())
 			})
 
-			By("Verifying that cluster creation was aborted at 100", func() {
-				// Give it a moment to finish processing
-				time.Sleep(time.Millisecond * 500)
+			By("Verifying the secret was actually deleted", func() {
+				secret := &corev1.Secret{}
+				err := k8sClient.Get(ctx, types.NamespacedName{
+					Name:      deletionSecretName,
+					Namespace: deletionNamespace,
+				}, secret)
+				Expect(apierrors.IsNotFound(err)).Should(BeTrue())
+			})
 
-				count, err := countDiscoveredClusters(deletionNamespace)
-				Expect(err).NotTo(HaveOccurred())
-				// Should have aborted right at the 100-cluster check (check happens when clusterCount%100==0)
-				Expect(count).Should(Equal(100))
+			By("Verifying that cluster creation was aborted at 100", func() {
+				// Poll until count stabilizes to ensure reconciliation stopped
+				var stableCount int
+				Eventually(func() int {
+					count, err := countDiscoveredClusters(deletionNamespace)
+					Expect(err).NotTo(HaveOccurred())
+					if count == stableCount {
+						return count
+					}
+					stableCount = count
+					return -1 // Return sentinel until stable
+				}, timeout, interval).Should(Equal(100))
 			})
 		})
 
@@ -445,10 +473,10 @@ var _ = Describe("Discoveryconfig controller", func() {
 				})).Should(Succeed())
 			})
 
-			// Return exactly 50 clusters (less than 100, so no check will trigger)
+			// Return 150 clusters to exercise the check at 100 (happy path: no change detected)
 			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
-				clusters := make([]discovery.DiscoveredCluster, 50)
-				for i := 0; i < 50; i++ {
+				clusters := make([]discovery.DiscoveredCluster, 150)
+				for i := 0; i < 150; i++ {
 					clusterName := fmt.Sprintf("stable-cluster-%d", i)
 					clusters[i] = discovery.DiscoveredCluster{
 						ObjectMeta: metav1.ObjectMeta{
@@ -467,10 +495,10 @@ var _ = Describe("Discoveryconfig controller", func() {
 				return clusters, nil
 			}
 
-			By("Verifying all 50 clusters are created", func() {
+			By("Verifying all 150 clusters are created (secret check passed at 100)", func() {
 				Eventually(func() (int, error) {
 					return countDiscoveredClusters(noChangeNamespace)
-				}, timeout, interval).Should(Equal(50))
+				}, timeout, interval).Should(Equal(150))
 			})
 		})
 	})
