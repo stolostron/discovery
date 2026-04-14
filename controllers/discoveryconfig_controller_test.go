@@ -310,17 +310,15 @@ var _ = Describe("Discoveryconfig controller", func() {
 			})
 
 			By("Verifying that cluster creation was aborted at 100", func() {
-				// Poll until count stabilizes to ensure reconciliation stopped
-				var stableCount int
-				Eventually(func() int {
-					count, err := countDiscoveredClusters(secretChangeNamespace)
-					Expect(err).NotTo(HaveOccurred())
-					if count == stableCount {
-						return count
-					}
-					stableCount = count
-					return -1 // Return sentinel until stable
+				// Wait for reconciliation to complete and verify final count
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(secretChangeNamespace)
 				}, timeout, interval).Should(Equal(100))
+
+				// Verify count remains stable (hasn't continued creating clusters)
+				Consistently(func() (int, error) {
+					return countDiscoveredClusters(secretChangeNamespace)
+				}, time.Second*2, interval).Should(Equal(100))
 			})
 		})
 
@@ -423,17 +421,15 @@ var _ = Describe("Discoveryconfig controller", func() {
 			})
 
 			By("Verifying that cluster creation was aborted at 100", func() {
-				// Poll until count stabilizes to ensure reconciliation stopped
-				var stableCount int
-				Eventually(func() int {
-					count, err := countDiscoveredClusters(deletionNamespace)
-					Expect(err).NotTo(HaveOccurred())
-					if count == stableCount {
-						return count
-					}
-					stableCount = count
-					return -1 // Return sentinel until stable
+				// Wait for reconciliation to complete and verify final count
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(deletionNamespace)
 				}, timeout, interval).Should(Equal(100))
+
+				// Verify count remains stable (hasn't continued creating clusters)
+				Consistently(func() (int, error) {
+					return countDiscoveredClusters(deletionNamespace)
+				}, time.Second*2, interval).Should(Equal(100))
 			})
 		})
 
