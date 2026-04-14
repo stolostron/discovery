@@ -146,6 +146,13 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 		return r.deleteAllClusters(ctx, config)
 	}
 
+	// Store original secret data to detect changes during cluster creation.
+	// This enables quick detection of credential changes during long-running apply operations.
+	originalSecretData := make(map[string]string)
+	for key, value := range ocmSecret.Data {
+		originalSecretData[key] = string(value)
+	}
+
 	// Set the baseURL for authentication requests.
 	authRequest.BaseURL = getURLOverride(config)
 	authRequest.BaseAuthURL = getAuthURLOverride(config)
@@ -197,12 +204,43 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 	}
 
 	// Apply clusters discovered
+	// Check every 100 clusters if secret changed to enable quick detection of credential revocation
+	clusterCount := 0
 	for _, discoveredCluster := range allClusters {
+		// Check if secret changed every 100 clusters
+		if clusterCount > 0 && clusterCount%100 == 0 {
+			currentSecret := &corev1.Secret{}
+			if err := r.Get(context.TODO(), types.NamespacedName{Name: secretName, Namespace: config.Namespace}, currentSecret); err != nil {
+				if apierrors.IsNotFound(err) {
+					logf.Info("Secret deleted during cluster creation, aborting", "ClustersCreated", clusterCount)
+					return nil
+				}
+				logf.Error(err, "Failed to check secret during cluster creation", "ClustersCreated", clusterCount)
+				// Continue applying - don't fail on transient errors
+			} else {
+				// Check if any credential field changed
+				secretChanged := false
+				for key, originalValue := range originalSecretData {
+					if string(currentSecret.Data[key]) != originalValue {
+						secretChanged = true
+						break
+					}
+				}
+				if secretChanged {
+					logf.Info("Secret credentials changed during cluster creation, aborting",
+						"ClustersCreated", clusterCount,
+						"TotalClusters", len(allClusters))
+					return nil
+				}
+			}
+		}
+
 		err := r.applyCluster(ctx, config, discoveredCluster, existing)
 		if err != nil {
 			return err
 		}
 		delete(existing, discoveredCluster.Spec.Name)
+		clusterCount++
 	}
 
 	// Everything remaining in existing should be deleted
