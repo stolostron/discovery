@@ -215,23 +215,43 @@ func (r *DiscoveryConfigReconciler) updateDiscoveredClusters(ctx context.Context
 					logf.Info("Secret deleted during cluster creation, aborting", "ClustersCreated", clusterCount)
 					return nil
 				}
-				logf.Error(err, "Failed to check secret during cluster creation", "ClustersCreated", clusterCount)
-				// Continue applying - don't fail on transient errors
+				// Fail-closed: abort if we can't read the secret
+				logf.Error(err, "Failed to check secret during cluster creation, aborting", "ClustersCreated", clusterCount)
+				return err
+			}
+
+			// Check for complete secret equivalence (additions, deletions, and value changes)
+			secretChanged := false
+
+			// Check if number of keys changed
+			if len(currentSecret.Data) != len(originalSecretData) {
+				secretChanged = true
 			} else {
-				// Check if any credential field changed
-				secretChanged := false
+				// Check if any original keys were modified or removed
 				for key, originalValue := range originalSecretData {
-					if string(currentSecret.Data[key]) != originalValue {
+					currentValue, exists := currentSecret.Data[key]
+					if !exists || string(currentValue) != originalValue {
 						secretChanged = true
 						break
 					}
 				}
-				if secretChanged {
-					logf.Info("Secret credentials changed during cluster creation, aborting",
-						"ClustersCreated", clusterCount,
-						"TotalClusters", len(allClusters))
-					return nil
+
+				// Check if any new keys were added
+				if !secretChanged {
+					for key := range currentSecret.Data {
+						if _, exists := originalSecretData[key]; !exists {
+							secretChanged = true
+							break
+						}
+					}
 				}
+			}
+
+			if secretChanged {
+				logf.Info("Secret credentials changed during cluster creation, aborting",
+					"ClustersCreated", clusterCount,
+					"TotalClusters", len(allClusters))
+				return nil
 			}
 		}
 

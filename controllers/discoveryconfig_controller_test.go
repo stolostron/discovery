@@ -216,6 +216,231 @@ var _ = Describe("Discoveryconfig controller", func() {
 		})
 	})
 
+	Context("Secret change detection during cluster creation", func() {
+		const secretChangeNamespace = "secret-change-test"
+		const secretChangeName = "secret-change-test"
+
+		It("Should abort cluster creation when secret credentials change", func() {
+			By("Creating a test namespace", func() {
+				err := k8sClient.Create(ctx, &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: secretChangeNamespace},
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			By("Creating a secret with initial credentials", func() {
+				Expect(k8sClient.Create(ctx, &corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      secretChangeName,
+						Namespace: secretChangeNamespace,
+					},
+					StringData: map[string]string{
+						"ocmAPIToken": "initial-token",
+					},
+				})).Should(Succeed())
+			})
+
+			By("Creating a DiscoveryConfig", func() {
+				Expect(k8sClient.Create(ctx, &discovery.DiscoveryConfig{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      TestDiscoveryConfigName,
+						Namespace: secretChangeNamespace,
+					},
+					Spec: discovery.DiscoveryConfigSpec{
+						Credential: secretChangeName,
+						Filters:    discovery.Filter{LastActive: 7},
+					},
+				})).Should(Succeed())
+			})
+
+			// Mock returning 150 clusters to trigger the check at cluster 100
+			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
+				clusters := make([]discovery.DiscoveredCluster, 150)
+				for i := 0; i < 150; i++ {
+					clusters[i] = discovery.DiscoveredCluster{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "cluster-" + string(rune(i)),
+							Namespace: secretChangeNamespace,
+						},
+						Spec: discovery.DiscoveredClusterSpec{
+							Name:              "cluster-" + string(rune(i)),
+							DisplayName:       "cluster-" + string(rune(i)),
+							OpenshiftVersion:  "4.10.0",
+							CreationTimestamp: &mockTime,
+							ActivityTimestamp: &mockTime,
+						},
+					}
+				}
+				return clusters, nil
+			}
+
+			By("Waiting for some clusters to be created (before check triggers)", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(secretChangeNamespace)
+				}, timeout, interval).Should(BeNumerically(">", 0))
+			})
+
+			By("Changing the secret credentials", func() {
+				secret := &corev1.Secret{}
+				Expect(k8sClient.Get(ctx, types.NamespacedName{
+					Name:      secretChangeName,
+					Namespace: secretChangeNamespace,
+				}, secret)).Should(Succeed())
+
+				secret.Data["ocmAPIToken"] = []byte("changed-token")
+				Expect(k8sClient.Update(ctx, secret)).Should(Succeed())
+			})
+
+			By("Verifying that not all 150 clusters were created (aborted at check)", func() {
+				Consistently(func() (int, error) {
+					return countDiscoveredClusters(secretChangeNamespace)
+				}, time.Second*5, interval).Should(BeNumerically("<", 150))
+			})
+		})
+
+		It("Should abort cluster creation when secret is deleted", func() {
+			const deletionNamespace = "secret-deletion-test"
+			const deletionSecretName = "deletion-test-secret"
+
+			By("Creating a test namespace", func() {
+				err := k8sClient.Create(ctx, &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: deletionNamespace},
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			By("Creating a secret", func() {
+				Expect(k8sClient.Create(ctx, &corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      deletionSecretName,
+						Namespace: deletionNamespace,
+					},
+					StringData: map[string]string{
+						"ocmAPIToken": "test-token",
+					},
+				})).Should(Succeed())
+			})
+
+			By("Creating a DiscoveryConfig", func() {
+				Expect(k8sClient.Create(ctx, &discovery.DiscoveryConfig{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      TestDiscoveryConfigName,
+						Namespace: deletionNamespace,
+					},
+					Spec: discovery.DiscoveryConfigSpec{
+						Credential: deletionSecretName,
+						Filters:    discovery.Filter{LastActive: 7},
+					},
+				})).Should(Succeed())
+			})
+
+			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
+				clusters := make([]discovery.DiscoveredCluster, 150)
+				for i := 0; i < 150; i++ {
+					clusters[i] = discovery.DiscoveredCluster{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "del-cluster-" + string(rune(i)),
+							Namespace: deletionNamespace,
+						},
+						Spec: discovery.DiscoveredClusterSpec{
+							Name:              "del-cluster-" + string(rune(i)),
+							DisplayName:       "del-cluster-" + string(rune(i)),
+							OpenshiftVersion:  "4.10.0",
+							CreationTimestamp: &mockTime,
+							ActivityTimestamp: &mockTime,
+						},
+					}
+				}
+				return clusters, nil
+			}
+
+			By("Waiting for initial clusters to be created", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(deletionNamespace)
+				}, timeout, interval).Should(BeNumerically(">", 0))
+			})
+
+			By("Deleting the secret", func() {
+				secret := &corev1.Secret{}
+				Expect(k8sClient.Get(ctx, types.NamespacedName{
+					Name:      deletionSecretName,
+					Namespace: deletionNamespace,
+				}, secret)).Should(Succeed())
+				Expect(k8sClient.Delete(ctx, secret)).Should(Succeed())
+			})
+
+			By("Verifying that not all 150 clusters were created (aborted)", func() {
+				Consistently(func() (int, error) {
+					return countDiscoveredClusters(deletionNamespace)
+				}, time.Second*5, interval).Should(BeNumerically("<", 150))
+			})
+		})
+
+		It("Should create all clusters when secret does not change", func() {
+			const noChangeNamespace = "no-change-test"
+			const noChangeSecretName = "no-change-secret"
+
+			By("Creating a test namespace", func() {
+				err := k8sClient.Create(ctx, &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: noChangeNamespace},
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			By("Creating a secret", func() {
+				Expect(k8sClient.Create(ctx, &corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      noChangeSecretName,
+						Namespace: noChangeNamespace,
+					},
+					StringData: map[string]string{
+						"ocmAPIToken": "stable-token",
+					},
+				})).Should(Succeed())
+			})
+
+			By("Creating a DiscoveryConfig", func() {
+				Expect(k8sClient.Create(ctx, &discovery.DiscoveryConfig{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      TestDiscoveryConfigName,
+						Namespace: noChangeNamespace,
+					},
+					Spec: discovery.DiscoveryConfigSpec{
+						Credential: noChangeSecretName,
+						Filters:    discovery.Filter{LastActive: 7},
+					},
+				})).Should(Succeed())
+			})
+
+			// Return exactly 50 clusters (less than 100, so no check will trigger)
+			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
+				clusters := make([]discovery.DiscoveredCluster, 50)
+				for i := 0; i < 50; i++ {
+					clusters[i] = discovery.DiscoveredCluster{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "stable-cluster-" + string(rune(i)),
+							Namespace: noChangeNamespace,
+						},
+						Spec: discovery.DiscoveredClusterSpec{
+							Name:              "stable-cluster-" + string(rune(i)),
+							DisplayName:       "stable-cluster-" + string(rune(i)),
+							OpenshiftVersion:  "4.10.0",
+							CreationTimestamp: &mockTime,
+							ActivityTimestamp: &mockTime,
+						},
+					}
+				}
+				return clusters, nil
+			}
+
+			By("Verifying all 50 clusters are created", func() {
+				Eventually(func() (int, error) {
+					return countDiscoveredClusters(noChangeNamespace)
+				}, timeout, interval).Should(Equal(50))
+			})
+		})
+	})
+
 })
 
 func Test_parseSecretForAuth(t *testing.T) {
