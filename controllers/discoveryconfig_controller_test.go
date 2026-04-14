@@ -20,6 +20,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -257,14 +258,15 @@ var _ = Describe("Discoveryconfig controller", func() {
 			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
 				clusters := make([]discovery.DiscoveredCluster, 150)
 				for i := 0; i < 150; i++ {
+					clusterName := fmt.Sprintf("cluster-%d", i)
 					clusters[i] = discovery.DiscoveredCluster{
 						ObjectMeta: metav1.ObjectMeta{
-							Name:      "cluster-" + string(rune(i)),
+							Name:      clusterName,
 							Namespace: secretChangeNamespace,
 						},
 						Spec: discovery.DiscoveredClusterSpec{
-							Name:              "cluster-" + string(rune(i)),
-							DisplayName:       "cluster-" + string(rune(i)),
+							Name:              clusterName,
+							DisplayName:       clusterName,
 							OpenshiftVersion:  "4.10.0",
 							CreationTimestamp: &mockTime,
 							ActivityTimestamp: &mockTime,
@@ -337,14 +339,15 @@ var _ = Describe("Discoveryconfig controller", func() {
 			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
 				clusters := make([]discovery.DiscoveredCluster, 150)
 				for i := 0; i < 150; i++ {
+					clusterName := fmt.Sprintf("del-cluster-%d", i)
 					clusters[i] = discovery.DiscoveredCluster{
 						ObjectMeta: metav1.ObjectMeta{
-							Name:      "del-cluster-" + string(rune(i)),
+							Name:      clusterName,
 							Namespace: deletionNamespace,
 						},
 						Spec: discovery.DiscoveredClusterSpec{
-							Name:              "del-cluster-" + string(rune(i)),
-							DisplayName:       "del-cluster-" + string(rune(i)),
+							Name:              clusterName,
+							DisplayName:       clusterName,
 							OpenshiftVersion:  "4.10.0",
 							CreationTimestamp: &mockTime,
 							ActivityTimestamp: &mockTime,
@@ -416,14 +419,15 @@ var _ = Describe("Discoveryconfig controller", func() {
 			mockDiscoveredCluster = func() ([]discovery.DiscoveredCluster, error) {
 				clusters := make([]discovery.DiscoveredCluster, 50)
 				for i := 0; i < 50; i++ {
+					clusterName := fmt.Sprintf("stable-cluster-%d", i)
 					clusters[i] = discovery.DiscoveredCluster{
 						ObjectMeta: metav1.ObjectMeta{
-							Name:      "stable-cluster-" + string(rune(i)),
+							Name:      clusterName,
 							Namespace: noChangeNamespace,
 						},
 						Spec: discovery.DiscoveredClusterSpec{
-							Name:              "stable-cluster-" + string(rune(i)),
-							DisplayName:       "stable-cluster-" + string(rune(i)),
+							Name:              clusterName,
+							DisplayName:       clusterName,
 							OpenshiftVersion:  "4.10.0",
 							CreationTimestamp: &mockTime,
 							ActivityTimestamp: &mockTime,
