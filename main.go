@@ -20,6 +20,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"os"
@@ -39,6 +40,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	admissionregistration "k8s.io/api/admissionregistration/v1"
 	apixv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	configv1 "github.com/openshift/api/config/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -64,6 +66,7 @@ import (
 	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 	discoveryv1 "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/controllers"
+	"github.com/stolostron/discovery/pkg/ocm"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
@@ -136,6 +139,29 @@ func main() {
 	setupLog.Info(fmt.Sprintf("Go Version: %s", goruntime.Version()))
 	setupLog.Info(fmt.Sprintf("Go OS/Arch: %s/%s", goruntime.GOOS, goruntime.GOARCH))
 
+	// Create uncached client early for TLS profile fetching and other setup tasks
+	ctx := context.Background()
+	uncachedClient, err := client.New(ctrl.GetConfigOrDie(), client.Options{
+		Scheme: scheme,
+	})
+	if err != nil {
+		setupLog.Error(err, "unable to create uncached client")
+		os.Exit(1)
+	}
+
+	// Get TLS configuration from OpenShift APIServer profile
+	tlsProfile, err := ocm.GetAPIServerTLSProfile(ctx, uncachedClient)
+	if err != nil {
+		setupLog.Error(err, "unable to get APIServer TLS profile, using default TLS 1.2")
+		// Continue with default if we can't get the profile
+		tlsProfile = &configv1.TLSProfileSpec{
+			MinTLSVersion: configv1.VersionTLS12,
+		}
+	}
+
+	minTLSVersion := ocm.ConvertTLSVersion(tlsProfile.MinTLSVersion)
+	setupLog.Info("Configuring webhook server TLS", "minTLSVersion", tlsProfile.MinTLSVersion, "numericValue", minTLSVersion)
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: scheme,
 		Metrics: metricsserver.Options{
@@ -143,6 +169,9 @@ func main() {
 		},
 		WebhookServer: webhook.NewServer(webhook.Options{
 			Port: 9443,
+			TLSOpts: []func(*tls.Config){func(config *tls.Config) {
+				config.MinVersion = minTLSVersion
+			}},
 		}),
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
@@ -153,14 +182,6 @@ func main() {
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
-		os.Exit(1)
-	}
-
-	uncachedClient, err := client.New(ctrl.GetConfigOrDie(), client.Options{
-		Scheme: scheme,
-	})
-	if err != nil {
-		setupLog.Error(err, "unable to create uncached client")
 		os.Exit(1)
 	}
 
