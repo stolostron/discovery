@@ -152,26 +152,9 @@ func main() {
 
 	// Get TLS configuration from OpenShift APIServer profile
 	tlsProfile, err := ocm.GetAPIServerTLSProfile(ctx, uncachedClient)
-	if err != nil {
-		setupLog.Error(err, "unable to get APIServer TLS profile, using default TLS 1.2")
-		// Continue with default if we can't get the profile
-		// Use Intermediate profile ciphers as secure default for TLS 1.2
-		tlsProfile = &configv1.TLSProfileSpec{
-			MinTLSVersion: configv1.VersionTLS12,
-			Ciphers: []string{
-				"TLS_AES_128_GCM_SHA256",
-				"TLS_AES_256_GCM_SHA384",
-				"TLS_CHACHA20_POLY1305_SHA256",
-				"ECDHE-ECDSA-AES128-GCM-SHA256",
-				"ECDHE-RSA-AES128-GCM-SHA256",
-				"ECDHE-ECDSA-AES256-GCM-SHA384",
-				"ECDHE-RSA-AES256-GCM-SHA384",
-				"ECDHE-ECDSA-CHACHA20-POLY1305",
-				"ECDHE-RSA-CHACHA20-POLY1305",
-				"DHE-RSA-AES128-GCM-SHA256",
-				"DHE-RSA-AES256-GCM-SHA384",
-			},
-		}
+	if err != nil || tlsProfile == nil {
+		setupLog.Error(err, "unable to get APIServer TLS profile, using default Intermediate profile")
+		tlsProfile = configv1.TLSProfiles[configv1.TLSProfileIntermediateType]
 	}
 
 	minTLSVersion := ocm.ConvertTLSVersion(tlsProfile.MinTLSVersion)
