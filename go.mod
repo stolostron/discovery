@@ -10,7 +10,7 @@ require (
 	github.com/openshift/api v0.0.0-20240509232804-02500a65025d
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
-	github.com/rs/zerolog v1.34.0
+	github.com/rs/zerolog v1.35.1
 	github.com/stolostron/cluster-lifecycle-api v0.0.0-20240813023109-42b5c115d0a3
 	github.com/stolostron/klusterlet-addon-controller v0.0.0-20251011010713-c9f0c7b72224
 	github.com/stretchr/testify v1.11.1
