@@ -99,11 +99,11 @@ type DiscoveredClusterSpec struct {
 
 type DiscoveredClusterCondition struct {
 	// Type is the type of the discovered cluster condition.
-	// +required
+	// +optional
 	Type DiscoveredClusterConditionType `json:"type,omitempty"`
 
 	// Status is the status of the condition. One of True, False, Unknown.
-	// +required
+	// +optional
 	Status metav1.ConditionStatus `json:"status,omitempty"`
 
 	// The last time this condition was updated.
