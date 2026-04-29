@@ -100,8 +100,7 @@ type DiscoveredClusterSpec struct {
 // DiscoveredClusterCondition represents an observation of a DiscoveredCluster's state
 type DiscoveredClusterCondition struct {
 	// Type of the condition
-	// +optional
-	Type string `json:"type,omitempty"`
+	Type string `json:"type"`
 
 	// Status of the condition (True, False, Unknown)
 	// +optional

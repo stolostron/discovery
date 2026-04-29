@@ -210,6 +210,8 @@ spec:
                     type:
                       description: Type of the condition
                       type: string
+                  required:
+                  - type
                   type: object
                 type: array
                 x-kubernetes-list-map-keys:
