@@ -101,6 +101,9 @@ type DiscoveredClusterSpec struct {
 
 	// Type defines the type of cluster, such as OpenShift, Kubernetes, or a specific managed service type.
 	Type string `json:"type" yaml:"type"`
+
+	// Usage indicates the cluster's intended purpose (e.g., Development/Test, Production).
+	Usage string `json:"usage,omitempty" yaml:"usage,omitempty"`
 }
 
 type DiscoveredClusterCondition struct {
@@ -183,7 +186,8 @@ func (a DiscoveredCluster) Equal(b DiscoveredCluster) bool {
 		a.Spec.Region != b.Spec.Region ||
 		a.Spec.SupportLevel != b.Spec.SupportLevel ||
 		a.Spec.Status != b.Spec.Status ||
-		a.Spec.Type != b.Spec.Type {
+		a.Spec.Type != b.Spec.Type ||
+		a.Spec.Usage != b.Spec.Usage {
 		return false
 	}
 	return true

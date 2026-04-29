@@ -99,6 +99,7 @@ func formatCluster(sub subscription.Subscription, clusterClient cluster.Client, 
 			Status:            sub.Status,
 			SupportLevel:      sub.SupportLevel,
 			Type:              computeType(sub),
+			Usage:             sub.Usage,
 		},
 	}
 	return discoveredCluster, true

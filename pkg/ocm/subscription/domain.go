@@ -56,6 +56,7 @@ type Subscription struct {
 	Status            string       `json:"status" yaml:"status"`
 	SupportLevel      string       `json:"support_level,omitempty" yaml:"support_level,omitempty"`
 	UpdatedAt         *metav1.Time `json:"updated_at,omitempty" yaml:"updated_at,omitempty"`
+	Usage             string       `json:"usage,omitempty" yaml:"usage,omitempty"`
 }
 
 // SubscriptionResponse ...

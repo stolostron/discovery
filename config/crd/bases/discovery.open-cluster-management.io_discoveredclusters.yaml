@@ -173,6 +173,10 @@ spec:
                 description: Type defines the type of cluster, such as OpenShift,
                   Kubernetes, or a specific managed service type.
                 type: string
+              usage:
+                description: Usage indicates the cluster's intended purpose (e.g.,
+                  Development/Test, Production).
+                type: string
             required:
             - apiUrl
             - displayName
