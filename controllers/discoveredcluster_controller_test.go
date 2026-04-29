@@ -1198,7 +1198,7 @@ func Test_Reconciler_ShouldReconcile(t *testing.T) {
 }
 func Test_Reconciler_buildStatusConditions(t *testing.T) {
 	now := metav1.Now()
-	
+
 	tests := []struct {
 		name     string
 		dc       *discovery.DiscoveredCluster
