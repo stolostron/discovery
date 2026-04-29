@@ -124,7 +124,123 @@ func (r *DiscoveredClusterReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 	}
 
+	// Update status conditions
+	if err := r.updateStatus(ctx, dc); err != nil {
+		logf.Error(err, "Failed to update DiscoveredCluster status", "Name", dc.Name)
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{RequeueAfter: recon.ShortRefreshInterval}, nil
+}
+
+// updateStatus updates the status conditions for a DiscoveredCluster
+func (r *DiscoveredClusterReconciler) updateStatus(ctx context.Context, dc *discovery.DiscoveredCluster) error {
+	// Get fresh copy to avoid conflicts
+	fresh := &discovery.DiscoveredCluster{}
+	if err := r.Get(ctx, types.NamespacedName{Name: dc.Name, Namespace: dc.Namespace}, fresh); err != nil {
+		// If resource was deleted, ignore the error
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	// Build new conditions
+	newConditions := r.buildStatusConditions(ctx, dc)
+
+	// Check if conditions changed
+	conditionsChanged := false
+	if len(fresh.Status.Conditions) != len(newConditions) {
+		conditionsChanged = true
+	} else {
+		for i := range newConditions {
+			if !conditionEqual(fresh.Status.Conditions[i], newConditions[i]) {
+				conditionsChanged = true
+				break
+			}
+		}
+	}
+
+	if !conditionsChanged {
+		return nil
+	}
+
+	// Update conditions
+	fresh.Status.Conditions = newConditions
+
+	// Update status subresource
+	if err := r.Status().Update(ctx, fresh); err != nil {
+		// If resource was deleted, ignore the error
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+		return errors.Wrap(err, "failed to update DiscoveredCluster status")
+	}
+
+	return nil
+}
+
+// buildStatusConditions constructs the status conditions based on the cluster state
+func (r *DiscoveredClusterReconciler) buildStatusConditions(ctx context.Context, dc *discovery.DiscoveredCluster) []discovery.DiscoveredClusterCondition {
+	now := metav1.Now()
+	conditions := []discovery.DiscoveredClusterCondition{}
+
+	// Available condition - based on spec.status from OCM
+	availableCondition := discovery.DiscoveredClusterCondition{
+		Type:               discovery.ConditionAvailable,
+		LastTransitionTime: now,
+		ObservedGeneration: dc.Generation,
+	}
+
+	if dc.Spec.Status == "Active" {
+		availableCondition.Status = metav1.ConditionTrue
+		availableCondition.Reason = discovery.ReasonRecentTelemetry
+		if dc.Spec.ActivityTimestamp != nil {
+			availableCondition.Message = fmt.Sprintf("Cluster is active. Last telemetry: %s", dc.Spec.ActivityTimestamp.Format("2006-01-02 15:04:05 MST"))
+		} else {
+			availableCondition.Message = "Cluster is active"
+		}
+	} else {
+		availableCondition.Status = metav1.ConditionFalse
+		availableCondition.Reason = discovery.ReasonStaleTelemetry
+		if dc.Spec.ActivityTimestamp != nil {
+			availableCondition.Message = fmt.Sprintf("Cluster is stale. Last telemetry: %s", dc.Spec.ActivityTimestamp.Format("2006-01-02 15:04:05 MST"))
+		} else {
+			availableCondition.Message = fmt.Sprintf("Cluster status: %s", dc.Spec.Status)
+		}
+	}
+
+	conditions = append(conditions, availableCondition)
+
+	// Managed condition - based on spec.isManagedCluster
+	managedCondition := discovery.DiscoveredClusterCondition{
+		Type:               discovery.ConditionManaged,
+		LastTransitionTime: now,
+		ObservedGeneration: dc.Generation,
+	}
+
+	if dc.Spec.IsManagedCluster {
+		managedCondition.Status = metav1.ConditionTrue
+		managedCondition.Reason = discovery.ReasonImportedAsManagedCluster
+		managedCondition.Message = "Cluster has been imported as a ManagedCluster"
+	} else {
+		managedCondition.Status = metav1.ConditionFalse
+		managedCondition.Reason = discovery.ReasonNotImported
+		managedCondition.Message = "Cluster has not been imported"
+	}
+
+	conditions = append(conditions, managedCondition)
+
+	return conditions
+}
+
+// conditionEqual checks if two conditions are semantically equal
+func conditionEqual(a, b discovery.DiscoveredClusterCondition) bool {
+	return a.Type == b.Type &&
+		a.Status == b.Status &&
+		a.Reason == b.Reason &&
+		a.Message == b.Message &&
+		a.ObservedGeneration == b.ObservedGeneration
 }
 
 /*

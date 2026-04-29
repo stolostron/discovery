@@ -97,36 +97,65 @@ type DiscoveredClusterSpec struct {
 	Type string `json:"type" yaml:"type"`
 }
 
+// DiscoveredClusterCondition represents an observation of a DiscoveredCluster's state
 type DiscoveredClusterCondition struct {
-	// Type is the type of the discovered cluster condition.
-	// +required
-	Type DiscoveredClusterConditionType `json:"type,omitempty"`
+	// Type of the condition
+	Type string `json:"type"`
 
-	// Status is the status of the condition. One of True, False, Unknown.
-	// +required
+	// Status of the condition (True, False, Unknown)
+	// +optional
 	Status metav1.ConditionStatus `json:"status,omitempty"`
 
-	// The last time this condition was updated.
-	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
-
-	// LastTransitionTime is the last time the condition changed from one status to another.
+	// Last time the condition transitioned from one status to another
+	// +optional
 	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+
+	// Human-readable message indicating details about the transition
+	// +optional
+	Message string `json:"message,omitempty"`
+
+	// Programmatic identifier indicating the reason for the condition's last transition
+	// +optional
+	Reason string `json:"reason,omitempty"`
+
+	// ObservedGeneration represents the .metadata.generation that the condition was set based upon
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
-type DiscoveredClusterConditionType string
-
-// These are valid conditions of the multiclusterengine.
+// Condition types for DiscoveredCluster
 const (
-	DiscoveredClusterActive   DiscoveredClusterConditionType = "Available"
-	DiscoveredClusterReserved DiscoveredClusterConditionType = "Reserved"
-	DiscoveredClusterStale    DiscoveredClusterConditionType = "Stale"
+	// ConditionAvailable indicates whether the cluster is active and sending telemetry
+	ConditionAvailable string = "Available"
+
+	// ConditionManaged indicates whether the cluster has been imported as a ManagedCluster
+	ConditionManaged string = "Managed"
+)
+
+// Condition reasons for DiscoveredCluster
+const (
+	// ReasonRecentTelemetry indicates the cluster has recent telemetry (Active)
+	ReasonRecentTelemetry string = "RecentTelemetry"
+
+	// ReasonStaleTelemetry indicates the cluster has not sent telemetry recently (Stale)
+	ReasonStaleTelemetry string = "StaleTelemetry"
+
+	// ReasonImportedAsManagedCluster indicates the cluster has been imported
+	ReasonImportedAsManagedCluster string = "ImportedAsManagedCluster"
+
+	// ReasonNotImported indicates the cluster has not been imported
+	ReasonNotImported string = "NotImported"
 )
 
 // DiscoveredClusterStatus defines the observed state of DiscoveredCluster
 type DiscoveredClusterStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	Conditions []DiscoveredClusterCondition `json:"conditions,omitempty"`
+	// Conditions represent the latest available observations of the DiscoveredCluster's state
+	// +optional
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []DiscoveredClusterCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 //+kubebuilder:object:root=true
