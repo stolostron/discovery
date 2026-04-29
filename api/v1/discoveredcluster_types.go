@@ -84,8 +84,14 @@ type DiscoveredClusterSpec struct {
 	// Owner identifies the owner or organization responsible for the cluster.
 	Owner string `json:"owner,omitempty" yaml:"owner,omitempty"`
 
+	// Provenance indicates how the cluster was discovered (e.g., Telemetry, Manual).
+	Provenance string `json:"provenance,omitempty" yaml:"provenance,omitempty"`
+
 	// RHOCMClusterID contains the cluster ID from Red Hat OpenShift Cluster Manager.
 	RHOCMClusterID string `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
+
+	// SupportLevel specifies the support tier for the cluster (e.g., Self-Support, L1-L3, Premium).
+	SupportLevel string `json:"supportLevel,omitempty" yaml:"supportLevel,omitempty"`
 
 	// Region specifies the geographical region where the cluster is deployed.
 	Region string `json:"region,omitempty" yaml:"region,omitempty"`
@@ -174,7 +180,9 @@ func (a DiscoveredCluster) Equal(b DiscoveredCluster) bool {
 		a.Spec.Name != b.Spec.Name ||
 		a.Spec.OpenshiftVersion != b.Spec.OpenshiftVersion ||
 		a.Spec.Owner != b.Spec.Owner ||
+		a.Spec.Provenance != b.Spec.Provenance ||
 		a.Spec.Region != b.Spec.Region ||
+		a.Spec.SupportLevel != b.Spec.SupportLevel ||
 		a.Spec.Status != b.Spec.Status ||
 		a.Spec.Type != b.Spec.Type {
 		return false

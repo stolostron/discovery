@@ -153,6 +153,10 @@ spec:
                 description: Owner identifies the owner or organization responsible
                   for the cluster.
                 type: string
+              provenance:
+                description: Provenance indicates how the cluster was discovered (e.g.,
+                  Telemetry, Manual).
+                type: string
               region:
                 description: Region specifies the geographical region where the cluster
                   is deployed.
@@ -164,6 +168,10 @@ spec:
               status:
                 description: Status represents the current state of the discovered
                   cluster (e.g Active, Stale).
+                type: string
+              supportLevel:
+                description: SupportLevel specifies the support tier for the cluster
+                  (e.g., Self-Support, L1-L3, Premium).
                 type: string
               type:
                 description: Type defines the type of cluster, such as OpenShift,
@@ -301,7 +309,11 @@ spec:
                 type: string
               openshiftVersion:
                 type: string
+              provenance:
+                type: string
               status:
+                type: string
+              supportLevel:
                 type: string
               type:
                 type: string
