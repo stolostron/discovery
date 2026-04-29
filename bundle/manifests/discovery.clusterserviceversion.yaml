@@ -21,11 +21,11 @@ metadata:
       ]
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
-    createdAt: "2025-10-21T19:17:06Z"
+    createdAt: "2026-04-29T19:57:12Z"
     description: This operator discovers OpenShift Conatiner Platform clusters which
       are not yet under management by Open Cluster Management.
     operatorframework.io/suggested-namespace: open-cluster-management
-    operators.operatorframework.io/builder: operator-sdk-v1.41.1
+    operators.operatorframework.io/builder: operator-sdk-v1.42.2
     operators.operatorframework.io/internal-objects: '["discoveredclusters.discovery.open-cluster-management.io"]'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
     support: Red Hat
@@ -151,6 +151,14 @@ spec:
           - list
           - patch
           - update
+        - apiGroups:
+          - config.openshift.io
+          resources:
+          - apiservers
+          verbs:
+          - get
+          - list
+          - watch
         - apiGroups:
           - discovery.open-cluster-management.io
           resources:

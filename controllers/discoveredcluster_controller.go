@@ -181,12 +181,12 @@ func (r *DiscoveredClusterReconciler) updateStatus(ctx context.Context, dc *disc
 }
 
 // buildStatusConditions constructs the status conditions based on the cluster state
-func (r *DiscoveredClusterReconciler) buildStatusConditions(ctx context.Context, dc *discovery.DiscoveredCluster) []metav1.Condition {
+func (r *DiscoveredClusterReconciler) buildStatusConditions(ctx context.Context, dc *discovery.DiscoveredCluster) []discovery.DiscoveredClusterCondition {
 	now := metav1.Now()
-	conditions := []metav1.Condition{}
+	conditions := []discovery.DiscoveredClusterCondition{}
 
 	// Available condition - based on spec.status from OCM
-	availableCondition := metav1.Condition{
+	availableCondition := discovery.DiscoveredClusterCondition{
 		Type:               discovery.ConditionAvailable,
 		LastTransitionTime: now,
 		ObservedGeneration: dc.Generation,
@@ -213,7 +213,7 @@ func (r *DiscoveredClusterReconciler) buildStatusConditions(ctx context.Context,
 	conditions = append(conditions, availableCondition)
 
 	// Managed condition - based on spec.isManagedCluster
-	managedCondition := metav1.Condition{
+	managedCondition := discovery.DiscoveredClusterCondition{
 		Type:               discovery.ConditionManaged,
 		LastTransitionTime: now,
 		ObservedGeneration: dc.Generation,
@@ -235,7 +235,7 @@ func (r *DiscoveredClusterReconciler) buildStatusConditions(ctx context.Context,
 }
 
 // conditionEqual checks if two conditions are semantically equal
-func conditionEqual(a, b metav1.Condition) bool {
+func conditionEqual(a, b discovery.DiscoveredClusterCondition) bool {
 	return a.Type == b.Type &&
 		a.Status == b.Status &&
 		a.Reason == b.Reason &&

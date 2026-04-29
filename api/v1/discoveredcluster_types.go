@@ -97,6 +97,33 @@ type DiscoveredClusterSpec struct {
 	Type string `json:"type" yaml:"type"`
 }
 
+// DiscoveredClusterCondition represents an observation of a DiscoveredCluster's state
+type DiscoveredClusterCondition struct {
+	// Type of the condition
+	// +optional
+	Type string `json:"type,omitempty"`
+
+	// Status of the condition (True, False, Unknown)
+	// +optional
+	Status metav1.ConditionStatus `json:"status,omitempty"`
+
+	// Last time the condition transitioned from one status to another
+	// +optional
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+
+	// Human-readable message indicating details about the transition
+	// +optional
+	Message string `json:"message,omitempty"`
+
+	// Programmatic identifier indicating the reason for the condition's last transition
+	// +optional
+	Reason string `json:"reason,omitempty"`
+
+	// ObservedGeneration represents the .metadata.generation that the condition was set based upon
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+}
+
 // Condition types for DiscoveredCluster
 const (
 	// ConditionAvailable indicates whether the cluster is active and sending telemetry
@@ -129,7 +156,7 @@ type DiscoveredClusterStatus struct {
 	// +patchStrategy=merge
 	// +listType=map
 	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+	Conditions []DiscoveredClusterCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 //+kubebuilder:object:root=true

@@ -1202,7 +1202,7 @@ func Test_Reconciler_buildStatusConditions(t *testing.T) {
 	tests := []struct {
 		name     string
 		dc       *discovery.DiscoveredCluster
-		expected []metav1.Condition
+		expected []discovery.DiscoveredClusterCondition
 	}{
 		{
 			name: "Active cluster, not managed",
@@ -1218,7 +1218,7 @@ func Test_Reconciler_buildStatusConditions(t *testing.T) {
 					IsManagedCluster:  false,
 				},
 			},
-			expected: []metav1.Condition{
+			expected: []discovery.DiscoveredClusterCondition{
 				{
 					Type:               discovery.ConditionAvailable,
 					Status:             metav1.ConditionTrue,
@@ -1248,7 +1248,7 @@ func Test_Reconciler_buildStatusConditions(t *testing.T) {
 					IsManagedCluster:  true,
 				},
 			},
-			expected: []metav1.Condition{
+			expected: []discovery.DiscoveredClusterCondition{
 				{
 					Type:               discovery.ConditionAvailable,
 					Status:             metav1.ConditionFalse,
@@ -1278,7 +1278,7 @@ func Test_Reconciler_buildStatusConditions(t *testing.T) {
 					IsManagedCluster:  false,
 				},
 			},
-			expected: []metav1.Condition{
+			expected: []discovery.DiscoveredClusterCondition{
 				{
 					Type:               discovery.ConditionAvailable,
 					Status:             metav1.ConditionTrue,
@@ -1339,20 +1339,20 @@ func Test_conditionEqual(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		a        metav1.Condition
-		b        metav1.Condition
+		a        discovery.DiscoveredClusterCondition
+		b        discovery.DiscoveredClusterCondition
 		expected bool
 	}{
 		{
 			name: "Identical conditions",
-			a: metav1.Condition{
+			a: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
 				Message:            "Cluster is active",
 				ObservedGeneration: 1,
 			},
-			b: metav1.Condition{
+			b: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
@@ -1363,14 +1363,14 @@ func Test_conditionEqual(t *testing.T) {
 		},
 		{
 			name: "Different Status",
-			a: metav1.Condition{
+			a: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
 				Message:            "Cluster is active",
 				ObservedGeneration: 1,
 			},
-			b: metav1.Condition{
+			b: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionFalse,
 				Reason:             "RecentTelemetry",
@@ -1381,14 +1381,14 @@ func Test_conditionEqual(t *testing.T) {
 		},
 		{
 			name: "Different Reason",
-			a: metav1.Condition{
+			a: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
 				Message:            "Cluster is active",
 				ObservedGeneration: 1,
 			},
-			b: metav1.Condition{
+			b: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "StaleTelemetry",
@@ -1399,14 +1399,14 @@ func Test_conditionEqual(t *testing.T) {
 		},
 		{
 			name: "Different Message",
-			a: metav1.Condition{
+			a: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
 				Message:            "Cluster is active",
 				ObservedGeneration: 1,
 			},
-			b: metav1.Condition{
+			b: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
@@ -1417,14 +1417,14 @@ func Test_conditionEqual(t *testing.T) {
 		},
 		{
 			name: "Different ObservedGeneration",
-			a: metav1.Condition{
+			a: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
 				Message:            "Cluster is active",
 				ObservedGeneration: 1,
 			},
-			b: metav1.Condition{
+			b: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
@@ -1435,7 +1435,7 @@ func Test_conditionEqual(t *testing.T) {
 		},
 		{
 			name: "Same semantics, different LastTransitionTime (should be equal)",
-			a: metav1.Condition{
+			a: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
@@ -1443,7 +1443,7 @@ func Test_conditionEqual(t *testing.T) {
 				LastTransitionTime: now,
 				ObservedGeneration: 1,
 			},
-			b: metav1.Condition{
+			b: discovery.DiscoveredClusterCondition{
 				Type:               "Available",
 				Status:             metav1.ConditionTrue,
 				Reason:             "RecentTelemetry",
