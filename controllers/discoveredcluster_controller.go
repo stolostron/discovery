@@ -138,6 +138,10 @@ func (r *DiscoveredClusterReconciler) updateStatus(ctx context.Context, dc *disc
 	// Get fresh copy to avoid conflicts
 	fresh := &discovery.DiscoveredCluster{}
 	if err := r.Get(ctx, types.NamespacedName{Name: dc.Name, Namespace: dc.Namespace}, fresh); err != nil {
+		// If resource was deleted, ignore the error
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
 		return err
 	}
 
@@ -166,6 +170,10 @@ func (r *DiscoveredClusterReconciler) updateStatus(ctx context.Context, dc *disc
 
 	// Update status subresource
 	if err := r.Status().Update(ctx, fresh); err != nil {
+		// If resource was deleted, ignore the error
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
 		return errors.Wrap(err, "failed to update DiscoveredCluster status")
 	}
 
