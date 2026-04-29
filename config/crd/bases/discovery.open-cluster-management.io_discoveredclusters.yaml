@@ -149,10 +149,6 @@ spec:
                 description: OpenshiftVersion specifies the OpenShift version running
                   on the cluster.
                 type: string
-              owner:
-                description: Owner identifies the owner or organization responsible
-                  for the cluster.
-                type: string
               provenance:
                 description: Provenance indicates how the cluster was discovered (e.g.,
                   Telemetry, Manual).
@@ -309,11 +305,7 @@ spec:
                 type: string
               openshiftVersion:
                 type: string
-              provenance:
-                type: string
               status:
-                type: string
-              supportLevel:
                 type: string
               type:
                 type: string
