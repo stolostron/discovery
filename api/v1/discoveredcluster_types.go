@@ -160,13 +160,24 @@ func init() {
 	SchemeBuilder.Register(&DiscoveredCluster{}, &DiscoveredClusterList{})
 }
 
+// timestampsEqual checks if two timestamp pointers are equal (handling nil cases).
+func timestampsEqual(a, b *metav1.Time) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return a.Truncate(time.Second).Equal(b.Truncate(time.Second))
+}
+
 // Equal reports whether the spec of a is equal to b.
 func (a DiscoveredCluster) Equal(b DiscoveredCluster) bool {
 	if a.Spec.APIURL != b.Spec.APIURL ||
-		a.Spec.ActivityTimestamp.Truncate(time.Second) != b.Spec.ActivityTimestamp.Truncate(time.Second) ||
+		!timestampsEqual(a.Spec.ActivityTimestamp, b.Spec.ActivityTimestamp) ||
 		a.Spec.CloudProvider != b.Spec.CloudProvider ||
 		a.Spec.Console != b.Spec.Console ||
-		a.Spec.CreationTimestamp.Truncate(time.Second) != b.Spec.CreationTimestamp.Truncate(time.Second) ||
+		!timestampsEqual(a.Spec.CreationTimestamp, b.Spec.CreationTimestamp) ||
 		a.Spec.Credential != b.Spec.Credential ||
 		a.Spec.DisplayName != b.Spec.DisplayName ||
 		a.Spec.ImportAsManagedCluster != b.Spec.ImportAsManagedCluster ||
