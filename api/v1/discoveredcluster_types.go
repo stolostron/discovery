@@ -81,11 +81,17 @@ type DiscoveredClusterSpec struct {
 	// OpenshiftVersion specifies the OpenShift version running on the cluster.
 	OpenshiftVersion string `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
 
-	// Owner identifies the owner or organization responsible for the cluster.
-	Owner string `json:"owner,omitempty" yaml:"owner,omitempty"`
+	// NOTE: Owner field removed - OCM API does not expose Creator.UserName in subscription responses
+	// due to privacy restrictions. The field was always empty and provided no value.
+
+	// Provenance indicates how the cluster was discovered (e.g., Telemetry, Manual).
+	Provenance string `json:"provenance,omitempty" yaml:"provenance,omitempty"`
 
 	// RHOCMClusterID contains the cluster ID from Red Hat OpenShift Cluster Manager.
 	RHOCMClusterID string `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
+
+	// SupportLevel specifies the support tier for the cluster (e.g., Self-Support, L1-L3, Premium).
+	SupportLevel string `json:"supportLevel,omitempty" yaml:"supportLevel,omitempty"`
 
 	// Region specifies the geographical region where the cluster is deployed.
 	Region string `json:"region,omitempty" yaml:"region,omitempty"`
@@ -95,6 +101,9 @@ type DiscoveredClusterSpec struct {
 
 	// Type defines the type of cluster, such as OpenShift, Kubernetes, or a specific managed service type.
 	Type string `json:"type" yaml:"type"`
+
+	// Usage indicates the cluster's intended purpose (e.g., Development/Test, Production).
+	Usage string `json:"usage,omitempty" yaml:"usage,omitempty"`
 }
 
 // DiscoveredClusterCondition represents an observation of a DiscoveredCluster's state
@@ -189,23 +198,36 @@ func init() {
 	SchemeBuilder.Register(&DiscoveredCluster{}, &DiscoveredClusterList{})
 }
 
+// timestampsEqual checks if two timestamp pointers are equal (handling nil cases).
+func timestampsEqual(a, b *metav1.Time) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return a.Truncate(time.Second).Equal(b.Truncate(time.Second))
+}
+
 // Equal reports whether the spec of a is equal to b.
 func (a DiscoveredCluster) Equal(b DiscoveredCluster) bool {
 	if a.Spec.APIURL != b.Spec.APIURL ||
-		a.Spec.ActivityTimestamp.Truncate(time.Second) != b.Spec.ActivityTimestamp.Truncate(time.Second) ||
+		!timestampsEqual(a.Spec.ActivityTimestamp, b.Spec.ActivityTimestamp) ||
 		a.Spec.CloudProvider != b.Spec.CloudProvider ||
 		a.Spec.Console != b.Spec.Console ||
-		a.Spec.CreationTimestamp.Truncate(time.Second) != b.Spec.CreationTimestamp.Truncate(time.Second) ||
+		!timestampsEqual(a.Spec.CreationTimestamp, b.Spec.CreationTimestamp) ||
 		a.Spec.Credential != b.Spec.Credential ||
 		a.Spec.DisplayName != b.Spec.DisplayName ||
 		a.Spec.ImportAsManagedCluster != b.Spec.ImportAsManagedCluster ||
 		a.Spec.IsManagedCluster != b.Spec.IsManagedCluster ||
 		a.Spec.Name != b.Spec.Name ||
 		a.Spec.OpenshiftVersion != b.Spec.OpenshiftVersion ||
-		a.Spec.Owner != b.Spec.Owner ||
+		a.Spec.Provenance != b.Spec.Provenance ||
 		a.Spec.Region != b.Spec.Region ||
+		a.Spec.SupportLevel != b.Spec.SupportLevel ||
 		a.Spec.Status != b.Spec.Status ||
-		a.Spec.Type != b.Spec.Type {
+		a.Spec.Type != b.Spec.Type ||
+		a.Spec.Usage != b.Spec.Usage {
 		return false
 	}
 	return true
