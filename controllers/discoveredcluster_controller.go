@@ -145,8 +145,18 @@ func (r *DiscoveredClusterReconciler) updateStatus(ctx context.Context, dc *disc
 		return err
 	}
 
-	// Build new conditions
-	newConditions := r.buildStatusConditions(ctx, dc)
+	// Build new conditions based on fresh resource
+	newConditions := r.buildStatusConditions(ctx, fresh)
+
+	// Preserve LastTransitionTime for conditions where Status hasn't changed
+	for i := range newConditions {
+		for _, oldCond := range fresh.Status.Conditions {
+			if oldCond.Type == newConditions[i].Type && oldCond.Status == newConditions[i].Status {
+				newConditions[i].LastTransitionTime = oldCond.LastTransitionTime
+				break
+			}
+		}
+	}
 
 	// Check if conditions changed
 	conditionsChanged := false
