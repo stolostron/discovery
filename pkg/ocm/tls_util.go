@@ -11,12 +11,15 @@ import (
 	configv1 "github.com/openshift/api/config/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
 	// UnitTestEnvVar is the environment variable for unit testing.
 	UnitTestEnvVar = "UNIT_TEST"
 )
+
+var tlsLog = log.Log.WithName("ocm-tls")
 
 // GetAPIServerTLSProfile retrieves the TLS security profile from the OpenShift APIServer resource.
 // Returns the TLSProfileSpec containing minTLSVersion and ciphers.
@@ -30,7 +33,8 @@ func GetAPIServerTLSProfile(ctx context.Context, cl client.Client) (*configv1.TL
 	apiServer := &configv1.APIServer{}
 	err := cl.Get(ctx, types.NamespacedName{Name: "cluster"}, apiServer)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get APIServer resource: %w", err)
+		tlsLog.V(1).Info("Failed to retrieve TLS configuration", "error", err.Error())
+		return nil, fmt.Errorf("failed to retrieve TLS configuration")
 	}
 
 	// If no TLS profile is set, use the default (Intermediate)

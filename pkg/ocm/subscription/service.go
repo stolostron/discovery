@@ -4,7 +4,6 @@ package subscription
 
 import (
 	"errors"
-	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -70,26 +69,23 @@ func (client *subscriptionClient) GetSubscriptions() ([]Subscription, error) {
 				err.Error = errors.New(err.Reason)
 			}
 
-			logf.Error(err.Error, "Failed to retrieve subscriptions", "Page", request.Page,
-				"BaseURL", client.Config.BaseURL)
+			logf.V(1).Info("Failed to retrieve subscriptions", "Page", request.Page, "BaseURL", client.Config.BaseURL, "StatusCode", err.StatusCode)
 
 			switch err.StatusCode {
 			case 401, 403:
-				logf.Info(fmt.Sprintf("%v error occurred, returning empty subscription list", err.StatusCode))
+				logf.Info("Authentication error, returning empty subscription list")
 				return []Subscription{}, nil
 
 			case 404:
-				logf.Info("404 error occurred, returning empty subscription list")
+				logf.Info("Resource not found, returning empty subscription list")
 				return []Subscription{}, nil
 
 			case 429:
-				logf.Info("429 Too Many Requests: Rate limit hit, returning empty subscription list")
+				logf.Info("Rate limit exceeded, returning empty subscription list")
 				return []Subscription{}, nil
 
 			case 500, 502, 503, 504:
-				logf.Info(fmt.Sprintf("Server error occurred (Code %v), returning empty subscription list",
-					err.StatusCode))
-
+				logf.Info("Server error, returning empty subscription list")
 				return []Subscription{}, nil
 
 			default:

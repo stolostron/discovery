@@ -403,7 +403,8 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 			} else if authRequest.AuthMethod == "offline-token" {
 				s = r.CreateAutoImportSecretOfflineToken(nn, dc.Spec.RHOCMClusterID, authRequest.Token)
 			} else {
-				return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, fmt.Errorf("unsupported auth method: %s", authRequest.AuthMethod)
+				logf.V(1).Info("Invalid authentication method", "method", authRequest.AuthMethod)
+				return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, fmt.Errorf("invalid authentication configuration")
 			}
 			if err := r.Create(ctx, s); err != nil {
 				logf.Error(err, "failed to create auto-import Secret for ManagedCluster", "Name", nn.Name)
