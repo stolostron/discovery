@@ -149,9 +149,9 @@ spec:
                 description: OpenshiftVersion specifies the OpenShift version running
                   on the cluster.
                 type: string
-              owner:
-                description: Owner identifies the owner or organization responsible
-                  for the cluster.
+              provenance:
+                description: Provenance indicates how the cluster was discovered (e.g.,
+                  Telemetry, Manual).
                 type: string
               region:
                 description: Region specifies the geographical region where the cluster
@@ -165,9 +165,17 @@ spec:
                 description: Status represents the current state of the discovered
                   cluster (e.g Active, Stale).
                 type: string
+              supportLevel:
+                description: SupportLevel specifies the support tier for the cluster
+                  (e.g., Self-Support, L1-L3, Premium).
+                type: string
               type:
                 description: Type defines the type of cluster, such as OpenShift,
                   Kubernetes, or a specific managed service type.
+                type: string
+              usage:
+                description: Usage indicates the cluster's intended purpose (e.g.,
+                  Development/Test, Production).
                 type: string
             required:
             - apiUrl
