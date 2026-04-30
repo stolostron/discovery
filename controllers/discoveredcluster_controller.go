@@ -39,8 +39,6 @@ import (
 	clusterapiv1beta2 "open-cluster-management.io/api/cluster/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // DiscoveredClusterReconciler reconciles a DiscoveredCluster object
@@ -394,7 +392,9 @@ func (r *DiscoveredClusterReconciler) CreateManagedCluster(nn types.NamespacedNa
 }
 
 /*
-CreateManagedClusterSetBinding ...
+CreateManagedClusterSetBinding creates a ManagedClusterSetBinding object that binds
+the default ManagedClusterSet to the specified namespace. This enables clusters in the
+ManagedClusterSet to be managed from the given namespace.
 */
 func (r *DiscoveredClusterReconciler) CreateManagedClusterSetBinding(nn types.NamespacedName,
 ) *clusterapiv1beta2.ManagedClusterSetBinding {
@@ -549,7 +549,22 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 }
 
 /*
-EnsureCommonResources ...
+EnsureCommonResources ensures all required resources exist for automatically importing a cluster.
+For HCP (Hosted Control Plane) clusters, it creates:
+  - ManagedClusterSetBinding to bind clusters to the operator namespace
+  - Placement for cluster selection
+  - AddOnDeploymentConfig for addon configuration
+  - Placement references in ClusterManagementAddOns (cluster-proxy, managed-serviceaccount, work-manager)
+
+For all cluster types, it creates:
+  - ManagedCluster resource
+  - KlusterletAddonConfig (if CRD exists)
+
+For non-HCP clusters, it additionally creates:
+  - Credential Secret for the discovered cluster
+  - AutoImportSecret for ROSA authentication
+
+Returns an error if any resource creation fails.
 */
 func (r *DiscoveredClusterReconciler) EnsureCommonResources(ctx context.Context,
 	dc *discovery.DiscoveredCluster, isHCP bool) (ctrl.Result, error) {
@@ -638,7 +653,10 @@ func (r *DiscoveredClusterReconciler) EnsureCRDExist(ctx context.Context, crdNam
 	return ctrl.Result{}, nil
 }
 
-// EnsureDiscoveredClusterCredentialExists ...
+// EnsureDiscoveredClusterCredentialExists verifies that the credential Secret referenced by
+// the DiscoveredCluster exists in the cluster. This credential Secret contains authentication
+// information needed to access the discovered cluster. Returns an error with requeue if the
+// Secret is not found or cannot be retrieved.
 func (r *DiscoveredClusterReconciler) EnsureDiscoveredClusterCredentialExists(
 	ctx context.Context, dc discovery.DiscoveredCluster) (ctrl.Result, error) {
 	nn := types.NamespacedName{Name: dc.Spec.Credential.Name, Namespace: dc.Spec.Credential.Namespace}
@@ -750,7 +768,10 @@ func (r *DiscoveredClusterReconciler) EnsureManagedClusterSetBinding(ctx context
 }
 
 /*
-EnsureMultiClusterEngineHCP ...
+EnsureMultiClusterEngineHCP ensures all required resources exist for automatically importing
+a MultiClusterEngine Hosted Control Plane (HCP) cluster. This is a convenience wrapper around
+EnsureCommonResources with the isHCP flag set to true, which creates additional HCP-specific
+resources like placement strategies and addon configurations for hosted clusters.
 */
 func (r *DiscoveredClusterReconciler) EnsureMultiClusterEngineHCP(ctx context.Context, dc *discovery.DiscoveredCluster,
 ) (ctrl.Result, error) {
@@ -788,7 +809,10 @@ func (r *DiscoveredClusterReconciler) EnsureNamespaceForDiscoveredCluster(ctx co
 }
 
 /*
-EnsurePlacement ...
+EnsurePlacement ensures a Placement resource exists in the operator namespace.
+The Placement is used to select which ManagedClusters should have certain addons installed.
+If the Placement doesn't exist, it creates one with the default configuration.
+Returns an error if creation or retrieval fails.
 */
 func (r *DiscoveredClusterReconciler) EnsurePlacement(ctx context.Context) (ctrl.Result, error) {
 	nn := types.NamespacedName{Name: DefaultName, Namespace: os.Getenv("POD_NAMESPACE")}
@@ -812,7 +836,10 @@ func (r *DiscoveredClusterReconciler) EnsurePlacement(ctx context.Context) (ctrl
 }
 
 /*
-EnsureROSA ...
+EnsureROSA ensures all required resources exist for automatically importing a ROSA (Red Hat
+OpenShift Service on AWS) cluster. It creates a dedicated namespace for the cluster and then
+calls EnsureCommonResources to create the standard import resources including ManagedCluster,
+KlusterletAddonConfig, credentials, and the AutoImportSecret with ROSA-specific authentication.
 */
 func (r *DiscoveredClusterReconciler) EnsureROSA(ctx context.Context, dc *discovery.DiscoveredCluster) (
 	ctrl.Result, error) {
@@ -825,7 +852,10 @@ func (r *DiscoveredClusterReconciler) EnsureROSA(ctx context.Context, dc *discov
 }
 
 /*
-EnsurePlacementAddedToClusterManagementAddOn
+AddPlacementToClusterManagementAddOn adds the default Placement reference to a ClusterManagementAddOn's
+install strategy if not already present. This ensures the addon is installed on clusters selected by
+the Placement. It also sets the install strategy type to "Placements" and adds the AddOnDeploymentConfig
+reference for addon configuration. Used for addons like cluster-proxy, managed-serviceaccount, and work-manager.
 */
 func (r *DiscoveredClusterReconciler) AddPlacementToClusterManagementAddOn(ctx context.Context, name string) (
 	ctrl.Result, error) {
@@ -880,30 +910,11 @@ func (r *DiscoveredClusterReconciler) AddPlacementToClusterManagementAddOn(ctx c
 	return ctrl.Result{}, nil
 }
 
-// SetupWithManager ...
+// SetupWithManager sets up the controller with the Manager.
+// Reconciles all DiscoveredCluster events to ensure status conditions are updated for all cluster types.
+// Auto-import logic is protected by webhook validation and type checking in the Reconcile function.
 func (r *DiscoveredClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&discovery.DiscoveredCluster{}).
-		WithEventFilter(predicate.Funcs{
-			CreateFunc: func(e event.CreateEvent) bool {
-				return r.ShouldReconcile(e.Object)
-			},
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				return r.ShouldReconcile(e.ObjectNew)
-			},
-			DeleteFunc: func(e event.DeleteEvent) bool {
-				return true
-			},
-		}).
 		Complete(r)
-}
-
-// ShouldReconcile ...
-func (r *DiscoveredClusterReconciler) ShouldReconcile(obj metav1.Object) bool {
-	dc, ok := obj.(*discovery.DiscoveredCluster)
-	if !ok {
-		return false
-	}
-
-	return discovery.IsSupportedClusterType(dc.Spec.Type)
 }

@@ -1156,46 +1156,6 @@ func Test_Reconciler_EnsureROSA(t *testing.T) {
 	}
 }
 
-func Test_Reconciler_ShouldReconcile(t *testing.T) {
-	tests := []struct {
-		name string
-		obj  metav1.Object
-		want bool
-	}{
-		{
-			name: "should reconcile ROSA cluster",
-			obj: &discovery.DiscoveredCluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "bar",
-				},
-				Spec: discovery.DiscoveredClusterSpec{
-					Type: "ROSA",
-				},
-			},
-			want: true,
-		},
-		{
-			name: "should not reconcile OCP cluster",
-			obj: &discovery.DiscoveredCluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "bar",
-				},
-				Spec: discovery.DiscoveredClusterSpec{
-					Type: "OCP",
-				},
-			},
-			want: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r.ShouldReconcile(tt.obj)
-		})
-	}
-}
 func Test_Reconciler_buildStatusConditions(t *testing.T) {
 	now := metav1.Now()
 
