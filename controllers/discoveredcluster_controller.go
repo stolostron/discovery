@@ -524,11 +524,12 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 			logf.Info("Creating auto-import-secret for managed cluster", "Namespace", nn.Namespace)
 
 			var s *corev1.Secret
-			if authRequest.AuthMethod == "service-account" {
+			switch authRequest.AuthMethod {
+			case "service-account":
 				s = r.CreateAutoImportSecretServiceAccount(nn, dc.Spec.RHOCMClusterID, authRequest.ID, authRequest.Secret)
-			} else if authRequest.AuthMethod == "offline-token" {
+			case "offline-token":
 				s = r.CreateAutoImportSecretOfflineToken(nn, dc.Spec.RHOCMClusterID, authRequest.Token)
-			} else {
+			default:
 				return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, fmt.Errorf("unsupported auth method: %s", authRequest.AuthMethod)
 			}
 			if err := r.Create(ctx, s); err != nil {
