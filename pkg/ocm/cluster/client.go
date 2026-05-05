@@ -9,11 +9,15 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
 	clusterByIDURL = "%s/api/clusters_mgmt/v1/clusters/%s"
 )
+
+var logf = log.Log.WithName("cluster-client")
 
 // Client interface for getting cluster information
 type Client interface {
@@ -73,9 +77,11 @@ func (c *clusterClient) GetClusterByID(clusterID string) (*Cluster, error) {
 	if resp.StatusCode >= 400 {
 		var clusterErr ClusterError
 		if err := json.Unmarshal(body, &clusterErr); err != nil {
-			return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
+			logf.V(1).Info("API error response received", "status", resp.StatusCode, "body", string(body))
+			return nil, fmt.Errorf("failed to retrieve cluster information")
 		}
-		clusterErr.Error = fmt.Errorf("cluster_mgmt API error: %s (code: %s)", clusterErr.Reason, clusterErr.Code)
+		logf.V(1).Info("Cluster API error", "reason", clusterErr.Reason, "code", clusterErr.Code)
+		clusterErr.Error = fmt.Errorf("failed to retrieve cluster information")
 		return nil, clusterErr.Error
 	}
 

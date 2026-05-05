@@ -116,25 +116,26 @@ func parseResponse(response *http.Response) (*SubscriptionResponse, *Subscriptio
 	if response.StatusCode > 299 {
 		var errResponse SubscriptionError
 		if err := json.Unmarshal(bytes, &errResponse); err != nil {
+			logf.V(1).Info("Subscription API error response", "status", response.StatusCode, "body", string(bytes))
 			return nil, &SubscriptionError{
-				Error:    fmt.Errorf("%s: %w", "couldn't unmarshal subscription error response", err),
-				Response: bytes,
+				Error:      fmt.Errorf("failed to retrieve subscription information"),
+				Response:   bytes,
+				StatusCode: response.StatusCode,
 			}
 		}
 
-		if errResponse.Reason == "" {
-			errResponse.Error = fmt.Errorf("unexpected json response body")
-			errResponse.Response = bytes
-		}
-
+		logf.V(1).Info("Subscription API error", "status", response.StatusCode, "reason", errResponse.Reason)
+		errResponse.Response = bytes
+		errResponse.Error = fmt.Errorf("failed to retrieve subscription information")
 		errResponse.StatusCode = response.StatusCode
 		return nil, &errResponse
 	}
 
 	var result SubscriptionResponse
 	if err := json.Unmarshal(bytes, &result); err != nil {
+		logf.V(1).Info("Failed to unmarshal subscription response", "body", string(bytes))
 		return nil, &SubscriptionError{
-			Error:    fmt.Errorf("%s: %w", "couldn't unmarshal subscription response", err),
+			Error:    fmt.Errorf("failed to parse subscription response"),
 			Response: bytes,
 		}
 	}

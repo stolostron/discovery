@@ -9,11 +9,15 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
 	authEndpoint = "%s/auth/realms/redhat-external/protocol/openid-connect/token"
 )
+
+var logf = log.Log.WithName("auth-provider")
 
 var (
 	httpClient   AuthPostInterface = &authRestClient{}
@@ -91,21 +95,24 @@ func parseResponse(response *http.Response) (*AuthTokenResponse, *AuthError) {
 	if response.StatusCode > 299 {
 		var errResponse AuthError
 		if err := json.Unmarshal(bytes, &errResponse); err != nil {
+			logf.V(1).Info("Auth API error response", "status", response.StatusCode, "body", string(bytes))
 			return nil, &AuthError{
-				Error:    err,
+				Error:    fmt.Errorf("authentication failed"),
 				Response: bytes,
 				Code:     response.StatusCode,
 			}
 		}
 		errResponse.Code = response.StatusCode
 
-		if errResponse.ErrorMessage == "" || errResponse.Description == "" {
-			errResponse.Error = fmt.Errorf("invalid json response body")
-			errResponse.Response = bytes
-		}
+		logf.V(1).Info("Auth API error", "status", response.StatusCode, "error", errResponse.ErrorMessage, "description", errResponse.Description)
+		errResponse.Response = bytes
 
-		if errResponse.Description == "Invalid refresh token" {
+		if errResponse.ErrorMessage == "" || errResponse.Description == "" {
+			errResponse.Error = fmt.Errorf("authentication failed")
+		} else if errResponse.Description == "Invalid refresh token" {
 			errResponse.Error = ErrInvalidToken
+		} else {
+			errResponse.Error = fmt.Errorf("authentication failed")
 		}
 
 		return nil, &errResponse
@@ -113,8 +120,9 @@ func parseResponse(response *http.Response) (*AuthTokenResponse, *AuthError) {
 
 	var result AuthTokenResponse
 	if err := json.Unmarshal(bytes, &result); err != nil {
+		logf.V(1).Info("Failed to unmarshal auth response", "status", response.StatusCode, "body", string(bytes))
 		return nil, &AuthError{
-			Error:    fmt.Errorf("error unmarshaling response"),
+			Error:    fmt.Errorf("failed to parse authentication response"),
 			Response: bytes,
 			Code:     response.StatusCode,
 		}
