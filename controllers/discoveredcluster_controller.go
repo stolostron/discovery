@@ -529,7 +529,7 @@ func (r *DiscoveredClusterReconciler) EnsureAutoImportSecret(ctx context.Context
 				s = r.CreateAutoImportSecretServiceAccount(nn, dc.Spec.RHOCMClusterID, authRequest.ID, authRequest.Secret)
 			case "offline-token":
 				s = r.CreateAutoImportSecretOfflineToken(nn, dc.Spec.RHOCMClusterID, authRequest.Token)
-			} else {
+			default:
 				logf.V(1).Info("Invalid authentication method", "method", authRequest.AuthMethod)
 				return ctrl.Result{RequeueAfter: recon.WarningRefreshInterval}, fmt.Errorf("invalid authentication configuration")
 			}
