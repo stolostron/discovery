@@ -1156,43 +1156,271 @@ func Test_Reconciler_EnsureROSA(t *testing.T) {
 	}
 }
 
-func Test_Reconciler_ShouldReconcile(t *testing.T) {
+func Test_Reconciler_buildStatusConditions(t *testing.T) {
+	now := metav1.Now()
+
 	tests := []struct {
-		name string
-		obj  metav1.Object
-		want bool
+		name     string
+		dc       *discovery.DiscoveredCluster
+		expected []discovery.DiscoveredClusterCondition
 	}{
 		{
-			name: "should reconcile ROSA cluster",
-			obj: &discovery.DiscoveredCluster{
+			name: "Active cluster, not managed",
+			dc: &discovery.DiscoveredCluster{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "bar",
+					Name:       "test-cluster",
+					Namespace:  "default",
+					Generation: 1,
 				},
 				Spec: discovery.DiscoveredClusterSpec{
-					Type: "ROSA",
+					Status:            "Active",
+					ActivityTimestamp: &now,
+					IsManagedCluster:  false,
 				},
 			},
-			want: true,
+			expected: []discovery.DiscoveredClusterCondition{
+				{
+					Type:               discovery.ConditionAvailable,
+					Status:             metav1.ConditionTrue,
+					Reason:             discovery.ReasonRecentTelemetry,
+					ObservedGeneration: 1,
+				},
+				{
+					Type:               discovery.ConditionManaged,
+					Status:             metav1.ConditionFalse,
+					Reason:             discovery.ReasonNotImported,
+					Message:            "Cluster has not been imported",
+					ObservedGeneration: 1,
+				},
+			},
 		},
 		{
-			name: "should not reconcile OCP cluster",
-			obj: &discovery.DiscoveredCluster{
+			name: "Stale cluster, managed",
+			dc: &discovery.DiscoveredCluster{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "bar",
+					Name:       "test-cluster",
+					Namespace:  "default",
+					Generation: 2,
 				},
 				Spec: discovery.DiscoveredClusterSpec{
-					Type: "OCP",
+					Status:            "Stale",
+					ActivityTimestamp: &now,
+					IsManagedCluster:  true,
 				},
 			},
-			want: false,
+			expected: []discovery.DiscoveredClusterCondition{
+				{
+					Type:               discovery.ConditionAvailable,
+					Status:             metav1.ConditionFalse,
+					Reason:             discovery.ReasonStaleTelemetry,
+					ObservedGeneration: 2,
+				},
+				{
+					Type:               discovery.ConditionManaged,
+					Status:             metav1.ConditionTrue,
+					Reason:             discovery.ReasonImportedAsManagedCluster,
+					Message:            "Cluster has been imported as a ManagedCluster",
+					ObservedGeneration: 2,
+				},
+			},
+		},
+		{
+			name: "Active cluster without timestamp",
+			dc: &discovery.DiscoveredCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:       "test-cluster",
+					Namespace:  "default",
+					Generation: 1,
+				},
+				Spec: discovery.DiscoveredClusterSpec{
+					Status:            "Active",
+					ActivityTimestamp: nil,
+					IsManagedCluster:  false,
+				},
+			},
+			expected: []discovery.DiscoveredClusterCondition{
+				{
+					Type:               discovery.ConditionAvailable,
+					Status:             metav1.ConditionTrue,
+					Reason:             discovery.ReasonRecentTelemetry,
+					Message:            "Cluster is active",
+					ObservedGeneration: 1,
+				},
+				{
+					Type:               discovery.ConditionManaged,
+					Status:             metav1.ConditionFalse,
+					Reason:             discovery.ReasonNotImported,
+					Message:            "Cluster has not been imported",
+					ObservedGeneration: 1,
+				},
+			},
+		},
+	}
+
+	r := &DiscoveredClusterReconciler{
+		Client: fake.NewClientBuilder().Build(),
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			conditions := r.buildStatusConditions(context.TODO(), tt.dc)
+
+			if len(conditions) != len(tt.expected) {
+				t.Errorf("Expected %d conditions, got %d", len(tt.expected), len(conditions))
+				return
+			}
+
+			for i, expected := range tt.expected {
+				actual := conditions[i]
+
+				if actual.Type != expected.Type {
+					t.Errorf("Condition %d: expected Type=%s, got %s", i, expected.Type, actual.Type)
+				}
+				if actual.Status != expected.Status {
+					t.Errorf("Condition %d: expected Status=%s, got %s", i, expected.Status, actual.Status)
+				}
+				if actual.Reason != expected.Reason {
+					t.Errorf("Condition %d: expected Reason=%s, got %s", i, expected.Reason, actual.Reason)
+				}
+				if actual.ObservedGeneration != expected.ObservedGeneration {
+					t.Errorf("Condition %d: expected ObservedGeneration=%d, got %d", i, expected.ObservedGeneration, actual.ObservedGeneration)
+				}
+				if expected.Message != "" && actual.Message != expected.Message {
+					t.Errorf("Condition %d: expected Message=%s, got %s", i, expected.Message, actual.Message)
+				}
+			}
+		})
+	}
+}
+
+func Test_conditionEqual(t *testing.T) {
+	now := metav1.Now()
+	later := metav1.NewTime(now.Add(1000))
+
+	tests := []struct {
+		name     string
+		a        discovery.DiscoveredClusterCondition
+		b        discovery.DiscoveredClusterCondition
+		expected bool
+	}{
+		{
+			name: "Identical conditions",
+			a: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				ObservedGeneration: 1,
+			},
+			b: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				ObservedGeneration: 1,
+			},
+			expected: true,
+		},
+		{
+			name: "Different Status",
+			a: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				ObservedGeneration: 1,
+			},
+			b: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionFalse,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				ObservedGeneration: 1,
+			},
+			expected: false,
+		},
+		{
+			name: "Different Reason",
+			a: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				ObservedGeneration: 1,
+			},
+			b: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "StaleTelemetry",
+				Message:            "Cluster is active",
+				ObservedGeneration: 1,
+			},
+			expected: false,
+		},
+		{
+			name: "Different Message",
+			a: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				ObservedGeneration: 1,
+			},
+			b: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Different message",
+				ObservedGeneration: 1,
+			},
+			expected: false,
+		},
+		{
+			name: "Different ObservedGeneration",
+			a: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				ObservedGeneration: 1,
+			},
+			b: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				ObservedGeneration: 2,
+			},
+			expected: false,
+		},
+		{
+			name: "Same semantics, different LastTransitionTime (should be equal)",
+			a: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				LastTransitionTime: now,
+				ObservedGeneration: 1,
+			},
+			b: discovery.DiscoveredClusterCondition{
+				Type:               "Available",
+				Status:             metav1.ConditionTrue,
+				Reason:             "RecentTelemetry",
+				Message:            "Cluster is active",
+				LastTransitionTime: later,
+				ObservedGeneration: 1,
+			},
+			expected: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r.ShouldReconcile(tt.obj)
+			result := conditionEqual(tt.a, tt.b)
+			if result != tt.expected {
+				t.Errorf("Expected %v, got %v", tt.expected, result)
+			}
 		})
 	}
 }
