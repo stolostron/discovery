@@ -13,7 +13,7 @@ require (
 	github.com/stolostron/cluster-lifecycle-api v0.0.0-20240813023109-42b5c115d0a3
 	github.com/stolostron/klusterlet-addon-controller v0.0.0-20260427155100-8e2a76232139
 	github.com/stretchr/testify v1.11.1
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.28.0
 	k8s.io/api v0.31.0
 	k8s.io/apiextensions-apiserver v0.31.0
 	k8s.io/apimachinery v0.31.0
