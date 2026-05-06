@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         go:
-          - '1.25.8'
+          - '1.25.9'
         kind:
           - 'latest'
     name: KinD tests
