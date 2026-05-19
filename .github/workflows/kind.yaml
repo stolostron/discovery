@@ -24,7 +24,7 @@ jobs:
     name: KinD tests
     steps:
     - name: Checkout Discovery
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
       with:
         path: discovery
         fetch-depth: 0 # Fetch all history for all tags and branches
