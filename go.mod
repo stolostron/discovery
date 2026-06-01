@@ -11,7 +11,7 @@ require (
 	github.com/prometheus/client_golang v1.20.4
 	github.com/rs/zerolog v1.35.1
 	github.com/stolostron/cluster-lifecycle-api v0.0.0-20240813023109-42b5c115d0a3
-	github.com/stolostron/klusterlet-addon-controller v0.0.0-20260521214020-b4a3c0980aa2
+	github.com/stolostron/klusterlet-addon-controller v0.0.0-20260528002846-29541056afe1
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.28.0
 	k8s.io/api v0.31.0
@@ -94,7 +94,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.27.0 // indirect
 	golang.org/x/crypto v0.52.0 // indirect
-	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a // indirect
+	golang.org/x/exp v0.0.0-20260527015227-08cc5374adb3 // indirect
 	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/oauth2 v0.32.0 // indirect
