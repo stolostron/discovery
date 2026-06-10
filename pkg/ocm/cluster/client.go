@@ -1,5 +1,9 @@
 // Copyright Contributors to the Open Cluster Management project
 
+// Package cluster provides OCM cluster discovery and synchronization.
+//
+// This package handles querying the OCM API for available OpenShift clusters
+// and syncing them as DiscoveredCluster resources in the hub cluster.
 package cluster
 
 import (

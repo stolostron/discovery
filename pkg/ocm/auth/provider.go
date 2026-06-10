@@ -1,5 +1,9 @@
 // Copyright Contributors to the Open Cluster Management project
 
+// Package auth handles authentication with OpenShift Cluster Manager (OCM).
+//
+// This package manages OCM API tokens, including token retrieval,
+// validation, and refresh for the discovery operator.
 package auth
 
 import (
