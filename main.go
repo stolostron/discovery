@@ -75,6 +75,15 @@ import (
 
 const (
 	crdName = "discoveredclusters.discovery.open-cluster-management.io"
+
+	// webhookRetryDelay is the delay between retries when webhook operations fail.
+	// Set to 5 seconds to balance between quick recovery from transient failures
+	// and avoiding overwhelming the API server.
+	webhookRetryDelay = 5 * time.Second
+
+	// webhookMaxAttempts is the maximum number of retry attempts for webhook operations.
+	// With retryDelay=5s and maxAttempts=10, total retry time is ~50 seconds.
+	webhookMaxAttempts = 10
 )
 
 var (
@@ -261,8 +270,7 @@ func ensureWebhooks(k8sClient client.Client) error {
 	}
 	validatingWebhook := discoveryv1.ValidatingWebhook(deploymentNamespace)
 
-	maxAttempts := 10
-	for i := 0; i < maxAttempts; i++ {
+	for i := 0; i < webhookMaxAttempts; i++ {
 		setupLog.Info("Applying ValidatingWebhookConfiguration")
 
 		// Get reference to DiscoveredCluster CRD to set as owner of the webhook
@@ -271,7 +279,7 @@ func ensureWebhooks(k8sClient client.Client) error {
 		owner := &apixv1.CustomResourceDefinition{}
 		if err := k8sClient.Get(context.Background(), crdKey, owner); err != nil {
 			setupLog.Error(err, "Failed to get DiscoveredCluster CRD")
-			time.Sleep(5 * time.Second)
+			time.Sleep(webhookRetryDelay)
 			continue
 		}
 		validatingWebhook.SetOwnerReferences([]metav1.OwnerReference{
@@ -295,14 +303,14 @@ func ensureWebhooks(k8sClient client.Client) error {
 			err = k8sClient.Create(ctx, validatingWebhook)
 			if err != nil {
 				setupLog.Error(err, "Error creating validatingwebhookconfiguration")
-				time.Sleep(5 * time.Second)
+				time.Sleep(webhookRetryDelay)
 				continue
 			}
 			return nil
 
 		} else if err != nil {
 			setupLog.Error(err, "Error getting validatingwebhookconfiguration")
-			time.Sleep(5 * time.Second)
+			time.Sleep(webhookRetryDelay)
 			continue
 
 		} else if err == nil {
@@ -312,7 +320,7 @@ func ensureWebhooks(k8sClient client.Client) error {
 			err = k8sClient.Update(ctx, existingWebhook)
 			if err != nil {
 				setupLog.Error(err, "Error updating validatingwebhookconfiguration")
-				time.Sleep(5 * time.Second)
+				time.Sleep(webhookRetryDelay)
 				continue
 			}
 			return nil
