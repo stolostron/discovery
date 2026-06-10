@@ -1,6 +1,13 @@
-// Copyright (c) 2020 Red Hat, Inc.
+// Copyright (c) 2026 Red Hat, Inc.
 // Copyright Contributors to the Open Cluster Management project
 
+// Package utils provides utility functions for managing discovery annotations and labels.
+//
+// This package contains helpers for:
+//   - Managing discovery-specific annotations on DiscoveredCluster resources
+//   - Checking annotation values and states
+//   - Tracking previously auto-imported clusters
+//   - Handling hosted cluster configurations
 package utils
 
 import (
