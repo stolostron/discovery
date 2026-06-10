@@ -14,6 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package controllers implements Discovery operator reconciliation logic.
+//
+// This package contains controllers that manage DiscoveryConfig and DiscoveredCluster
+// resources, orchestrating cluster discovery from OpenShift Cluster Manager (OCM).
+// Controllers in this package:
+//   - DiscoveryConfig controller: manages OCM credential validation and discovery scheduling
+//   - DiscoveredCluster controller: handles discovered cluster lifecycle and import automation
+//   - ManagedCluster controller: syncs discovered clusters with managed cluster state
+//
+// All controllers follow the Kubernetes operator pattern using controller-runtime.
 package controllers
 
 import (
