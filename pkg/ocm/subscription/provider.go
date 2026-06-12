@@ -1,5 +1,9 @@
 // Copyright Contributors to the Open Cluster Management project
 
+// Package subscription manages OCM subscription information.
+//
+// This package handles querying and caching OCM subscription data,
+// including quota and entitlement information for discovered clusters.
 package subscription
 
 import (

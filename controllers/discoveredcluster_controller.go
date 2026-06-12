@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package controllers implements the DiscoveredCluster controller.
+//
+// This package contains the reconciliation logic for DiscoveredCluster
+// custom resources, which represent OpenShift clusters discovered via
+// OCM (OpenShift Cluster Manager) integration.
 package controllers
 
 import (

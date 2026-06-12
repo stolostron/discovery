@@ -1,5 +1,16 @@
 // Copyright Contributors to the Open Cluster Management project
 
+// Package ocm provides integration with OpenShift Cluster Manager (OCM) API.
+//
+// This package handles authentication, cluster discovery, and subscription management
+// for OCM. It supports:
+//   - OCM API authentication via offline tokens
+//   - Cluster discovery and metadata retrieval
+//   - Subscription and organization queries
+//   - TLS profile configuration from APIServer
+//
+// The main entry point is DiscoverClusters, which authenticates to OCM and returns
+// discovered cluster information as DiscoveredCluster resources.
 package ocm
 
 import (
