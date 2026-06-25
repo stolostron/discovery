@@ -1,6 +1,6 @@
 module github.com/stolostron/discovery
 
-go 1.26.0
+go 1.25.9
 
 require (
 	github.com/gin-gonic/gin v1.9.1
@@ -14,11 +14,11 @@ require (
 	github.com/stolostron/klusterlet-addon-controller v0.0.0-20260528143026-0611b060ef79
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.28.0
-	k8s.io/api v0.36.2
-	k8s.io/apiextensions-apiserver v0.36.2
-	k8s.io/apimachinery v0.36.2
-	k8s.io/client-go v0.36.2
-	k8s.io/metrics v0.36.2
+	k8s.io/api v0.35.3
+	k8s.io/apiextensions-apiserver v0.35.3
+	k8s.io/apimachinery v0.35.3
+	k8s.io/client-go v0.35.3
+	k8s.io/metrics v0.35.3
 	open-cluster-management.io/api v0.16.2
 	sigs.k8s.io/controller-runtime v0.19.4
 	sigs.k8s.io/yaml v1.6.0
