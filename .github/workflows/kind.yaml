@@ -31,7 +31,7 @@ jobs:
         fetch-depth: 0 # Fetch all history for all tags and branches
 
     - name: Set up Go - ${{ matrix.go }}
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       id: go
       with:
         go-version: ${{ matrix.go }}
