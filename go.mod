@@ -11,7 +11,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/zerolog v1.35.1
 	github.com/stolostron/cluster-lifecycle-api v0.0.0-20240813023109-42b5c115d0a3
-	github.com/stolostron/klusterlet-addon-controller v0.0.0-20260622204223-1d339b7d8f4f
+	github.com/stolostron/klusterlet-addon-controller v0.0.0-20260708194830-83876f1cedef
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.28.0
 	k8s.io/api v0.31.0
