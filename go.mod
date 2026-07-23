@@ -1,6 +1,6 @@
 module github.com/stolostron/discovery
 
-go 1.25.9
+go 1.26.0
 
 require (
 	github.com/gin-gonic/gin v1.9.1
@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/zerolog v1.34.0
 	github.com/stolostron/cluster-lifecycle-api v0.0.0-20240813023109-42b5c115d0a3
-	github.com/stolostron/klusterlet-addon-controller v0.0.0-20260521214020-b4a3c0980aa2
+	github.com/stolostron/klusterlet-addon-controller v0.0.0-20260708194830-83876f1cedef
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
 	k8s.io/api v0.35.3
