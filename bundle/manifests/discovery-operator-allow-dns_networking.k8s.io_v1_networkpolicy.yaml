@@ -1,0 +1,23 @@
+# Allow discovery-operator pods to reach cluster DNS for name resolution.
+# Port-based with no namespace selector to support both OpenShift (openshift-dns)
+# and vanilla Kubernetes (kube-system) DNS deployments.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: discovery-operator-allow-dns
+spec:
+  podSelector:
+    matchLabels:
+      app: discovery-operator
+  egress:
+  - ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 5353
+    - protocol: UDP
+      port: 5353
+  policyTypes:
+  - Egress
