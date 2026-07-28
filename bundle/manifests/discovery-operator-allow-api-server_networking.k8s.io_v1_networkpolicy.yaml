@@ -1,0 +1,21 @@
+# Allow discovery-operator pods to reach the Kubernetes API server.
+# Port-based with empty 'to' because the API server runs on the host network
+# and cannot be selected via pod/namespace selectors. Covers both standard (443)
+# and common alternate (6443) API server ports.
+# Also covers egress to external HTTPS endpoints (sso.redhat.com, api.openshift.com).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: discovery-operator-allow-api-server
+spec:
+  podSelector:
+    matchLabels:
+      app: discovery-operator
+  egress:
+  - ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 6443
+  policyTypes:
+  - Egress
