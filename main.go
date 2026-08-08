@@ -67,6 +67,7 @@ import (
 	discoveryv1 "github.com/stolostron/discovery/api/v1"
 	"github.com/stolostron/discovery/controllers"
 	"github.com/stolostron/discovery/pkg/ocm"
+	"github.com/stolostron/discovery/pkg/version"
 	agentv1 "github.com/stolostron/klusterlet-addon-controller/pkg/apis/agent/v1"
 	corev1 "k8s.io/api/core/v1"
 	clusterapiv1 "open-cluster-management.io/api/cluster/v1"
@@ -148,6 +149,7 @@ func main() {
 
 	setupLog.Info(fmt.Sprintf("Go Version: %s", goruntime.Version()))
 	setupLog.Info(fmt.Sprintf("Go OS/Arch: %s/%s", goruntime.GOOS, goruntime.GOARCH))
+	ctrl.Log.WithName("Discovery Operator version").Info(fmt.Sprintf("%#v", version.Get()))
 
 	// Create uncached client early for TLS profile fetching and other setup tasks
 	ctx := context.Background()

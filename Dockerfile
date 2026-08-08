@@ -16,8 +16,20 @@ RUN go mod download
 # Copy the go source
 COPY . .
 
+# Version injection build args
+ARG GIT_VERSION="v0.0.1-alpha.0"
+ARG GIT_COMMIT="unknown"
+ARG GIT_TREE_STATE="unknown"
+ARG BUILD_DATE="unknown"
+ARG VERSION_PKG="github.com/stolostron/discovery/pkg/version"
+
 # Build
-RUN go build -a -o manager main.go
+RUN go build -a \
+    -ldflags "-X ${VERSION_PKG}.gitVersion=${GIT_VERSION} \
+              -X ${VERSION_PKG}.gitCommit=${GIT_COMMIT} \
+              -X ${VERSION_PKG}.gitTreeState=${GIT_TREE_STATE} \
+              -X ${VERSION_PKG}.buildDate=${BUILD_DATE}" \
+    -o manager main.go
 
 # Use ubi-minimal as minimal base image to package the manager binary
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
