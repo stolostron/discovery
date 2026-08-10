@@ -53,6 +53,20 @@ SHELL = /usr/bin/env bash -o pipefail
 GOTOOLCHAIN ?= $(shell awk '/^toolchain /{print $$2; found=1} /^go /{gover=$$2} END{if(found==0) print "go"gover}' go.mod)
 export GOTOOLCHAIN
 
+# Version injection via ldflags
+VERSION_PKG = github.com/stolostron/discovery/pkg/version
+GIT_VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "v0.0.1-alpha.0")
+GIT_COMMIT ?= $(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
+GIT_TREE_STATE ?= $(shell \
+	status="$$(git status --porcelain 2>/dev/null)"; rc=$$?; \
+	if [ $$rc -ne 0 ]; then echo "unknown"; \
+	elif [ -z "$$status" ]; then echo "clean"; else echo "dirty"; fi)
+BUILD_DATE ?= $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+LDFLAGS = -X $(VERSION_PKG).gitVersion=$(GIT_VERSION) \
+          -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) \
+          -X $(VERSION_PKG).gitTreeState=$(GIT_TREE_STATE) \
+          -X $(VERSION_PKG).buildDate=$(BUILD_DATE)
+
 all: build
 
 ##@ General
@@ -112,19 +126,24 @@ verify: test deploy-and-test manifests
 ##@ Build
 
 build: generate fmt vet ## Build manager binary.
-	go build -o bin/manager main.go
+	go build -ldflags "$(LDFLAGS)" -o bin/manager main.go
 
 run: manifests generate fmt ## Run a controller from your host.
-	go run ./main.go
+	go run -ldflags "$(LDFLAGS)" ./main.go
+
+DOCKER_BUILD_ARGS = --build-arg GIT_VERSION=$(GIT_VERSION) \
+                    --build-arg GIT_COMMIT=$(GIT_COMMIT) \
+                    --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE) \
+                    --build-arg BUILD_DATE=$(BUILD_DATE)
 
 docker-build: ## Build docker image with the manager.
-	docker build -t "${URL}" .
+	docker build $(DOCKER_BUILD_ARGS) -t "${URL}" .
 
 docker-push: ## Push docker image with the manager.
 	docker push "${URL}"
 
 podman-build: ## Build podman image with the manager.
-	podman build -t "${URL}" .
+	podman build $(DOCKER_BUILD_ARGS) -t "${URL}" .
 
 podman-push: ## Push podman image with the manager.
 	podman push "${URL}"
