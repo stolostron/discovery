@@ -28,8 +28,8 @@ RUN CGO_ENABLED=1 go build -mod=readonly \
               -X ${VERSION_PKG}.buildDate=${BUILD_DATE}" \
     -o manager main.go
 
-# Use ubi-minimal as minimal base image to package the manager binary
-FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+# Use ubi-minimal-pqc as minimal base image to package the manager binary
+FROM registry.redhat.io/ubi9/ubi-minimal-pqc:latest
 
 LABEL org.label-schema.vendor="Red Hat" \
       url="https://github.com/stolostron/discovery" \
