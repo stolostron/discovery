@@ -2,7 +2,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: discovery-role
 rules:
 - apiGroups:
@@ -108,14 +107,9 @@ rules:
   - discovery.open-cluster-management.io
   resources:
   - discoveredclusters/finalizers
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - discovery.open-cluster-management.io
-  resources:
   - discoveredclusters/status
+  - discoveryconfigs/finalizers
+  - discoveryconfigs/status
   verbs:
   - get
   - patch
@@ -132,22 +126,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - discovery.open-cluster-management.io
-  resources:
-  - discoveryconfigs/finalizers
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - discovery.open-cluster-management.io
-  resources:
-  - discoveryconfigs/status
-  verbs:
-  - get
-  - patch
-  - update
 - apiGroups:
   - register.open-cluster-management.io
   resources:
