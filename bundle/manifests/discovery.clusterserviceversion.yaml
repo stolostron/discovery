@@ -21,7 +21,7 @@ metadata:
       ]
     capabilities: Seamless Upgrades
     categories: Integration & Delivery
-    createdAt: "2026-04-30T13:23:41Z"
+    createdAt: "2026-08-27T15:14:45Z"
     description: This operator discovers OpenShift Conatiner Platform clusters which
       are not yet under management by Open Cluster Management.
     operatorframework.io/suggested-namespace: open-cluster-management
@@ -241,6 +241,8 @@ spec:
                 ports:
                 - containerPort: 8080
                   name: metrics
+                - containerPort: 9443
+                  name: webhook-server
                 readinessProbe:
                   httpGet:
                     path: /readyz
