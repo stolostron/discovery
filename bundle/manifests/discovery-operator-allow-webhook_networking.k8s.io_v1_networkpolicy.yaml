@@ -1,6 +1,14 @@
 # Allow ingress to the discovery-operator webhook server (port 9443).
-# Webhook calls originate from the API server which runs on the host network,
-# so we use the special host-network namespace selector.
+# Webhook calls originate from kube-apiserver, which validates the
+# DiscoveredCluster CRD and runs on the host network, so we use the
+# special host-network namespace selector.
+#
+# IMPORTANT: do not combine this namespaceSelector with a podSelector in
+# the same "from" entry (even an empty podSelector: {}). OVN-Kubernetes
+# does not correctly match host-network-sourced traffic against the
+# special "openshift-host-network" virtual namespace when a podSelector
+# is present alongside the namespaceSelector, causing all webhook calls
+# from kube-apiserver to silently time out.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -14,7 +22,6 @@ spec:
     - namespaceSelector:
         matchLabels:
           policy-group.network.openshift.io/host-network: ""
-      podSelector: {}
     ports:
     - protocol: TCP
       port: 9443
