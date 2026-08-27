@@ -56,6 +56,8 @@ spec:
         ports:
         - containerPort: 8080
           name: metrics
+        - containerPort: 9443
+          name: webhook-server
         resources:
           requests:
             cpu: 100m
