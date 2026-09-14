@@ -30,7 +30,7 @@ URL ?= $(REGISTRY)/$(IMG):$(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:crdVersions=v1"
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION = 1.25
+ENVTEST_K8S_VERSION = 1.35.0
 
 # Namespace to deploy resources into
 NAMESPACE ?= multicluster-engine
@@ -248,7 +248,7 @@ podman-catalog-push: ## Push a catalog image.
 
 .PHONY: test
 test: envtest ## Run unit tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --arch=amd64 --bin-dir=$(LOCALBIN) --use-deprecated-gcs=false -p path)" go test `go list ./... | grep -v e2e` -coverprofile cover.out
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --arch=amd64 --bin-dir=$(LOCALBIN) -p path)" go test `go list ./... | grep -v e2e` -coverprofile cover.out
 
 integration-tests: ## Run functional/integration tests
 	kubectl apply -f testserver/build/clusters.open-cluster-management.io_managedclusters.yaml
@@ -306,7 +306,7 @@ ENVTEST ?= $(LOCALBIN)/setup-envtest
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v4.5.7
 CONTROLLER_TOOLS_VERSION ?= v0.19.0
-SETUP_ENVTEST_VERSION ?= release-0.17
+SETUP_ENVTEST_VERSION ?= release-0.23
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize

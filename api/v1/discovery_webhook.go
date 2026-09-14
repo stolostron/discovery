@@ -18,16 +18,16 @@ limitations under the License.
 package v1
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 
 	admissionregistration "k8s.io/api/admissionregistration/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	runtime "k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	cl "sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -89,38 +89,40 @@ func ValidatingWebhook(namespace string) *admissionregistration.ValidatingWebhoo
 
 func (r *DiscoveredCluster) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	Client = mgr.GetClient()
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+	return builder.WebhookManagedBy(mgr, r).
+		WithDefaulter(r).
+		WithValidator(r).
 		Complete()
 }
 
-var _ webhook.Defaulter = &DiscoveredCluster{}
+var _ admission.Defaulter[*DiscoveredCluster] = &DiscoveredCluster{}
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *DiscoveredCluster) Default() {
-	discoveredclusterLog.Info("default", "Name", r.Name)
+// Default implements admission.Defaulter so a webhook will be registered for the type
+func (r *DiscoveredCluster) Default(_ context.Context, obj *DiscoveredCluster) error {
+	discoveredclusterLog.Info("default", "Name", obj.Name)
+	return nil
 }
 
-var _ webhook.Validator = &DiscoveredCluster{}
+var _ admission.Validator[*DiscoveredCluster] = &DiscoveredCluster{}
 
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
-	discoveredclusterLog.Info("validate create", "Name", r.Name, "Type", r.Spec.Type)
+// ValidateCreate implements admission.Validator so a webhook will be registered for the type
+func (r *DiscoveredCluster) ValidateCreate(_ context.Context, obj *DiscoveredCluster) (admission.Warnings, error) {
+	discoveredclusterLog.Info("validate create", "Name", obj.Name, "Type", obj.Spec.Type)
 
 	// Validate resource
-	if !IsSupportedClusterType(r.Spec.Type) && r.Spec.ImportAsManagedCluster {
+	if !IsSupportedClusterType(obj.Spec.Type) && obj.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot create DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
-				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
+				"Only ROSA type clusters support auto import", obj.Name, obj.Spec.Type)
 
 		discoveredclusterLog.Error(err, "validation failed")
 		return nil, err
 	}
 
-	if !IsStringValid(r.Spec.DisplayName) && r.Spec.ImportAsManagedCluster {
+	if !IsStringValid(obj.Spec.DisplayName) && obj.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters with an invalid display name '%s'. "+
-				"Display name must consist of lowercase alphanumeric characters or '-'", r.Name, r.Spec.DisplayName)
+				"Display name must consist of lowercase alphanumeric characters or '-'", obj.Name, obj.Spec.DisplayName)
 
 		discoveredclusterLog.Error(err, "validation failed")
 		return nil, err
@@ -129,25 +131,24 @@ func (r *DiscoveredCluster) ValidateCreate() (admission.Warnings, error) {
 	return nil, nil
 }
 
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	discoveredclusterLog.Info("validate update", "Name", r.Name, "Type", r.Spec.Type)
+// ValidateUpdate implements admission.Validator so a webhook will be registered for the type
+func (r *DiscoveredCluster) ValidateUpdate(_ context.Context, oldObj, newObj *DiscoveredCluster) (admission.Warnings, error) {
+	discoveredclusterLog.Info("validate update", "Name", newObj.Name, "Type", newObj.Spec.Type)
 
 	// Validate resource
-	oldDiscoveredCluster := old.(*DiscoveredCluster)
-	if !IsSupportedClusterType(oldDiscoveredCluster.Spec.Type) && r.Spec.ImportAsManagedCluster {
+	if !IsSupportedClusterType(oldObj.Spec.Type) && newObj.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters of type '%s'. "+
-				"Only ROSA type clusters support auto import", r.Name, r.Spec.Type)
+				"Only ROSA type clusters support auto import", newObj.Name, newObj.Spec.Type)
 
 		discoveredclusterLog.Error(err, "validation failed")
 		return nil, err
 	}
 
-	if !IsStringValid(r.Spec.DisplayName) && r.Spec.ImportAsManagedCluster {
+	if !IsStringValid(newObj.Spec.DisplayName) && newObj.Spec.ImportAsManagedCluster {
 		err := fmt.Errorf(
 			"cannot update DiscoveredCluster '%s': importAsManagedCluster is not allowed for clusters with an invalid display name '%s'. "+
-				"Display name must consist of lowercase alphanumeric characters or '-'", r.Name, r.Spec.DisplayName)
+				"Display name must consist of lowercase alphanumeric characters or '-'", newObj.Name, newObj.Spec.DisplayName)
 
 		discoveredclusterLog.Error(err, "validation failed")
 		return nil, err
@@ -156,9 +157,9 @@ func (r *DiscoveredCluster) ValidateUpdate(old runtime.Object) (admission.Warnin
 	return nil, nil
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *DiscoveredCluster) ValidateDelete() (admission.Warnings, error) {
-	discoveredclusterLog.Info("validate delete", "Name", r.Name, "Type", r.Spec.Type)
+// ValidateDelete implements admission.Validator so a webhook will be registered for the type
+func (r *DiscoveredCluster) ValidateDelete(_ context.Context, obj *DiscoveredCluster) (admission.Warnings, error) {
+	discoveredclusterLog.Info("validate delete", "Name", obj.Name, "Type", obj.Spec.Type)
 	return nil, nil
 }
 
