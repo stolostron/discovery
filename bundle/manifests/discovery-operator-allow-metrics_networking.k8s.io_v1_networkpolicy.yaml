@@ -1,0 +1,16 @@
+# Allow ingress to the discovery-operator metrics endpoint (port 8080)
+# from any pod in the cluster for Prometheus scraping.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: discovery-operator-allow-metrics
+spec:
+  podSelector:
+    matchLabels:
+      app: discovery-operator
+  ingress:
+  - ports:
+    - protocol: TCP
+      port: 8080
+  policyTypes:
+  - Ingress

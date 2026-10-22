@@ -1,0 +1,234 @@
+// Copyright Contributors to the Open Cluster Management project
+
+/*
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package v1
+
+import (
+	"time"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// Constants for labels and annotations used in discovery and management operations.
+const (
+	// AutoDetectLabels is used to specify automatic detection.
+	AutoDetectLabels = "auto-detect"
+
+	// ClusterMonitoringLabel is the label indicating cluster monitoring.
+	ClusterMonitoringLabel = "openshift.io/cluster-monitoring"
+
+	// CreatedViaAnnotation is the annotation indicating the creation method.
+	CreatedViaAnnotation = "open-cluster-management/created-via"
+
+	// ImportStrategyAnnotation is the annotation indicating the import strategy.
+	ImportStrategyAnnotation = "discovery.open-cluster-management.io/import-strategy"
+
+	// ImportCleanUpFinalizer is a cleanup finalizer associated with resources created by the discovery operator.
+	ImportCleanUpFinalizer = "discovery.open-cluster-management.io/import-cleanup"
+)
+
+// DiscoveredClusterSpec defines the desired state of DiscoveredCluster
+type DiscoveredClusterSpec struct {
+	// ActivityTimestamp records the last observed activity of the cluster.
+	ActivityTimestamp *metav1.Time `json:"activityTimestamp,omitempty" yaml:"activityTimestamp,omitempty"`
+
+	// APIURL is the endpoint used to access the cluster's API server.
+	APIURL string `json:"apiUrl" yaml:"apiUrl"`
+
+	// CloudProvider specifies the cloud provider where the cluster is hosted (e.g., AWS, Azure, GCP).
+	CloudProvider string `json:"cloudProvider,omitempty" yaml:"cloudProvider,omitempty"`
+
+	// Console provides the URL of the cluster's web-based console.
+	Console string `json:"console,omitempty" yaml:"console,omitempty"`
+
+	// CreationTimestamp marks when the cluster was initially discovered.
+	CreationTimestamp *metav1.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
+
+	// Credential references the Kubernetes secret containing authentication details for the cluster.
+	Credential corev1.ObjectReference `json:"credential,omitempty" yaml:"credential,omitempty"`
+
+	// DisplayName is a human-readable name assigned to the cluster.
+	DisplayName string `json:"displayName" yaml:"displayName"`
+
+	// ImportAsManagedCluster determines whether the discovered cluster should be automatically imported as a managed cluster.
+	// +kubebuilder:default:=false
+	ImportAsManagedCluster bool `json:"importAsManagedCluster,omitempty" yaml:"importAsManagedCluster,omitempty"`
+
+	// IsManagedCluster indicates whether the cluster is currently managed.
+	IsManagedCluster bool `json:"isManagedCluster" yaml:"isManagedCluster"`
+
+	// Name represents the unique identifier of the discovered cluster.
+	Name string `json:"name" yaml:"name"`
+
+	// OCPClusterID contains the unique identifier assigned by OpenShift to the cluster.
+	OCPClusterID string `json:"ocpClusterId,omitempty" yaml:"ocpClusterId,omitempty"`
+
+	// OpenshiftVersion specifies the OpenShift version running on the cluster.
+	OpenshiftVersion string `json:"openshiftVersion,omitempty" yaml:"openshiftVersion,omitempty"`
+
+	// NOTE: Owner field removed - OCM API does not expose Creator.UserName in subscription responses
+	// due to privacy restrictions. The field was always empty and provided no value.
+
+	// Provenance indicates how the cluster was discovered (e.g., Telemetry, Manual).
+	Provenance string `json:"provenance,omitempty" yaml:"provenance,omitempty"`
+
+	// RHOCMClusterID contains the cluster ID from Red Hat OpenShift Cluster Manager.
+	RHOCMClusterID string `json:"rhocmClusterId,omitempty" yaml:"rhocmClusterId,omitempty"`
+
+	// SupportLevel specifies the support tier for the cluster (e.g., Self-Support, L1-L3, Premium).
+	SupportLevel string `json:"supportLevel,omitempty" yaml:"supportLevel,omitempty"`
+
+	// Region specifies the geographical region where the cluster is deployed.
+	Region string `json:"region,omitempty" yaml:"region,omitempty"`
+
+	// Status represents the current state of the discovered cluster (e.g Active, Stale).
+	Status string `json:"status,omitempty" yaml:"status,omitempty"`
+
+	// Type defines the type of cluster, such as OpenShift, Kubernetes, or a specific managed service type.
+	Type string `json:"type" yaml:"type"`
+
+	// Usage indicates the cluster's intended purpose (e.g., Development/Test, Production).
+	Usage string `json:"usage,omitempty" yaml:"usage,omitempty"`
+}
+
+// DiscoveredClusterCondition represents an observation of a DiscoveredCluster's state
+type DiscoveredClusterCondition struct {
+	// Type of the condition
+	Type string `json:"type"`
+
+	// Status of the condition (True, False, Unknown)
+	// +optional
+	Status metav1.ConditionStatus `json:"status,omitempty"`
+
+	// Last time the condition transitioned from one status to another
+	// +optional
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+
+	// Human-readable message indicating details about the transition
+	// +optional
+	Message string `json:"message,omitempty"`
+
+	// Programmatic identifier indicating the reason for the condition's last transition
+	// +optional
+	Reason string `json:"reason,omitempty"`
+
+	// ObservedGeneration represents the .metadata.generation that the condition was set based upon
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+}
+
+// Condition types for DiscoveredCluster
+const (
+	// ConditionAvailable indicates whether the cluster is active and sending telemetry
+	ConditionAvailable string = "Available"
+
+	// ConditionManaged indicates whether the cluster has been imported as a ManagedCluster
+	ConditionManaged string = "Managed"
+)
+
+// Condition reasons for DiscoveredCluster
+const (
+	// ReasonRecentTelemetry indicates the cluster has recent telemetry (Active)
+	ReasonRecentTelemetry string = "RecentTelemetry"
+
+	// ReasonStaleTelemetry indicates the cluster has not sent telemetry recently (Stale)
+	ReasonStaleTelemetry string = "StaleTelemetry"
+
+	// ReasonImportedAsManagedCluster indicates the cluster has been imported
+	ReasonImportedAsManagedCluster string = "ImportedAsManagedCluster"
+
+	// ReasonNotImported indicates the cluster has not been imported
+	ReasonNotImported string = "NotImported"
+)
+
+// DiscoveredClusterStatus defines the observed state of DiscoveredCluster
+type DiscoveredClusterStatus struct {
+	// Conditions represent the latest available observations of the DiscoveredCluster's state
+	// +optional
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []DiscoveredClusterCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+}
+
+//+kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:storageversion
+
+// +kubebuilder:printcolumn:name="Display Name",type="string",JSONPath=".spec.displayName",description="Human-readable name assigned to the cluster"
+// +kubebuilder:printcolumn:name="Cloud Provider",type="string",JSONPath=".spec.cloudProvider",description="Cloud provider where the cluster is hosted (e.g., AWS, Azure, GCP)"
+// +kubebuilder:printcolumn:name="Region",type="string",JSONPath=".spec.region",description="Region where the cluster is deployed (e.g., us-east-1, us-central1)"
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".spec.status",description="Current state of the discovered cluster (e.g Active, Stale)"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// DiscoveredCluster is the Schema for the discoveredclusters API
+type DiscoveredCluster struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   DiscoveredClusterSpec   `json:"spec,omitempty"`
+	Status DiscoveredClusterStatus `json:"status,omitempty"`
+}
+
+//+kubebuilder:object:root=true
+
+// DiscoveredClusterList contains a list of DiscoveredCluster
+type DiscoveredClusterList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []DiscoveredCluster `json:"items"`
+}
+
+func init() {
+	SchemeBuilder.Register(&DiscoveredCluster{}, &DiscoveredClusterList{})
+}
+
+// timestampsEqual checks if two timestamp pointers are equal (handling nil cases).
+func timestampsEqual(a, b *metav1.Time) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return a.Truncate(time.Second).Equal(b.Truncate(time.Second))
+}
+
+// Equal reports whether the spec of a is equal to b.
+func (a DiscoveredCluster) Equal(b DiscoveredCluster) bool {
+	if a.Spec.APIURL != b.Spec.APIURL ||
+		!timestampsEqual(a.Spec.ActivityTimestamp, b.Spec.ActivityTimestamp) ||
+		a.Spec.CloudProvider != b.Spec.CloudProvider ||
+		a.Spec.Console != b.Spec.Console ||
+		!timestampsEqual(a.Spec.CreationTimestamp, b.Spec.CreationTimestamp) ||
+		a.Spec.Credential != b.Spec.Credential ||
+		a.Spec.DisplayName != b.Spec.DisplayName ||
+		a.Spec.ImportAsManagedCluster != b.Spec.ImportAsManagedCluster ||
+		a.Spec.IsManagedCluster != b.Spec.IsManagedCluster ||
+		a.Spec.Name != b.Spec.Name ||
+		a.Spec.OpenshiftVersion != b.Spec.OpenshiftVersion ||
+		a.Spec.Provenance != b.Spec.Provenance ||
+		a.Spec.Region != b.Spec.Region ||
+		a.Spec.SupportLevel != b.Spec.SupportLevel ||
+		a.Spec.Status != b.Spec.Status ||
+		a.Spec.Type != b.Spec.Type ||
+		a.Spec.Usage != b.Spec.Usage {
+		return false
+	}
+	return true
+}

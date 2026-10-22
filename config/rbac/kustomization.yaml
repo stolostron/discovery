@@ -1,0 +1,8 @@
+# Copyright Contributors to the Open Cluster Management project
+
+resources:
+- role.yaml
+- role_binding.yaml
+- leader_election_role.yaml
+- leader_election_role_binding.yaml
+- service_account.yaml

@@ -1,0 +1,8 @@
+-include /opt/build-harness/Makefile.prow
+
+.PHONY: build
+build:
+	go build -o bin/manager main.go
+
+unit-tests:
+	go test ./... -short -v

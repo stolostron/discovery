@@ -1,0 +1,29 @@
+# Copyright Contributors to the Open Cluster Management project
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-ocm-server
+spec:
+  selector:
+    matchLabels:
+      app: mock-ocm-server
+  template:
+    metadata:
+      labels:
+        app: mock-ocm-server
+    spec:
+      containers:
+      - command:
+        - /local-server
+        args:
+        - --scenario=tenClusters
+        image: testserver:latest
+        imagePullPolicy: Always
+        name: mock-ocm-server
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"

@@ -1,0 +1,13 @@
+# Copyright Contributors to the Open Cluster Management project
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: mock-ocm-server
+spec:
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: mock-ocm-server

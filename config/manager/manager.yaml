@@ -1,0 +1,87 @@
+# Copyright Contributors to the Open Cluster Management project
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app: discovery-operator
+  name: system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discovery-operator
+  namespace: system
+  labels:
+    app: discovery-operator
+spec:
+  selector:
+    matchLabels:
+      app: discovery-operator
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: discovery-operator
+    spec:
+      containers:
+      - command:
+        - /manager
+        args:
+        - --leader-elect
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: KUBE_FEATURE_WatchListClient
+          value: "false"
+        image: controller:latest
+        imagePullPolicy: Always
+        name: discovery-operator
+        securityContext:
+          allowPrivilegeEscalation: false
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        ports:
+        - containerPort: 8080
+          name: metrics
+        - containerPort: 9443
+          name: webhook-server
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+          - mountPath: /tmp/k8s-webhook-server/serving-certs
+            name: cert
+            readOnly: true
+          - mountPath: /etc/pki/ca-trust/extracted/pem/
+            name: trusted-ca-bundle
+      terminationGracePeriodSeconds: 10
+      imagePullSecrets:
+        - name: discovery-operator-pull-secret
+      serviceAccountName: discovery-operator
+      volumes:
+        - secret: 
+            defaultMode: 420
+            secretName: discovery-operator-webhook-service
+          name: cert
+        - configMap:
+            defaultMode: 440
+            items:
+              - key: ca-bundle.crt
+                path: tls-ca-bundle.pem
+            name: trusted-ca-bundle
+            optional: true
+          name: trusted-ca-bundle

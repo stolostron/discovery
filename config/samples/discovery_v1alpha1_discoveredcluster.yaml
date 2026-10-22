@@ -1,0 +1,9 @@
+# Copyright Contributors to the Open Cluster Management project
+
+apiVersion: discovery.open-cluster-management.io/v1alpha1
+kind: DiscoveredCluster
+metadata:
+  name: discoveredcluster-sample
+spec:
+  # Add fields here
+  foo: bar

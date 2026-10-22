@@ -1,0 +1,14 @@
+# Default deny for discovery-operator pods.
+# Label-scoped: only affects pods with app: discovery-operator.
+# Does not impact other pods in the namespace (safe for shared/OLM namespaces).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: discovery-operator-default-deny
+spec:
+  podSelector:
+    matchLabels:
+      app: discovery-operator
+  policyTypes:
+  - Ingress
+  - Egress
