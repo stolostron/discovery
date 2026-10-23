@@ -11,6 +11,9 @@ defaults:
     shell: bash
     working-directory: discovery
 
+permissions:
+  contents: read
+
 jobs:
   kind-tests:
     runs-on: ubuntu-latest
