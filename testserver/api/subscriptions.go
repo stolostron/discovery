@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -110,10 +111,17 @@ func paginate(file, page string) string {
 		return file
 	}
 
+	// page comes from a query parameter; only accept a plain integer so it can
+	// never influence the path being read.
+	pageNum, err := strconv.Atoi(page)
+	if err != nil || pageNum < 1 {
+		return file
+	}
+
 	extension := path.Ext(file)
 	newPath := strings.TrimSuffix(file, extension)
 
-	return fmt.Sprintf("%s_%s%s", newPath, page, extension)
+	return fmt.Sprintf("%s_%d%s", newPath, pageNum, extension)
 }
 
 // Replaces time placeholders in the subscription template with the current time
