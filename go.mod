@@ -7,11 +7,11 @@ require (
 	github.com/go-logr/logr v1.4.3
 	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
-	github.com/openshift/api v0.0.0-20240509232804-02500a65025d
+	github.com/openshift/api v0.0.0-20251120220512-cb382c9eaf42
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/zerolog v1.34.0
-	github.com/stolostron/cluster-lifecycle-api v0.0.0-20240813023109-42b5c115d0a3
+	github.com/stolostron/cluster-lifecycle-api v0.0.0-20261016140402-a0759edd9e0d
 	github.com/stolostron/klusterlet-addon-controller v0.0.0-20260826204436-5341d7699a6d
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
@@ -20,7 +20,7 @@ require (
 	k8s.io/apimachinery v0.35.3
 	k8s.io/client-go v0.35.3
 	k8s.io/metrics v0.35.3
-	open-cluster-management.io/api v0.16.2
+	open-cluster-management.io/api v1.2.0
 	sigs.k8s.io/controller-runtime v0.23.3
 	sigs.k8s.io/yaml v1.6.0
 )
