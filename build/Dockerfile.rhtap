@@ -14,7 +14,7 @@ COPY go.sum go.sum
 COPY . .
 
 # Build
-RUN CGO_ENABLED=1 go build -mod=readonly -o manager main.go
+RUN CGO_ENABLED=1 GOEXPERIMENT=strictfipsruntime go build -mod=readonly -o manager main.go
 
 # Use ubi-minimal as minimal base image to package the manager binary
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
